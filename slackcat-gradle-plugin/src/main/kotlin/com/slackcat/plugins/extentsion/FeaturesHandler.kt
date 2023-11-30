@@ -43,6 +43,7 @@ abstract class FeaturesHandler @Inject constructor(
             dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.6")
             dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.6")
             dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.6")
+            dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.6")
         }
 
         if (reflection.get()) {
