@@ -9,11 +9,10 @@ import javax.inject.Inject
 
 @SlackcatExtensionMarker
 open class SlackcatExtension @Inject constructor(
-    val objects: ObjectFactory,
-    val properties: SlackcatProperties,
+    objects: ObjectFactory,
+    properties: SlackcatProperties,
 ) {
-    internal val featuresHandler = objects.newInstance<FeaturesHandler>(objects, properties)
-
+    val featuresHandler = objects.newInstance<FeaturesHandler>(objects, properties)
 
     fun features(action: Action<FeaturesHandler>) {
         action.execute(featuresHandler)

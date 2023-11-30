@@ -1,4 +1,4 @@
-package com.stash
+package com.slackcat
 
 object AppVersions {
     const val versionMajor = 0

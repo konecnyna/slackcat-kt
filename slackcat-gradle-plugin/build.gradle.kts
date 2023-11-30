@@ -6,18 +6,18 @@ plugins {
     `kotlin-dsl`
 }
 
-
-dependencies {
-//    implementation(libs.gradlePluginKotlin)
+repositories {
+    mavenCentral()
 }
 
-//if (JavaVersion.current().majorVersion != "17") {
-//    throw GradleException(
-//        """
-//        The Java version used ${JavaVersion.current()} is not the expected version 17.
-//
-//        More details here:
-//        https://stashinvest.github.io/stash-invest-android/getting-started/java/
-//        """.trimIndent(),
-//    )
-//}
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
+}
+
+if (JavaVersion.current().majorVersion != "17") {
+    throw GradleException(
+        """
+        The Java version used ${JavaVersion.current()} is not the expected version 17.
+        """.trimIndent(),
+    )
+}
