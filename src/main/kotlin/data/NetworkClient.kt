@@ -21,6 +21,3 @@ class NetworkClient {
         return Json { ignoreUnknownKeys = true }.decodeFromString(serializer, jsonResponse)
     }
 }
-
-
-interface RemoteResponse
