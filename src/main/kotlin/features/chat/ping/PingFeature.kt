@@ -1,7 +1,7 @@
-package features.ping
+package features.chat.ping
 
 import app.Router
-import features.ChatModule
+import features.common.ChatModule
 
 class PingFeature : ChatModule() {
     override fun onInvoke(message: Router.Message) {

@@ -1,6 +1,6 @@
 package app
 
-import features.ChatModule
+import features.common.ChatModule
 import features.FeatureEntry.features
 import java.time.Instant.now
 import kotlin.reflect.full.createInstance
@@ -37,13 +37,16 @@ class Router(private val chatClient: ChatClient) {
             Message(
                 id = now().toString(),
                 rawMessage = message,
-                userText = message.replace("?${feature.provideCommand()}", "").trim()
+                userText = message
+                    .lowercase()
+                    .replace("?${feature.provideCommand()}", "")
+                    .trim()
             )
         )
         return true
     }
 
-    fun validateCommandMessage(message: String): Boolean {
+    private fun validateCommandMessage(message: String): Boolean {
         return when {
             message[0] != '?' -> false
             else -> true

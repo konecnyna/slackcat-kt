@@ -9,7 +9,7 @@ import java.time.Duration
 class CliChatEngine(private val args: String) : ChatEngine {
     companion object {
         val commandNotHandledErrorMessage =
-            "The incoming message wasn't handled. Please check to make sure its in the proper format. E.g. '?ping'"
+            "\n\nThe incoming message wasn't handled.\n* Please check to make sure its in the proper format. E.g. '?ping'\n* Make sure to add your feature to 'FeatureEntry.kt'\n\n"
     }
 
 

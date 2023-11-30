@@ -1,4 +1,4 @@
-package features
+package features.common
 
 import app.ChatClient
 import app.Router
