@@ -22,7 +22,7 @@ application {
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget("11"))
+        jvmTarget.set(JvmTarget.fromTarget("17"))
         suppressWarnings.set(true)
         freeCompilerArgs.set(defaultKotlinCompilerArguments)
     }
