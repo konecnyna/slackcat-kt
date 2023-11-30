@@ -26,22 +26,23 @@ abstract class FeaturesHandler @Inject constructor(
 
     internal fun applyTo(project: Project) = with(project) {
         if (coroutines.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
+            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
+            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
         }
 
         if (exposed.get()) {
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-core:0.34.1")
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-dao:0.34.1")
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-jdbc:0.34.1")
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-core:0.44.1")
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-dao:0.44.1")
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-jdbc:0.44.1")
             dependencies.add("implementation", "org.xerial:sqlite-jdbc:3.34.0")
         }
 
         if (ktor.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-            dependencies.add("implementation", "io.ktor:ktor-client-core:1.6.7")
-            dependencies.add("implementation", "io.ktor:ktor-client-cio:1.6.7")
-            dependencies.add("implementation", "io.ktor:ktor-client-serialization:1.6.7")
+            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+            dependencies.add("implementation", "io.ktor:ktor-client-core:2.3.6")
+            dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.6")
+            dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.6")
+            dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.6")
         }
 
         if (reflection.get()) {

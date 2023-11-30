@@ -1,9 +1,9 @@
 package data.network
 
-import data.chat.engine.ChatEngine
 import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import kotlinx.serialization.json.Json
 
 /**
  * A very simple global singleton dependency graph.
@@ -11,9 +11,13 @@ import io.ktor.client.features.json.serializer.*
  * For a real app, you would use something like Hilt/Dagger instead.
  */
 object NetworkGraph {
-    val networkClient = NetworkClient(HttpClient {
-        install(JsonFeature) {
-            serializer = KotlinxSerializer()
+    val networkClient = NetworkClient(HttpClient(CIO) {
+        install(ContentNegotiation) {
+            Json {
+                // Configure the JSON settings if needed
+                isLenient = true
+                ignoreUnknownKeys = true
+            }
         }
     })
 }
