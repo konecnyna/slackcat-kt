@@ -1,15 +1,12 @@
 package app
 
 import app.AppGraph.globalScope
-import app.common.ChatClient
+import data.chat.models.ChatClient
 import app.common.Router
-import app.engine.ChatEngine
-import app.engine.CliChatEngine
-import app.engine.SlackChatEngine
-import data.database.DatabaseGraph
+import data.chat.engine.cli.CliChatEngine
+import data.chat.engine.slack.SlackChatEngine
+import data.chat.models.OutgoingChatMessage
 import data.database.DatabaseGraph.connectDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -25,11 +22,11 @@ class App {
         }
 
         AppGraph.chatClient = object : ChatClient {
-            override fun sendMessage(message: String) {
+            override fun sendMessage(message: OutgoingChatMessage) {
                 globalScope.launch { AppGraph.chatEngine.sendMessage(message) }
             }
         }
-        
+
         connectDatabase()
 
         runBlocking {

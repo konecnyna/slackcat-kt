@@ -1,7 +1,7 @@
 package app
 
-import app.common.ChatClient
-import app.engine.ChatEngine
+import data.chat.models.ChatClient
+import data.chat.engine.ChatEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 

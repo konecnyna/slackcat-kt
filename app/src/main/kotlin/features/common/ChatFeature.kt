@@ -1,13 +1,12 @@
 package features.common
 
 
-import app.common.Router
-import app.models.Message
+import data.chat.models.IncomingChatMessage
 import org.jetbrains.exposed.sql.Table
 
 
 abstract class FeatureModule {
-    abstract fun onInvoke(message: Message)
+    abstract fun onInvoke(incomingChatMessage: IncomingChatMessage)
     abstract fun provideCommand(): String
 }
 

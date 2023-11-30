@@ -1,12 +1,13 @@
 package features.chat.ping
 
 import app.AppGraph.chatClient
-import app.models.Message
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import features.common.FeatureModule
 
 class PingFeature : FeatureModule() {
-    override fun onInvoke(message: Message) {
-        chatClient.sendMessage("pong")
+    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        chatClient.sendMessage(OutgoingChatMessage("pong"))
     }
 
     override fun provideCommand(): String = "ping"

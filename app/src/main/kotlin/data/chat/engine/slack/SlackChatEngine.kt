@@ -1,9 +1,9 @@
-package app.engine
+package data.chat.engine.slack
 
-import app.App
 import app.AppGraph.globalScope
-import com.slack.api.Slack
-import com.slack.api.rtm.RTMClient
+import data.chat.engine.ChatEngine
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.*
@@ -18,7 +18,7 @@ class SlackChatEngine : ChatEngine {
     private var webSocket: WebSocket? = null
     private val client = OkHttpClient()
 
-    private val _messagesFlow = MutableSharedFlow<String>()
+    private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     val messagesFlow = _messagesFlow.asSharedFlow()
     private val webSocketUrl = "wss://slack-rtm-api-url"
 
@@ -31,11 +31,11 @@ class SlackChatEngine : ChatEngine {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                globalScope.launch { _messagesFlow.emit(text) }
+                // globalScope.launch { _messagesFlow.emit(text) }
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                globalScope.launch { _messagesFlow.emit(bytes.toString()) }
+                // globalScope.launch { _messagesFlow.emit(bytes.toString()) }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -49,8 +49,8 @@ class SlackChatEngine : ChatEngine {
         })
     }
 
-    override suspend fun sendMessage(message: String) {
-        webSocket?.send(message) ?: println("WebSocket not connected")
+    override suspend fun sendMessage(message: OutgoingChatMessage) {
+        webSocket?.send(message.text) ?: println("WebSocket not connected")
     }
 
     override suspend fun disconnect() {

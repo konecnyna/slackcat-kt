@@ -1,6 +1,6 @@
 package data.network
 
-import app.engine.ChatEngine
+import data.chat.engine.ChatEngine
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*

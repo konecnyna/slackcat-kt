@@ -1,11 +1,14 @@
-package app.engine
+package data.chat.engine.cli
 
-import app.App
 import app.AppGraph.globalScope
+import data.chat.engine.ChatEngine
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
 import java.time.Duration
+import java.time.Instant
 
 class CliChatEngine(private val args: String) : ChatEngine {
     companion object {
@@ -13,15 +16,20 @@ class CliChatEngine(private val args: String) : ChatEngine {
             "\n\nThe incoming message wasn't handled.\n* Please check to make sure its in the proper format. E.g. '?ping'\n* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
     }
 
-
-    private val _messagesFlow = MutableSharedFlow<String>()
+    private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     private val messagesFlow = _messagesFlow.asSharedFlow()
 
     init {
         globalScope.launch {
             delay(Duration.ofSeconds(1))
             println("Incoming message: $args")
-            _messagesFlow.emit(args)
+            _messagesFlow.emit(
+                IncomingChatMessage(
+                    chatUser = CliMockData.defaultCliUser,
+                    messageId = Instant.now().toString(),
+                    rawMessage = args,
+                )
+            )
         }
     }
 
@@ -29,11 +37,11 @@ class CliChatEngine(private val args: String) : ChatEngine {
         println("${provideEngineName()} is connected")
     }
 
-    override suspend fun sendMessage(message: String) = println("Outgoing message: $message")
+    override suspend fun sendMessage(message: OutgoingChatMessage) = println("Outgoing message: $message")
     override suspend fun disconnect() {
         /** no op **/
     }
 
-    override suspend fun eventFlow(): SharedFlow<String> = messagesFlow
+    override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
     override fun provideEngineName(): String = "Cli"
 }
