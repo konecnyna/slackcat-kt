@@ -21,8 +21,10 @@ object NetworkGraph {
         }
 
         install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
+            logger = object : Logger {
+                override fun log(message: String) { println("\n--------NetworkRequest-----------\n$message\n------------EndRequest-----------\n") }
+            }
+            level = LogLevel.BODY
         }
     })
 }
