@@ -1,8 +1,12 @@
 package app
 
+import app.AppGraph.globalScope
+import app.common.ChatClient
+import app.common.Router
 import app.engine.ChatEngine
 import app.engine.CliChatEngine
 import app.engine.SlackChatEngine
+import data.database.DatabaseGraph
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -10,29 +14,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class App {
-    companion object {
-        val globalScope = CoroutineScope(Dispatchers.IO)
-    }
+    private val router = Router()
 
     fun onCreate(args: String?) {
-        val chatEngine: ChatEngine = if (!args.isNullOrEmpty()) {
+        AppGraph.chatEngine = if (!args.isNullOrEmpty()) {
             CliChatEngine(args)
         } else {
             SlackChatEngine()
         }
 
-        val router = Router(object : ChatClient {
+        AppGraph.chatClient = object : ChatClient {
             override fun sendMessage(message: String) {
-                globalScope.launch { chatEngine.sendMessage(message) }
+                globalScope.launch { AppGraph.chatEngine.sendMessage(message) }
             }
-        })
+        }
+
 
         runBlocking {
-            println("Starting slackcat using ${chatEngine.provideEngineName()} engine")
-            chatEngine.connect()
-            chatEngine.eventFlow().collect {
+            println("Starting slackcat using ${AppGraph.chatEngine.provideEngineName()} engine")
+            AppGraph.chatEngine.connect()
+            AppGraph.chatEngine.eventFlow().collect {
                 val handled = router.onMessage(it)
-                if (!handled && chatEngine is CliChatEngine) {
+                if (!handled && AppGraph.chatEngine is CliChatEngine) {
                     throw Error(CliChatEngine.commandNotHandledErrorMessage)
                 }
             }

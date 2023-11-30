@@ -1,20 +1,19 @@
-package app
+package app.common
 
-import features.common.ChatModule
-import features.FeatureEntry.features
+import app.models.ChatUser
+import app.models.Message
+import features.FeatureGraph.featureModules
+import features.common.FeatureModule
 import java.time.Instant.now
-import kotlin.reflect.full.createInstance
 
 
-class Router(private val chatClient: ChatClient) {
-    private val featureCommandMap: MutableMap<String, ChatModule> = mutableMapOf()
+class Router {
+    private val featureCommandMap: MutableMap<String, FeatureModule> = mutableMapOf()
 
     init {
-        features.map { kClass ->
+        featureModules.map {
             try {
-                val featureClass: ChatModule = kClass.createInstance()
-                featureClass.chatClient = chatClient
-                featureCommandMap[featureClass.provideCommand()] = featureClass
+                featureCommandMap[it.provideCommand()] = it
             } catch (e: Exception) {
                 throw e
             }
@@ -35,7 +34,8 @@ class Router(private val chatClient: ChatClient) {
 
         feature.onInvoke(
             Message(
-                id = now().toString(),
+                chatUser = ChatUser(userId = "42069"),
+                messageId = now().toString(),
                 rawMessage = message,
                 userText = message
                     .lowercase()
@@ -52,10 +52,4 @@ class Router(private val chatClient: ChatClient) {
             else -> true
         }
     }
-
-    data class Message(
-        val id: String,
-        val rawMessage: String,
-        val userText: String,
-    )
 }

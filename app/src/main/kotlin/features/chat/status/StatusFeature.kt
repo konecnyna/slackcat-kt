@@ -1,15 +1,16 @@
 package features.chat.status
 
-import app.App
-import app.Router
-import features.common.ChatModule
 import kotlinx.coroutines.launch
+import app.AppGraph.chatClient
+import app.AppGraph.globalScope
+import app.models.Message
+import features.common.FeatureModule
 
-class StatusFeature : ChatModule() {
-    val statusClient = StatusClient()
+class StatusFeature : FeatureModule() {
+    private val statusClient = StatusClient()
 
-    override fun onInvoke(message: Router.Message) {
-        App.globalScope.launch {
+    override fun onInvoke(message: Message) {
+        globalScope.launch {
             val response = statusClient.fetch()
             println("Network: $response")
             chatClient.sendMessage("Slack Status: ${response.status}")
@@ -19,3 +20,4 @@ class StatusFeature : ChatModule() {
 
     override fun provideCommand(): String = "status"
 }
+

@@ -14,35 +14,34 @@ abstract class FeaturesHandler @Inject constructor(
     objects: ObjectFactory,
     val properties: SlackcatProperties,
 ) {
-    private val ktor: Property<Boolean> = objects.property<Boolean>().convention(false)
     private val coroutines: Property<Boolean> = objects.property<Boolean>().convention(false)
+    private val exposed: Property<Boolean> = objects.property<Boolean>().convention(false)
+    private val ktor: Property<Boolean> = objects.property<Boolean>().convention(false)
     private val reflection: Property<Boolean> = objects.property<Boolean>().convention(false)
 
-
-    fun reflection() {
-        reflection.setDisallowChanges(true)
-    }
-
-    fun ktor() {
-        ktor.setDisallowChanges(true)
-    }
-
-    fun coroutines() {
-        coroutines.setDisallowChanges(true)
-    }
-
+    fun coroutines() = coroutines.setDisallowChanges(true)
+    fun exposed() = exposed.setDisallowChanges(true)
+    fun ktor() = ktor.setDisallowChanges(true)
+    fun reflection() = reflection.setDisallowChanges(true)
 
     internal fun applyTo(project: Project) = with(project) {
+        if (coroutines.get()) {
+            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
+        }
+
+        if (exposed.get()) {
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-core:0.34.1")
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-dao:0.34.1")
+            dependencies.add("implementation", "org.jetbrains.exposed:exposed-jdbc:0.34.1")
+            dependencies.add("implementation", "org.xerial:sqlite-jdbc:3.34.0")
+        }
+
         if (ktor.get()) {
             dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
             dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
             dependencies.add("implementation", "io.ktor:ktor-client-core:1.6.7")
             dependencies.add("implementation", "io.ktor:ktor-client-cio:1.6.7")
             dependencies.add("implementation", "io.ktor:ktor-client-serialization:1.6.7")
-        }
-
-        if (coroutines.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
         }
 
         if (reflection.get()) {

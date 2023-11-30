@@ -1,6 +1,7 @@
 package app.engine
 
 import app.App
+import app.AppGraph.globalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
@@ -9,7 +10,7 @@ import java.time.Duration
 class CliChatEngine(private val args: String) : ChatEngine {
     companion object {
         val commandNotHandledErrorMessage =
-            "\n\nThe incoming message wasn't handled.\n* Please check to make sure its in the proper format. E.g. '?ping'\n* Make sure to add your feature to 'FeatureEntry.kt'\n\n"
+            "\n\nThe incoming message wasn't handled.\n* Please check to make sure its in the proper format. E.g. '?ping'\n* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
     }
 
 
@@ -17,7 +18,7 @@ class CliChatEngine(private val args: String) : ChatEngine {
     private val messagesFlow = _messagesFlow.asSharedFlow()
 
     init {
-        App.globalScope.launch {
+        globalScope.launch {
             delay(Duration.ofSeconds(1))
             println("Incoming message: $args")
             _messagesFlow.emit(args)

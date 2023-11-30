@@ -1,12 +1,11 @@
 package features.chat.status
 
-import data.NetworkClient
+import data.network.NetworkGraph
 import kotlinx.serialization.Serializable
 
 
 class StatusClient {
-    val networkClient = NetworkClient()
-
+    private val networkClient = NetworkGraph.networkClient
     suspend fun fetch(): SlackStatusResponse {
         return networkClient.fetch(
             "https://status.slack.com/api/v2.0.0/current",

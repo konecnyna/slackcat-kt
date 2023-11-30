@@ -10,7 +10,6 @@ plugins {
     kotlin("jvm")
 }
 
-tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = "1.8" }
 application { mainClass.set("MainKt") }
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {

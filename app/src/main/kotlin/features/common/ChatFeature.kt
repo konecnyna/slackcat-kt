@@ -1,10 +1,17 @@
 package features.common
 
-import app.ChatClient
-import app.Router
 
-abstract class ChatModule {
-    abstract fun onInvoke(message: Router.Message)
+import app.common.Router
+import app.models.Message
+import org.jetbrains.exposed.sql.Table
+
+
+abstract class FeatureModule {
+    abstract fun onInvoke(message: Message)
     abstract fun provideCommand(): String
-    lateinit var chatClient: ChatClient
+}
+
+
+interface StorageClient {
+    fun provideTable(): Table
 }

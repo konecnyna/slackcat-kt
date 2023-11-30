@@ -1,6 +1,7 @@
 package app.engine
 
 import app.App
+import app.AppGraph.globalScope
 import com.slack.api.Slack
 import com.slack.api.rtm.RTMClient
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,11 +31,11 @@ class SlackChatEngine : ChatEngine {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                App.globalScope.launch { _messagesFlow.emit(text) }
+                globalScope.launch { _messagesFlow.emit(text) }
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                App.globalScope.launch { _messagesFlow.emit(bytes.toString()) }
+                globalScope.launch { _messagesFlow.emit(bytes.toString()) }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {

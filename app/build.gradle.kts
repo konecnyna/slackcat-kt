@@ -15,6 +15,7 @@ repositories {
 slackcat {
     features {
         coroutines()
+        exposed()
         ktor()
         reflection()
     }
