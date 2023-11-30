@@ -4,10 +4,12 @@ import features.FeatureGraph
 import features.common.StorageClient
 
 object DatabaseGraph {
-    val databaseClient = DatabaseClient().apply {
+    val databaseClient = DatabaseClient()
+
+    fun connectDatabase() {
         val databaseFeatures: List<StorageClient> = FeatureGraph.featureModules
             .filter { it is StorageClient }
             .map { it as StorageClient }
-        initialize(databaseFeatures)
+        databaseClient.initialize(databaseFeatures)
     }
 }

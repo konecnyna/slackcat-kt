@@ -25,13 +25,13 @@ class Router {
      * false -> message was NOT handled
      */
     fun onMessage(message: String): Boolean {
-        if (!validateCommandMessage(message)) {
+        val command = extractCommand(message)
+        if (!validateCommandMessage(message) || command == null) {
             return false
         }
 
         // Drop ? arg
-        val feature = featureCommandMap[message.drop(1)] ?: return false
-
+        val feature = featureCommandMap[command] ?: return false
         feature.onInvoke(
             Message(
                 chatUser = ChatUser(userId = "42069"),
@@ -44,6 +44,12 @@ class Router {
             )
         )
         return true
+    }
+
+    private fun extractCommand(input: String): String? {
+        val regex = "\\?(\\S+)".toRegex()
+        val matchResult = regex.find(input)
+        return matchResult?.groups?.get(1)?.value
     }
 
     private fun validateCommandMessage(message: String): Boolean {

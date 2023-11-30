@@ -7,6 +7,7 @@ import app.engine.ChatEngine
 import app.engine.CliChatEngine
 import app.engine.SlackChatEngine
 import data.database.DatabaseGraph
+import data.database.DatabaseGraph.connectDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -28,7 +29,8 @@ class App {
                 globalScope.launch { AppGraph.chatEngine.sendMessage(message) }
             }
         }
-
+        
+        connectDatabase()
 
         runBlocking {
             println("Starting slackcat using ${AppGraph.chatEngine.provideEngineName()} engine")
