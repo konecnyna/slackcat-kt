@@ -1,6 +1,6 @@
-package database
+package data.database
 
-import database.models.StorageClient
+import data.database.models.StorageClient
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils

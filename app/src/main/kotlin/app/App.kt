@@ -7,7 +7,9 @@ import chat.models.ChatClient
 import chat.engine.cli.CliChatEngine
 import chat.engine.slack.SlackChatEngine
 import chat.models.OutgoingChatMessage
-import database.DatabaseGraph.connectDatabase
+import data.database.DatabaseGraph.connectDatabase
+import data.database.models.StorageClient
+import features.FeatureGraph
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -16,6 +18,13 @@ class App {
     private val router = Router()
 
     fun onCreate(args: String?) {
+        setupChatModule(args)
+        connectDatabase()
+        observeRealTimeMessages()
+    }
+
+
+    private fun setupChatModule(args: String?) {
         ChatGraph.chatEngine = if (!args.isNullOrEmpty()) {
             CliChatEngine(args)
         } else {
@@ -27,9 +36,17 @@ class App {
                 globalScope.launch { ChatGraph.chatEngine.sendMessage(message) }
             }
         }
+    }
 
-        connectDatabase()
+    private fun connectDatabase() {
+        val databaseFeatures: List<StorageClient> = FeatureGraph.features
+            .filter { it is StorageClient }
+            .map { it as StorageClient }
 
+        connectDatabase(databaseFeatures)
+    }
+
+    private fun observeRealTimeMessages() {
         runBlocking {
             println("Starting slackcat using ${ChatGraph.chatEngine.provideEngineName()} engine")
             ChatGraph.chatEngine.connect()
@@ -41,4 +58,5 @@ class App {
             }
         }
     }
+
 }

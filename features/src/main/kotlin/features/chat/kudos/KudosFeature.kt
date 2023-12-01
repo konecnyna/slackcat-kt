@@ -6,7 +6,7 @@ import chat.models.OutgoingChatMessage
 import features.FeatureGraph.featureCoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Table
-import database.models.StorageClient
+import data.database.models.StorageClient
 import features.common.FeatureModule
 
 class KudosFeature : FeatureModule(), StorageClient {

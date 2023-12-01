@@ -5,6 +5,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import kotlinx.serialization.json.Json
+import data.network.NetworkClient
 
 /**
  * A very simple global singleton dependency graph.

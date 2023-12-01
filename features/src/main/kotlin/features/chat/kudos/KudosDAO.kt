@@ -1,6 +1,6 @@
 package features.chat.kudos
 
-import database.dbQuery
+import data.database.dbQuery
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 
