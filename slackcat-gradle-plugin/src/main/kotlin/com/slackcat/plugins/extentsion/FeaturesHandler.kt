@@ -1,6 +1,5 @@
 package com.slackcat.plugins.extentsion
 
-
 import com.slackcat.SlackcatProperties
 import com.slackcat.utils.setDisallowChanges
 import org.gradle.api.Project
@@ -9,45 +8,50 @@ import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
+abstract class FeaturesHandler
+    @Inject
+    constructor(
+        objects: ObjectFactory,
+        val properties: SlackcatProperties,
+    ) {
+        private val coroutines: Property<Boolean> = objects.property<Boolean>().convention(false)
+        private val exposed: Property<Boolean> = objects.property<Boolean>().convention(false)
+        private val ktor: Property<Boolean> = objects.property<Boolean>().convention(false)
+        private val reflection: Property<Boolean> = objects.property<Boolean>().convention(false)
 
-abstract class FeaturesHandler @Inject constructor(
-    objects: ObjectFactory,
-    val properties: SlackcatProperties,
-) {
-    private val coroutines: Property<Boolean> = objects.property<Boolean>().convention(false)
-    private val exposed: Property<Boolean> = objects.property<Boolean>().convention(false)
-    private val ktor: Property<Boolean> = objects.property<Boolean>().convention(false)
-    private val reflection: Property<Boolean> = objects.property<Boolean>().convention(false)
+        fun coroutines() = coroutines.setDisallowChanges(true)
 
-    fun coroutines() = coroutines.setDisallowChanges(true)
-    fun exposed() = exposed.setDisallowChanges(true)
-    fun ktor() = ktor.setDisallowChanges(true)
-    fun reflection() = reflection.setDisallowChanges(true)
+        fun exposed() = exposed.setDisallowChanges(true)
 
-    internal fun applyTo(project: Project) = with(project) {
-        if (coroutines.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        }
+        fun ktor() = ktor.setDisallowChanges(true)
 
-        if (exposed.get()) {
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-core:0.44.1")
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-dao:0.44.1")
-            dependencies.add("implementation", "org.jetbrains.exposed:exposed-jdbc:0.44.1")
-            dependencies.add("implementation", "org.xerial:sqlite-jdbc:3.34.0")
-        }
+        fun reflection() = reflection.setDisallowChanges(true)
 
-        if (ktor.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
-            dependencies.add("implementation", "io.ktor:ktor-client-core:2.3.6")
-            dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.6")
-            dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.6")
-            dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.6")
-            dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.6")
-        }
+        internal fun applyTo(project: Project) =
+            with(project) {
+                if (coroutines.get()) {
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                }
 
-        if (reflection.get()) {
-            dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect")
-        }
+                if (exposed.get()) {
+                    dependencies.add("implementation", "org.jetbrains.exposed:exposed-core:0.44.1")
+                    dependencies.add("implementation", "org.jetbrains.exposed:exposed-dao:0.44.1")
+                    dependencies.add("implementation", "org.jetbrains.exposed:exposed-jdbc:0.44.1")
+                    dependencies.add("implementation", "org.xerial:sqlite-jdbc:3.34.0")
+                }
+
+                if (ktor.get()) {
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+                    dependencies.add("implementation", "io.ktor:ktor-client-core:2.3.6")
+                    dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.6")
+                    dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.6")
+                    dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.6")
+                    dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.6")
+                }
+
+                if (reflection.get()) {
+                    dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect")
+                }
+            }
     }
-}

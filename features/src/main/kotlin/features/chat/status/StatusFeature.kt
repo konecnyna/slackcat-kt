@@ -1,11 +1,11 @@
 package features.chat.status
 
-import kotlinx.coroutines.launch
 import data.chat.ChatGraph.chatClient
 import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
 import features.FeatureGraph.featureCoroutineScope
 import features.common.FeatureModule
+import kotlinx.coroutines.launch
 
 class StatusFeature : FeatureModule() {
     private val statusClient = StatusClient()
@@ -17,7 +17,5 @@ class StatusFeature : FeatureModule() {
         }
     }
 
-
     override fun provideCommand(): String = "status"
 }
-

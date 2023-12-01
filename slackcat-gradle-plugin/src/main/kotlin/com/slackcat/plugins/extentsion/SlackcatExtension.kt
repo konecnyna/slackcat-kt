@@ -8,17 +8,19 @@ import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
 @SlackcatExtensionMarker
-open class SlackcatExtension @Inject constructor(
-    objects: ObjectFactory,
-    properties: SlackcatProperties,
-) {
-    val featuresHandler = objects.newInstance<FeaturesHandler>(objects, properties)
+open class SlackcatExtension
+    @Inject
+    constructor(
+        objects: ObjectFactory,
+        properties: SlackcatProperties,
+    ) {
+        val featuresHandler = objects.newInstance<FeaturesHandler>(objects, properties)
 
-    fun features(action: Action<FeaturesHandler>) {
-        action.execute(featuresHandler)
-    }
+        fun features(action: Action<FeaturesHandler>) {
+            action.execute(featuresHandler)
+        }
 
-    fun applyTo(project: Project) {
-        featuresHandler.applyTo(project)
+        fun applyTo(project: Project) {
+            featuresHandler.applyTo(project)
+        }
     }
-}

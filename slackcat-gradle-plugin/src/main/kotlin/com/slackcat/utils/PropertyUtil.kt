@@ -1,10 +1,8 @@
 @file:JvmName("PropertyUtil")
+
 package com.slackcat.utils
 
-
 // https://github.com/slackhq/slack-gradle-plugin/blob/72f06d88f7a800d3902ce0dfe4de96af036148f2/slack-plugin/src/main/kotlin/slack/gradle/util/PropertyUtil.kt
-import java.util.Properties
-import kotlin.contracts.contract
 import org.gradle.StartParameter
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -13,7 +11,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.provider.ValueSourceSpec
+import java.util.Properties
 import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 // Gradle's map {} APIs sometimes are interpreted by Kotlin to be non-null only but legally allow
 // null returns. This
@@ -64,7 +64,10 @@ internal abstract class LocalProperties : ValueSource<Properties, LocalPropertie
 }
 
 /** Gets or creates a cached extra property. */
-internal fun <T> Project.getOrCreateExtra(key: String, body: (Project) -> T): T {
+internal fun <T> Project.getOrCreateExtra(
+    key: String,
+    body: (Project) -> T,
+): T {
     with(project.extensions.extraProperties) {
         if (!has(key)) {
             set(key, body(project))
@@ -102,7 +105,7 @@ private fun Project.startParameterProperties(key: String): Provider<String> {
 private fun Project.localPropertiesProvider(
     key: String,
     cacheKey: String,
-    valueSourceSpec: ValueSourceSpec<LocalProperties.Parameters>.() -> Unit
+    valueSourceSpec: ValueSourceSpec<LocalProperties.Parameters>.() -> Unit,
 ): Provider<String> {
     val provider =
         project.getOrCreateExtra(cacheKey) {
@@ -115,7 +118,7 @@ private fun Project.localPropertiesProvider(
 internal fun Project.localProperty(key: String): Provider<String> {
     return localPropertiesProvider(key, "slack.properties.provider.local-properties") {
         parameters.propertiesFile.setDisallowChanges(
-            project.layout.projectDirectory.file("local.properties")
+            project.layout.projectDirectory.file("local.properties"),
         )
     }
 }
@@ -127,7 +130,7 @@ internal fun Project.localProperty(key: String): Provider<String> {
 internal fun Project.localGradleProperty(key: String): Provider<String> {
     return localPropertiesProvider(key, "slack.properties.provider.local-gradle-properties") {
         parameters.propertiesFile.setDisallowChanges(
-            project.layout.projectDirectory.file("gradle.properties")
+            project.layout.projectDirectory.file("gradle.properties"),
         )
     }
 }
@@ -159,52 +162,71 @@ internal fun Provider<String>.mapToInt(): Provider<Int> {
 }
 
 @Suppress("RedundantNullableReturnType")
-internal fun Project.synchronousEnvProperty(env: String, default: String? = null): String? {
+internal fun Project.synchronousEnvProperty(
+    env: String,
+    default: String? = null,
+): String? {
     return providers.environmentVariable(env).getOrElse(sneakyNull(default))
 }
 
 // TODO rename these scalar types to <type>Value
-internal fun Project.booleanProperty(key: String, defaultValue: Boolean = false): Boolean {
+internal fun Project.booleanProperty(
+    key: String,
+    defaultValue: Boolean = false,
+): Boolean {
     return booleanProvider(key, defaultValue).get()
 }
 
-internal fun Project.booleanProperty(key: String, defaultValue: Provider<Boolean>): Boolean {
+internal fun Project.booleanProperty(
+    key: String,
+    defaultValue: Provider<Boolean>,
+): Boolean {
     return booleanProvider(key, defaultValue).get()
 }
 
 internal fun Project.booleanProvider(
     key: String,
-    defaultValue: Boolean = false
+    defaultValue: Boolean = false,
 ): Provider<Boolean> {
     return booleanProvider(key, provider { defaultValue })
 }
 
 internal fun Project.booleanProvider(
     key: String,
-    defaultValue: Provider<Boolean>
+    defaultValue: Provider<Boolean>,
 ): Provider<Boolean> {
     return booleanProvider(key).orElse(defaultValue)
 }
 
-internal fun Project.booleanProvider(
-    key: String,
-): Provider<Boolean> {
+internal fun Project.booleanProvider(key: String): Provider<Boolean> {
     return safeProperty(key).mapToBoolean()
 }
 
-internal fun Project.intProperty(key: String, defaultValue: Int = -1): Int {
+internal fun Project.intProperty(
+    key: String,
+    defaultValue: Int = -1,
+): Int {
     return intProvider(key, defaultValue).get()
 }
 
-internal fun Project.intProperty(key: String, defaultValue: Provider<Int>): Int {
+internal fun Project.intProperty(
+    key: String,
+    defaultValue: Provider<Int>,
+): Int {
     return intProvider(key, defaultValue).get()
 }
 
-internal fun Project.intProvider(key: String, defaultValue: Int = -1): Provider<Int> {
+internal fun Project.intProvider(
+    key: String,
+    defaultValue: Int = -1,
+): Provider<Int> {
     return intProvider(key, provider { defaultValue })
 }
 
-internal fun Project.intProvider(key: String, defaultValue: Provider<Int>): Provider<Int> {
+internal fun Project.intProvider(
+    key: String,
+    defaultValue: Provider<Int>,
+): Provider<Int> {
     return safeProperty(key).mapToInt().orElse(defaultValue)
 }
 
@@ -213,12 +235,18 @@ internal fun Project.stringProperty(key: String): String {
         ?: error("No property for $key found and no default value was provided.")
 }
 
-internal fun Project.stringProperty(key: String, defaultValue: String): String {
+internal fun Project.stringProperty(
+    key: String,
+    defaultValue: String,
+): String {
     return optionalStringProperty(key, defaultValue)
         ?: error("No property for $key found and no default value was provided.")
 }
 
-internal fun Project.optionalStringProperty(key: String, defaultValue: String? = null): String? {
+internal fun Project.optionalStringProperty(
+    key: String,
+    defaultValue: String? = null,
+): String? {
     return safeProperty(key).orNull ?: defaultValue
 }
 
@@ -228,8 +256,7 @@ internal fun Project.optionalStringProvider(key: String): Provider<String> {
 
 internal fun Project.optionalStringProvider(
     key: String,
-    defaultValue: String? = null
+    defaultValue: String? = null,
 ): Provider<String> {
     return safeProperty(key).let { defaultValue?.let { provider { defaultValue } } ?: it }
 }
-

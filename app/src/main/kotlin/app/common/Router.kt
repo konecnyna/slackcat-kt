@@ -5,7 +5,6 @@ import features.FeatureGraph
 import features.common.FeatureModule
 import kotlin.reflect.full.createInstance
 
-
 class Router {
     private val featureCommandMap: MutableMap<String, FeatureModule> = mutableMapOf()
     private val featureModules: List<FeatureModule> by lazy { FeatureGraph.features.map { it.createInstance() } }

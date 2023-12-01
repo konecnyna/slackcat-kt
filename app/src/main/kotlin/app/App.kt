@@ -3,9 +3,9 @@ package app
 import app.AppGraph.globalScope
 import app.common.Router
 import data.chat.ChatGraph
-import data.chat.models.ChatClient
 import data.chat.engine.cli.CliChatEngine
 import data.chat.engine.slack.SlackChatEngine
+import data.chat.models.ChatClient
 import data.chat.models.OutgoingChatMessage
 import data.database.DatabaseGraph.connectDatabase
 import data.database.models.StorageClient
@@ -23,25 +23,27 @@ class App {
         observeRealTimeMessages()
     }
 
-
     private fun setupChatModule(args: String?) {
-        ChatGraph.chatEngine = if (!args.isNullOrEmpty()) {
-            CliChatEngine(args)
-        } else {
-            SlackChatEngine()
-        }
-
-        ChatGraph.chatClient = object : ChatClient {
-            override fun sendMessage(message: OutgoingChatMessage) {
-                globalScope.launch { ChatGraph.chatEngine.sendMessage(message) }
+        ChatGraph.chatEngine =
+            if (!args.isNullOrEmpty()) {
+                CliChatEngine(args)
+            } else {
+                SlackChatEngine()
             }
-        }
+
+        ChatGraph.chatClient =
+            object : ChatClient {
+                override fun sendMessage(message: OutgoingChatMessage) {
+                    globalScope.launch { ChatGraph.chatEngine.sendMessage(message) }
+                }
+            }
     }
 
     private fun connectDatabase() {
-        val databaseFeatures: List<StorageClient> = FeatureGraph.features
-            .filter { it is StorageClient }
-            .map { it as StorageClient }
+        val databaseFeatures: List<StorageClient> =
+            FeatureGraph.features
+                .filter { it is StorageClient }
+                .map { it as StorageClient }
 
         connectDatabase(databaseFeatures)
     }
@@ -58,5 +60,4 @@ class App {
             }
         }
     }
-
 }

@@ -29,7 +29,7 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
                     chatUser = CliMockData.defaultCliUser,
                     messageId = Instant.now().toString(),
                     rawMessage = args,
-                )
+                ),
             )
         }
     }
@@ -39,10 +39,12 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) = println("Outgoing message: $message")
+
     override suspend fun disconnect() {
         /** no op **/
     }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
+
     override fun provideEngineName(): String = "Cli"
 }

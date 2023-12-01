@@ -15,7 +15,6 @@ class KudosDAO {
         override val primaryKey = PrimaryKey(id)
     }
 
-
     suspend fun upsertKudos(userId: String): KudosRow {
         return dbQuery {
             val existingUser = KudosTable.select { KudosTable.userId eq userId }.singleOrNull()
@@ -25,7 +24,6 @@ class KudosDAO {
                     it[this.userId] = userId
                     it[count] = 1
                 }
-
             } else {
                 // User exists, increment count
                 KudosTable.update({ KudosTable.userId eq userId }) {
@@ -39,10 +37,8 @@ class KudosDAO {
             return@dbQuery KudosRow(
                 id = resultRow[KudosTable.id],
                 userId = resultRow[KudosTable.userId],
-                count = resultRow[KudosTable.count]
+                count = resultRow[KudosTable.count],
             )
         }
     }
-
-
 }

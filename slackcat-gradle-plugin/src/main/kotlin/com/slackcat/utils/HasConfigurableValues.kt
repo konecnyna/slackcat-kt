@@ -1,6 +1,5 @@
 package com.slackcat.utils
 
-
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
@@ -59,7 +58,7 @@ internal fun <T> SetProperty<T>.setDisallowChanges(value: Iterable<T>?) {
 
 internal fun <T> ListProperty<T>.setDisallowChanges(
     value: Provider<out Iterable<T>>?,
-    handleNullable: ListProperty<T>.() -> Unit
+    handleNullable: ListProperty<T>.() -> Unit,
 ) {
     value?.let { set(value) } ?: handleNullable()
     disallowChanges()
@@ -67,7 +66,7 @@ internal fun <T> ListProperty<T>.setDisallowChanges(
 
 internal fun <K, V> MapProperty<K, V>.setDisallowChanges(
     map: Provider<Map<K, V>>?,
-    handleNullable: MapProperty<K, V>.() -> Unit
+    handleNullable: MapProperty<K, V>.() -> Unit,
 ) {
     map?.let { set(map) } ?: handleNullable()
     disallowChanges()

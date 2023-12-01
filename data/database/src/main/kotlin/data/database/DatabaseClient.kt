@@ -11,10 +11,11 @@ class DatabaseClient {
     companion object {
         val DatabaseName = "slackcat"
     }
+
     fun initialize(storageClients: List<StorageClient>) {
         Database.connect("jdbc:sqlite:$DatabaseName.db", driver = "org.sqlite.JDBC")
         transaction {
-            storageClients.forEach { SchemaUtils.create(it.provideTable())  }
+            storageClients.forEach { SchemaUtils.create(it.provideTable()) }
         }
     }
 }

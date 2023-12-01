@@ -11,10 +11,11 @@ import kotlin.reflect.KClass
 
 object FeatureGraph {
     val featureCoroutineScope = CoroutineScope(Dispatchers.IO)
-    val features: Array<KClass<out FeatureModule>> = arrayOf(
-        DateFeature::class,
-        KudosFeature::class,
-        PingFeature::class,
-        StatusFeature::class
-    )
+    val features: Array<KClass<out FeatureModule>> =
+        arrayOf(
+            DateFeature::class,
+            KudosFeature::class,
+            PingFeature::class,
+            StatusFeature::class,
+        )
 }
