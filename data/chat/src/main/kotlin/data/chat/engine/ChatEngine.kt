@@ -1,7 +1,7 @@
-package chat.engine
+package data.chat.engine
 
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.SharedFlow
 
 interface ChatEngine {

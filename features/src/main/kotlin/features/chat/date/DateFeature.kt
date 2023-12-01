@@ -1,8 +1,8 @@
 package features.chat.date
 
-import chat.ChatGraph.chatClient
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.ChatGraph.chatClient
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import features.common.FeatureModule
 import java.text.SimpleDateFormat
 import java.util.*

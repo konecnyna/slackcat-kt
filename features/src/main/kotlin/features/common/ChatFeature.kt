@@ -1,6 +1,6 @@
 package features.common
 
-import chat.models.IncomingChatMessage
+import data.chat.models.IncomingChatMessage
 import org.jetbrains.exposed.sql.Table
 
 

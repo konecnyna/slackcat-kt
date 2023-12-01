@@ -1,9 +1,9 @@
 package features.chat.status
 
 import kotlinx.coroutines.launch
-import chat.ChatGraph.chatClient
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.ChatGraph.chatClient
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import features.FeatureGraph.featureCoroutineScope
 import features.common.FeatureModule
 

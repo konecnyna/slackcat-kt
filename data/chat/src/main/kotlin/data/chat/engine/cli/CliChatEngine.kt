@@ -1,8 +1,8 @@
-package chat.engine.cli
+package data.chat.engine.cli
 
-import chat.engine.ChatEngine
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.engine.ChatEngine
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*

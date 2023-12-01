@@ -5,12 +5,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import kotlinx.serialization.json.Json
-import data.network.NetworkClient
 
-/**
- * A very simple global singleton dependency graph.
- * For a real app, you would use something like Hilt/Dagger instead.
- */
 object NetworkGraph {
     val networkClient = NetworkClient(HttpClient(CIO) {
         install(ContentNegotiation) {

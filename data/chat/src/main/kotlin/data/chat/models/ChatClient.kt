@@ -1,4 +1,4 @@
-package chat.models
+package data.chat.models
 
 interface ChatClient {
     fun sendMessage(message: OutgoingChatMessage)

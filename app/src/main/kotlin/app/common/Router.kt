@@ -1,6 +1,6 @@
 package app.common
 
-import chat.models.IncomingChatMessage
+import data.chat.models.IncomingChatMessage
 import features.FeatureGraph
 import features.common.FeatureModule
 import kotlin.reflect.full.createInstance

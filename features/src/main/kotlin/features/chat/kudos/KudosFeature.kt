@@ -1,8 +1,8 @@
 package features.chat.kudos
 
-import chat.ChatGraph.chatClient
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.ChatGraph.chatClient
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import features.FeatureGraph.featureCoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Table

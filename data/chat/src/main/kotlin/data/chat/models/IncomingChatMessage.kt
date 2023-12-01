@@ -1,4 +1,4 @@
-package chat.models
+package data.chat.models
 
 data class IncomingChatMessage(
     val chatUser: ChatUser,

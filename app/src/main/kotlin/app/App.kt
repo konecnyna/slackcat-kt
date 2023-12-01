@@ -2,11 +2,11 @@ package app
 
 import app.AppGraph.globalScope
 import app.common.Router
-import chat.ChatGraph
-import chat.models.ChatClient
-import chat.engine.cli.CliChatEngine
-import chat.engine.slack.SlackChatEngine
-import chat.models.OutgoingChatMessage
+import data.chat.ChatGraph
+import data.chat.models.ChatClient
+import data.chat.engine.cli.CliChatEngine
+import data.chat.engine.slack.SlackChatEngine
+import data.chat.models.OutgoingChatMessage
 import data.database.DatabaseGraph.connectDatabase
 import data.database.models.StorageClient
 import features.FeatureGraph

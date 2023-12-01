@@ -1,8 +1,8 @@
-package chat.engine.slack
+package data.chat.engine.slack
 
-import chat.engine.ChatEngine
-import chat.models.IncomingChatMessage
-import chat.models.OutgoingChatMessage
+import data.chat.engine.ChatEngine
+import data.chat.models.IncomingChatMessage
+import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.*

@@ -1,7 +1,7 @@
-package chat
+package data.chat
 
-import chat.engine.ChatEngine
-import chat.models.ChatClient
+import data.chat.engine.ChatEngine
+import data.chat.models.ChatClient
 
 object ChatGraph {
     lateinit var chatEngine: ChatEngine
