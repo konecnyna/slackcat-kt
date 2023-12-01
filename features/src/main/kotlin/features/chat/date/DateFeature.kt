@@ -5,7 +5,7 @@ import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
 import features.common.FeatureModule
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 class DateFeature : FeatureModule() {
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {

@@ -5,7 +5,8 @@ import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
 import java.time.Duration
@@ -14,7 +15,9 @@ import java.time.Instant
 class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
     companion object {
         val commandNotHandledErrorMessage =
-            "\n\nThe incoming message wasn't handled.\n* Please check to make sure its in the proper format. E.g. '?ping'\n* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
+            "\n\nThe incoming message wasn't handled.\n" +
+                "* Please check to make sure its in the proper format. E.g. '?ping'\n" +
+                "* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
     }
 
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
