@@ -9,7 +9,6 @@ import data.chat.engine.ChatEngine
 import features.slackcat.internal.Router
 import features.slackcat.models.SlackcatModule
 import features.slackcat.models.StorageModule
-import features.slackcat.models.createExposedTable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,9 +25,6 @@ class SlackcatBot(
     lateinit var router: Router
 
     fun start(args: String?) {
-        val slackcatModules: List<SlackcatModule> = modules.map { it.createInstance() }
-        router = Router(slackcatModules)
-
         setupChatModule(args)
         connectDatabase()
         observeRealTimeMessages()
@@ -47,6 +43,10 @@ class SlackcatBot(
             }
         }
 
+        val slackcatModules: List<SlackcatModule> =
+            modules.map { it.createInstance().also { module -> module.chatClient = chatClient } }
+        router = Router(slackcatModules)
+
         chatEngine.connect()
     }
 
@@ -56,7 +56,7 @@ class SlackcatBot(
                 .filter { it is StorageModule }
                 .map { it as StorageModule }
 
-        val exposedTables = databaseFeatures.map { it.provideTable().createExposedTable() }
+        val exposedTables = databaseFeatures.map { it.provideTable() }
         DatabaseGraph.connectDatabase(exposedTables)
     }
 

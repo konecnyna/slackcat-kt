@@ -16,6 +16,7 @@ slackcat {
     features {
         coroutines()
         reflection()
+        exposed()
     }
 }
 
