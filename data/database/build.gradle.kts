@@ -25,7 +25,4 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    // Slack stuff
-    implementation("com.slack.api:slack-api-client:1.8.1")
-}
+dependencies {}

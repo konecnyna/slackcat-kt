@@ -6,5 +6,6 @@ include(
     ":features",
     ":data:chat",
     ":data:database",
-    ":data:network"
+    ":data:network",
+    ":data:server"
 )

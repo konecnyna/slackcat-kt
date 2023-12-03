@@ -24,6 +24,7 @@
             <option value="$PROJECT_DIR$/data/chat" />
             <option value="$PROJECT_DIR$/data/database" />
             <option value="$PROJECT_DIR$/data/network" />
+            <option value="$PROJECT_DIR$/data/server" />
             <option value="$PROJECT_DIR$/features" />
             <option value="$PROJECT_DIR$/slackcat-gradle-plugin" />
           </set>

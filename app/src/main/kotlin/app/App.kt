@@ -1,63 +1,22 @@
 package app
 
-import app.AppGraph.globalScope
 import app.common.Router
+import app.common.SlackcatBot
 import data.chat.ChatGraph
 import data.chat.engine.cli.CliChatEngine
-import data.chat.engine.slack.SlackChatEngine
-import data.chat.models.ChatClient
-import data.chat.models.OutgoingChatMessage
-import data.database.DatabaseGraph.connectDatabase
-import data.database.models.StorageClient
-import features.FeatureGraph
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+
 
 class App {
     private val router = Router()
+    private val slackcatBot = SlackcatBot()
 
     fun onCreate(args: String?) {
-        setupChatModule(args)
-        connectDatabase()
-        observeRealTimeMessages()
-    }
-
-    private fun setupChatModule(args: String?) {
-        ChatGraph.chatEngine =
-            if (!args.isNullOrEmpty()) {
-                CliChatEngine(args)
-            } else {
-                SlackChatEngine()
-            }
-
-        ChatGraph.chatClient =
-            object : ChatClient {
-                override fun sendMessage(message: OutgoingChatMessage) {
-                    globalScope.launch { ChatGraph.chatEngine.sendMessage(message) }
-                }
-            }
-    }
-
-    private fun connectDatabase() {
-        val databaseFeatures: List<StorageClient> =
-            FeatureGraph.features
-                .filter { it is StorageClient }
-                .map { it as StorageClient }
-
-        connectDatabase(databaseFeatures)
-    }
-
-    private fun observeRealTimeMessages() {
-        runBlocking {
-            println("Starting slackcat using ${ChatGraph.chatEngine.provideEngineName()} engine")
-            ChatGraph.chatEngine.connect()
-            ChatGraph.chatEngine.eventFlow().collect {
-                val handled = router.onMessage(it)
-                if (!handled && ChatGraph.chatEngine is CliChatEngine) {
-                    throw Error(CliChatEngine.commandNotHandledErrorMessage)
-                }
+        slackcatBot.start(args) {
+            val handled = router.onMessage(it)
+            if (!handled && ChatGraph.chatEngine is CliChatEngine) {
+                throw Error(CliChatEngine.commandNotHandledErrorMessage)
             }
         }
     }
 }
+

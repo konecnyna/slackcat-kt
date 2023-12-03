@@ -6,6 +6,7 @@ import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
@@ -29,6 +30,7 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
             println("Incoming message: $args")
             _messagesFlow.emit(
                 IncomingChatMessage(
+                    channeId = "123456789",
                     chatUser = CliMockData.defaultCliUser,
                     messageId = Instant.now().toString(),
                     rawMessage = args,
@@ -37,15 +39,11 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
         }
     }
 
-    override suspend fun connect() {
+    override fun connect() {
         println("${provideEngineName()} is connected")
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) = println("Outgoing message: $message")
-
-    override suspend fun disconnect() {
-        /** no op **/
-    }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
 
