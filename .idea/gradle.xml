@@ -27,8 +27,7 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/data/chat" />
             <option value="$PROJECT_DIR$/features" />
-            <option value="$PROJECT_DIR$/features/slackcat-bot" />
-            <option value="$PROJECT_DIR$/features/slackcat-modules" />
+            <option value="$PROJECT_DIR$/features/slackcat" />
             <option value="$PROJECT_DIR$/slackcat-gradle-plugin" />
           </set>
         </option>

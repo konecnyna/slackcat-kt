@@ -2,13 +2,11 @@ package data.chat.engine.slack
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder
-import com.slack.api.model.event.MessageEvent
 import data.chat.engine.ChatEngine
-import data.chat.engine.slack.internal.SlackEvent
 import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
-import data.server.Server
-import data.server.models.RouteRegistrar
+import core.server.Server
+import core.server.models.RouteRegistrar
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -36,17 +34,17 @@ class SlackChatEngine(val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
                 routing.apply {
                     post("/slack/events") {
                         try {
-                            val slackEvent = call.receive<SlackEvent>()
-                            println(slackEvent)
-                            when (slackEvent.type) {
-                                "url_verification" -> {
-//                                    call.respond(
-//                                        mapOf("challenge" to slackEvent.challenge)
-//                                    )
-                                }
-
-                                else -> call.respond(200)
-                            }
+//                            val slackEvent = call.receive<SlackEvent>()
+//                            println(slackEvent)
+//                            when (slackEvent.type) {
+//                                "url_verification" -> {
+////                                    call.respond(
+////                                        mapOf("challenge" to slackEvent.challenge)
+////                                    )
+//                                }
+//
+//                                else -> call.respond(200)
+//                            }
                         } catch (exception: Exception) {
                             exception.printStackTrace()
                         }

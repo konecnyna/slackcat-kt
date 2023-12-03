@@ -27,6 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":features:slackcat-modules"))
-    implementation(project(":features:slackcat-bot"))
+    implementation(project(":features:slackcat"))
+    implementation(project(":data:chat"))
 }
