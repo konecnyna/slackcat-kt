@@ -28,6 +28,6 @@ repositories {
 
 dependencies {
     implementation(project(":data:chat"))
-    implementation(project(":data:database"))
-    implementation(project(":data:network"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
 }

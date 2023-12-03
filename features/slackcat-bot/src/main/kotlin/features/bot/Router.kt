@@ -1,4 +1,4 @@
-package app.common
+package features.bot
 
 import data.chat.models.IncomingChatMessage
 import features.FeatureGraph

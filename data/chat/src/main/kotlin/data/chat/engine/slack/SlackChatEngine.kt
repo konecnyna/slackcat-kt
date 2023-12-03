@@ -4,6 +4,7 @@ import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder
 import com.slack.api.model.event.MessageEvent
 import data.chat.engine.ChatEngine
+import data.chat.engine.slack.internal.SlackEvent
 import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
 import data.server.Server
@@ -18,6 +19,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.serialization.Serializable
+
 
 
 class SlackChatEngine(val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
@@ -25,32 +28,28 @@ class SlackChatEngine(val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     val messagesFlow = _messagesFlow.asSharedFlow()
 
     val token = System.getenv("SLACK_TOKEN")
-    val slack = Slack.getInstance().methods("")
-
+    val slack = Slack.getInstance().methods(token)
 
     override fun connect() {
         val registrar = object : RouteRegistrar {
             override fun register(routing: Routing) {
                 routing.apply {
                     post("/slack/events") {
-                        val slackEvent = call.receive<MessageEvent>()
-                        println(slackEvent)
-                        when (slackEvent.type) {
-                            "message" -> {
-                                // Example: respond to a message event
-                                val slack = Slack.getInstance()
-                                val response = slack.methods().chatPostMessage { req ->
-                                    req.channel(slackEvent.channel)
-                                        .text("Received your message: ${slackEvent.text}")
+                        try {
+                            val slackEvent = call.receive<SlackEvent>()
+                            println(slackEvent)
+                            when (slackEvent.type) {
+                                "url_verification" -> {
+//                                    call.respond(
+//                                        mapOf("challenge" to slackEvent.challenge)
+//                                    )
                                 }
-                                call.respondText("Message sent: ${response.message?.text}", ContentType.Text.Plain)
-                            }
 
-                            else -> call.respond(200)
+                                else -> call.respond(200)
+                            }
+                        } catch (exception: Exception) {
+                            exception.printStackTrace()
                         }
-                    }
-                    get("/") {
-                        call.respondText("foo")
                     }
                 }
             }
