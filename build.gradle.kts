@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.slackcat.plugins.root")
@@ -8,7 +7,7 @@ plugins {
 }
 
 allprojects {
-    group = "org.defkon"
+    group = "com.slackcat"
     version = "0.0.1"
 
     repositories {
