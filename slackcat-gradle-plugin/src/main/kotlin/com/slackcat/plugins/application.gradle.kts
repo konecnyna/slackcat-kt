@@ -11,6 +11,7 @@ plugins {
 }
 
 application { mainClass.set("MainKt") }
+
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.fromTarget("17"))

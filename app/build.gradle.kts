@@ -15,9 +15,8 @@ repositories {
 slackcat {
     features {
         coroutines()
-        exposed()
-        ktor()
         reflection()
+        exposed()
     }
 }
 
@@ -29,6 +28,6 @@ repositories {
 }
 
 dependencies {
-    // Slack stuff
-    implementation("com.slack.api:slack-api-client:1.8.1")
+    implementation(project(":features:slackcat"))
+    implementation(project(":data:chat"))
 }

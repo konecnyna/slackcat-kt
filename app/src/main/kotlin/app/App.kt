@@ -1,43 +1,30 @@
 package app
 
-import app.AppGraph.globalScope
-import data.chat.models.ChatClient
-import app.common.Router
-import data.chat.engine.cli.CliChatEngine
-import data.chat.engine.slack.SlackChatEngine
-import data.chat.models.OutgoingChatMessage
-import data.database.DatabaseGraph.connectDatabase
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import app.modules.date.DateModule
+import app.modules.kudos.KudosModule
+import app.modules.ping.PingModule
+import app.modules.status.StatusModule
+import features.slackcat.SlackcatBot
+import features.slackcat.models.SlackcatModule
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
+
 
 class App {
-    private val router = Router()
+    val modules: Array<KClass<out SlackcatModule>> = arrayOf(
+        DateModule::class,
+        KudosModule::class,
+        PingModule::class,
+        StatusModule::class
+    )
+
 
     fun onCreate(args: String?) {
-        AppGraph.chatEngine = if (!args.isNullOrEmpty()) {
-            CliChatEngine(args)
-        } else {
-            SlackChatEngine()
-        }
-
-        AppGraph.chatClient = object : ChatClient {
-            override fun sendMessage(message: OutgoingChatMessage) {
-                globalScope.launch { AppGraph.chatEngine.sendMessage(message) }
-            }
-        }
-
-        connectDatabase()
-
-        runBlocking {
-            println("Starting slackcat using ${AppGraph.chatEngine.provideEngineName()} engine")
-            AppGraph.chatEngine.connect()
-            AppGraph.chatEngine.eventFlow().collect {
-                val handled = router.onMessage(it)
-                if (!handled && AppGraph.chatEngine is CliChatEngine) {
-                    throw Error(CliChatEngine.commandNotHandledErrorMessage)
-                }
-            }
-        }
+        val slackcatBot = SlackcatBot(
+            modules = modules,
+            coroutineScope = AppGraph.globalScope
+        )
+        slackcatBot.start(args)
     }
 }
+
