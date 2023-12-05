@@ -1,14 +1,14 @@
 package com.features.slackcat
 
+import com.features.slackcat.internal.Router
+import com.features.slackcat.models.SlackcatModule
+import com.features.slackcat.models.StorageModule
+import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.engine.cli.CliChatEngine
 import com.slackcat.chat.engine.slack.SlackChatEngine
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.database.DatabaseGraph
-import com.slackcat.chat.engine.ChatEngine
-import com.features.slackcat.internal.Router
-import com.features.slackcat.models.SlackcatModule
-import com.features.slackcat.models.StorageModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,17 +31,19 @@ class SlackcatBot(
     }
 
     private fun setupChatModule(args: String?) {
-        chatEngine = if (!args.isNullOrEmpty()) {
-            CliChatEngine(args)
-        } else {
-            SlackChatEngine()
-        }
-
-        chatClient = object : ChatClient {
-            override fun sendMessage(message: OutgoingChatMessage) {
-                coroutineScope.launch { chatEngine.sendMessage(message) }
+        chatEngine =
+            if (!args.isNullOrEmpty()) {
+                CliChatEngine(args)
+            } else {
+                SlackChatEngine()
             }
-        }
+
+        chatClient =
+            object : ChatClient {
+                override fun sendMessage(message: OutgoingChatMessage) {
+                    coroutineScope.launch { chatEngine.sendMessage(message) }
+                }
+            }
 
         val slackcatModules: List<SlackcatModule> =
             modules.map { it.createInstance().also { module -> module.chatClient = chatClient } }

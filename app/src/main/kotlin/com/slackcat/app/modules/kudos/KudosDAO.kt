@@ -1,8 +1,12 @@
 package com.slackcat.app.modules.kudos
 
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.update
 
 class KudosDAO {
     data class KudosRow(val id: Int, val userId: String, val count: Int)

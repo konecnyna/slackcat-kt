@@ -3,7 +3,6 @@ package com.slackcat.app.modules.status
 import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
 import kotlinx.serialization.Serializable
 
-
 class StatusClient {
     @Serializable
     data class SlackStatusResponse(
@@ -13,7 +12,6 @@ class StatusClient {
         val active_incidents: List<String?>?,
     )
 
-
     suspend fun fetch(): SlackStatusResponse {
         return slackcatNetworkClient.fetch(
             "https://status.slack.com/api/v2.0.0/current",
@@ -21,4 +19,3 @@ class StatusClient {
         )
     }
 }
-

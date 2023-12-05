@@ -1,8 +1,8 @@
 package com.slackcat.app.modules.date
 
+import com.features.slackcat.models.SlackcatModule
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.features.slackcat.models.SlackcatModule
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -15,7 +15,7 @@ class DateModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channeId,
-                text= "Currently, it's $dateString where I am"
+                text = "Currently, it's $dateString where I am",
             ),
         )
     }

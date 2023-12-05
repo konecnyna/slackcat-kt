@@ -9,7 +9,8 @@ import io.ktor.client.plugins.logging.Logging
 import kotlinx.serialization.json.Json
 
 object NetworkGraph {
-    val networkClient = NetworkClient(
+    val networkClient =
+        NetworkClient(
             HttpClient(CIO) {
                 install(ContentNegotiation) {
                     Json {

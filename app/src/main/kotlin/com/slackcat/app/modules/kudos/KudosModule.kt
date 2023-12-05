@@ -1,10 +1,10 @@
 package com.slackcat.app.modules.kudos
 
+import com.features.slackcat.models.SlackcatModule
+import com.features.slackcat.models.StorageModule
 import com.slackcat.app.SlackcatAppGraph.globalScope
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.features.slackcat.models.SlackcatModule
-import com.features.slackcat.models.StorageModule
 import kotlinx.coroutines.launch
 
 class KudosModule : SlackcatModule(), StorageModule {
@@ -18,7 +18,7 @@ class KudosModule : SlackcatModule(), StorageModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channeId,
-                        text = "Bob now has $updatedKudos"
+                        text = "Bob now has $updatedKudos",
                     ),
                 )
             }
