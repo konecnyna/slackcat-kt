@@ -2,7 +2,7 @@ package com.slackcat.app.modules.date
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.slackcat.models.SlackcatModule
+import com.features.slackcat.models.SlackcatModule
 import java.text.SimpleDateFormat
 import java.util.Date
 

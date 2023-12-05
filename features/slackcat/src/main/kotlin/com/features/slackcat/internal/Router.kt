@@ -1,7 +1,7 @@
-package com.slackcat.slackcat.internal
+package com.features.slackcat.internal
 
 import com.slackcat.chat.models.IncomingChatMessage
-import com.slackcat.slackcat.models.SlackcatModule
+import com.features.slackcat.models.SlackcatModule
 
 class Router(modules: List<SlackcatModule>) {
     private val featureCommandMap: MutableMap<String, SlackcatModule> = mutableMapOf()

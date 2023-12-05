@@ -1,4 +1,4 @@
-package com.slackcat.slackcat.models
+package com.features.slackcat.models
 
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.IncomingChatMessage

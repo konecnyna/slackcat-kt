@@ -1,4 +1,4 @@
-package com.slackcat.slackcat.models
+package com.features.slackcat.models
 
 import org.jetbrains.exposed.sql.Table
 

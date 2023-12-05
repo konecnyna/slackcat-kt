@@ -30,4 +30,6 @@ repositories {
 dependencies {
     implementation(project(":features:slackcat"))
     implementation(project(":data:chat"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
 }

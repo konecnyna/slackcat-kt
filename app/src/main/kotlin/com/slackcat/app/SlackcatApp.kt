@@ -4,8 +4,8 @@ import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.ping.PingModule
 import com.slackcat.app.modules.status.StatusModule
-import com.slackcat.slackcat.SlackcatBot
-import com.slackcat.slackcat.models.SlackcatModule
+import com.features.slackcat.SlackcatBot
+import com.features.slackcat.models.SlackcatModule
 import kotlin.reflect.KClass
 
 

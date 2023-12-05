@@ -2,7 +2,7 @@ package com.slackcat.app.modules.ping
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.slackcat.models.SlackcatModule
+import com.features.slackcat.models.SlackcatModule
 
 class PingModule : SlackcatModule() {
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {

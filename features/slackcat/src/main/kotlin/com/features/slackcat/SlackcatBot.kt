@@ -1,4 +1,4 @@
-package com.slackcat.slackcat
+package com.features.slackcat
 
 import com.slackcat.chat.engine.cli.CliChatEngine
 import com.slackcat.chat.engine.slack.SlackChatEngine
@@ -6,9 +6,9 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.database.DatabaseGraph
 import com.slackcat.chat.engine.ChatEngine
-import com.slackcat.slackcat.internal.Router
-import com.slackcat.slackcat.models.SlackcatModule
-import com.slackcat.slackcat.models.StorageModule
+import com.features.slackcat.internal.Router
+import com.features.slackcat.models.SlackcatModule
+import com.features.slackcat.models.StorageModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

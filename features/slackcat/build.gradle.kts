@@ -1,6 +1,4 @@
 import com.slackcat.SlackcatProperties
-import com.slackcat.plugins.extentsion.SlackcatExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.slackcat.plugins.library")
