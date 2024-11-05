@@ -18,7 +18,7 @@ import okhttp3.WebSocket
 
 class SlackChatEngine : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
-    val messagesFlow = _messagesFlow.asSharedFlow()
+    private val messagesFlow = _messagesFlow.asSharedFlow()
 
     private val app = App()
     private val client = app.client
