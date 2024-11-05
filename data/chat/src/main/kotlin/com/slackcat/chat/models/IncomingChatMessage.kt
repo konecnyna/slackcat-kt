@@ -5,6 +5,7 @@ data class IncomingChatMessage(
     val chatUser: ChatUser,
     val messageId: String,
     val rawMessage: String,
+    var threadId: String? = null,
 ) {
     val command: String? = """\?\s*(\w+)""".toRegex().find(rawMessage)?.groups?.get(1)?.value
     val userText: String = rawMessage.replace(command ?: "", "")

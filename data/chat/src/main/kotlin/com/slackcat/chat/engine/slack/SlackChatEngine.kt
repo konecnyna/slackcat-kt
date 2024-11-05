@@ -1,65 +1,63 @@
 package com.slackcat.chat.engine.slack
 
-import com.slack.api.Slack
-import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder
+import com.slack.api.bolt.App
+import com.slack.api.bolt.socket_mode.SocketModeApp
+import com.slack.api.model.event.AppMentionEvent
+import com.slack.api.model.event.MessageEvent
 import com.slackcat.chat.engine.ChatEngine
+import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.server.Server
-import com.slackcat.server.models.RouteRegistrar
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.post
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.WebSocket
 
-class SlackChatEngine(val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
+
+class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
-    val messagesFlow = _messagesFlow.asSharedFlow()
+    private val messagesFlow = _messagesFlow.asSharedFlow()
 
-    val token = System.getenv("SLACK_TOKEN")
-    val slack = Slack.getInstance().methods(token)
+    private val app = App()
+    private val client = app.client
 
     override fun connect() {
-        val registrar =
-            object : RouteRegistrar {
-                override fun register(routing: Routing) {
-                    routing.apply {
-                        post("/slack/events") {
-                            try {
-//                            val slackEvent = call.receive<SlackEvent>()
-//                            println(slackEvent)
-//                            when (slackEvent.type) {
-//                                "url_verification" -> {
-// //                                    call.respond(
-// //                                        mapOf("challenge" to slackEvent.challenge)
-// //                                    )
-//                                }
-//
-//                                else -> call.respond(200)
-//                            }
-                            } catch (exception: Exception) {
-                                exception.printStackTrace()
-                            }
-                        }
-                    }
-                }
-            }
+        app.event(MessageEvent::class.java) { payload, ctx ->
+            val message = payload.event
 
-        Server(listOf(registrar)).start()
+            if (message.botId != null) {
+                return@event ctx.ack()
+            }
+            globalCoroutineScope.launch {
+                _messagesFlow.emit(message.toDomain())
+            }
+            ctx.ack()
+        }
+
+        val socketModeApp = SocketModeApp(app)
+        globalCoroutineScope.launch {
+            socketModeApp.start()
+        }
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
-        val response =
-            slack.chatPostMessage { req: ChatPostMessageRequestBuilder ->
-                req
-                    .channel(message.channelId) // Channel ID
-                    .text(message.text)
-            }
+        client.chatPostMessage { req ->
+            req.channel(message.channelId)
+                .text(message.text)
+        }
     }
 
     override suspend fun eventFlow() = messagesFlow
+    override fun provideEngineName(): String = "SlackRTM"
 
-    override fun provideEngineName(): String = "Slack"
+
+    fun MessageEvent.toDomain() = IncomingChatMessage(
+        channeId = channel,
+        chatUser = ChatUser(userId = user),
+        messageId = ts,
+        rawMessage = text,
+        threadId = ts,
+    )
 }
