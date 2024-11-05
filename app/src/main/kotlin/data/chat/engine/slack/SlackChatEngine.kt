@@ -30,14 +30,6 @@ class SlackChatEngine : ChatEngine {
             if (message.botId != null) {
                 return@event ctx.ack()
             }
-            println("""
-            |New message:
-            |Channel: ${message.channel}
-            |User: ${message.user}
-            |Text: ${message.text}
-            |Timestamp: ${message.ts}
-            |""".trimMargin())
-
             AppGraph.globalScope.launch {
                 _messagesFlow.emit(message.toDomain())
             }

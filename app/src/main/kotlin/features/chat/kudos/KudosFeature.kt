@@ -18,7 +18,7 @@ class KudosFeature : FeatureModule(), StorageClient {
             chatClient.sendMessage(
                 OutgoingChatMessage(
                     channel = incomingChatMessage.channelId,
-                    text  = "Bob now has ${updatedKudos}"
+                    text = "Bob now has ${updatedKudos.count} pluses"
                 )
             )
         }
