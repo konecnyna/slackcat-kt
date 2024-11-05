@@ -13,7 +13,12 @@ class StatusFeature : FeatureModule() {
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         globalScope.launch {
             val response = statusClient.fetch()
-            chatClient.sendMessage(OutgoingChatMessage("Slack Status: ${response.status}"))
+            chatClient.sendMessage(
+                OutgoingChatMessage(
+                    channel = incomingChatMessage.channelId,
+                    text = "Slack Status: ${response.status}"
+                )
+            )
         }
     }
 

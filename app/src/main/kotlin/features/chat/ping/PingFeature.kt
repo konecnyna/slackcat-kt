@@ -7,7 +7,12 @@ import features.common.FeatureModule
 
 class PingFeature : FeatureModule() {
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        chatClient.sendMessage(OutgoingChatMessage("pong"))
+        chatClient.sendMessage(
+            OutgoingChatMessage(
+                channel = incomingChatMessage.channelId,
+                text = "pong"
+            )
+        )
     }
 
     override fun provideCommand(): String = "ping"

@@ -1,62 +1,76 @@
 package data.chat.engine.slack
 
-import app.AppGraph.globalScope
+import app.AppGraph
+import com.slack.api.bolt.App
+import com.slack.api.bolt.socket_mode.SocketModeApp
+import com.slack.api.model.event.AppMentionEvent
+import com.slack.api.model.event.MessageEvent
 import data.chat.engine.ChatEngine
+import data.chat.models.ChatUser
 import data.chat.models.IncomingChatMessage
 import data.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import okio.ByteString
 
 
 class SlackChatEngine : ChatEngine {
-    private var webSocket: WebSocket? = null
-    private val client = OkHttpClient()
-
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     val messagesFlow = _messagesFlow.asSharedFlow()
-    private val webSocketUrl = "wss://slack-rtm-api-url"
+
+    private val app = App()
+    private val client = app.client
 
     override suspend fun connect() {
-        val request = Request.Builder().url(webSocketUrl).build()
-        webSocket = client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
-                println("Connected to Slack RTM")
-                // Publish flow here
-            }
+        app.event(MessageEvent::class.java) { payload, ctx ->
+            val message = payload.event
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                // globalScope.launch { _messagesFlow.emit(text) }
+            if (message.botId != null) {
+                return@event ctx.ack()
             }
+            println("""
+            |New message:
+            |Channel: ${message.channel}
+            |User: ${message.user}
+            |Text: ${message.text}
+            |Timestamp: ${message.ts}
+            |""".trimMargin())
 
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                // globalScope.launch { _messagesFlow.emit(bytes.toString()) }
+            AppGraph.globalScope.launch {
+                _messagesFlow.emit(message.toDomain())
             }
+            ctx.ack()
+        }
 
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                webSocket.close(1000, null)
-                println("Closing Slack RTM: $code / $reason")
-            }
-
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
-                println("Error connecting to Slack RTM: ${t.message}")
-            }
-        })
+        val socketModeApp = SocketModeApp(app)
+        AppGraph.globalScope.launch {
+            socketModeApp.start()
+        }
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
-        webSocket?.send(message.text) ?: println("WebSocket not connected")
+        client.chatPostMessage { req ->
+            req.channel(message.channel)
+                .text(message.text)
+        }
     }
 
     override suspend fun disconnect() {
-        webSocket?.close(1000, "Client done")
+        // TODO.
     }
 
     override suspend fun eventFlow() = messagesFlow
     override fun provideEngineName(): String = "SlackRTM"
+
+
+    fun MessageEvent.toDomain() = IncomingChatMessage(
+        channelId = channel,
+        chatUser = ChatUser(userId = user),
+        messageId = ts,
+        rawMessage = text,
+        userText = text,
+        threadId = ts,
+    )
 }

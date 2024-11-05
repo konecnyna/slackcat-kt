@@ -14,7 +14,10 @@ class DateFeature: FeatureModule() {
         val dateString = dateFormat.format(currentDate)
 
         chatClient.sendMessage(
-            OutgoingChatMessage("Currently, it's $dateString where I am")
+            OutgoingChatMessage(
+                channel = incomingChatMessage.channelId,
+                text = "Currently, it's $dateString where I am"
+            )
         )
     }
 

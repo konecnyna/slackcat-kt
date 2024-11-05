@@ -33,6 +33,7 @@ class App {
             println("Starting slackcat using ${AppGraph.chatEngine.provideEngineName()} engine")
             AppGraph.chatEngine.connect()
             AppGraph.chatEngine.eventFlow().collect {
+                println("here we gooooooo")
                 val handled = router.onMessage(it)
                 if (!handled && AppGraph.chatEngine is CliChatEngine) {
                     throw Error(CliChatEngine.commandNotHandledErrorMessage)

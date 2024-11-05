@@ -16,7 +16,10 @@ class KudosFeature : FeatureModule(), StorageClient {
         featureCoroutineScope.launch {
             val updatedKudos = kudosDAO.upsertKudos(incomingChatMessage.chatUser.userId)
             chatClient.sendMessage(
-                OutgoingChatMessage("Bob now has ${updatedKudos}")
+                OutgoingChatMessage(
+                    channel = incomingChatMessage.channelId,
+                    text  = "Bob now has ${updatedKudos}"
+                )
             )
         }
 

@@ -25,6 +25,7 @@ class CliChatEngine(private val args: String) : ChatEngine {
             println("Incoming message: $args")
             _messagesFlow.emit(
                 IncomingChatMessage(
+                    channelId = "42069",
                     chatUser = CliMockData.defaultCliUser,
                     messageId = Instant.now().toString(),
                     rawMessage = args,
