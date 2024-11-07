@@ -2,7 +2,7 @@ import com.slackcat.SlackcatProperties
 
 plugins {
     id("com.slackcat.plugins.library")
-    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("plugin.serialization")
 }
 
 repositories {

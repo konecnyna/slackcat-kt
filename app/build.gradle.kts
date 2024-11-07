@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("com.slackcat.plugins.application")
     id("com.github.johnrengelman.shadow")
-    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("plugin.serialization")
 }
 
 
