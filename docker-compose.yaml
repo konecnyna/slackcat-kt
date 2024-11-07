@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  slack-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: slack-bot:latest
+    container_name: slack-bot
+    environment:
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+    volumes:
+      - ./slackcat.db:/slackcat.db # Mount slackcat.db to /app/slackcat.db in the container
+
+    ports:
+      - "8080:8080" # Adjust if your bot needs to expose any ports
+    # Debugggin
+    # entrypoint: [ "tail", "-f", "/dev/null" ]  # Keep container running without any actions
+
+    restart: unless-stopped
