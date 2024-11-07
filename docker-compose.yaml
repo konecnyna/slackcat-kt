@@ -8,8 +8,8 @@ services:
     image: slack-bot:latest
     container_name: slack-bot
     environment:
-      - SLACK_BOT_TOKEN=Fix_me
-      - SLACK_APP_TOKEN=Fix_me
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
     volumes:
       - ./slackcat.db:/slackcat.db # Mount slackcat.db to /app/slackcat.db in the container
 
