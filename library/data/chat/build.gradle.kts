@@ -29,7 +29,7 @@ repositories {
 dependencies {
     // Slack stuff
     implementation("com.slack.api:slack-api-client:1.8.1")
-    implementation(project(":core:server"))
+    implementation(projects.library.core.server)
 
     implementation("com.slack.api:bolt:1.44.1")
     implementation("com.slack.api:bolt-socket-mode:1.44.1")

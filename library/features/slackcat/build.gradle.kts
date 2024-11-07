@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":data:chat"))
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
+    implementation(projects.library.data.chat)
+    implementation(projects.library.core.database)
+    implementation(projects.library.core.network)
 }
