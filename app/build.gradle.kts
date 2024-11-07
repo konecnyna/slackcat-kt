@@ -3,8 +3,7 @@ import com.slackcat.plugins.extentsion.SlackcatExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    application
-    id("com.slackcat.plugins.base-internal")
+    id("com.slackcat.plugins.application")
     id("com.github.johnrengelman.shadow")
     kotlin("plugin.serialization") version "1.5.21"
 }

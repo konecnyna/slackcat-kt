@@ -9,10 +9,8 @@ plugins {
     id("com.slackcat.plugins.base-internal")
     kotlin("jvm")
 }
-//
-// application {
-//    mainClass.set("com.slackcat.app.MainKt")
-// }
+
+application { mainClass.set("com.slackcat.app.ApplicationKt") }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
