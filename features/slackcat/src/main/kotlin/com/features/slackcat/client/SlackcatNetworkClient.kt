@@ -5,7 +5,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
 
 class SlackcatNetworkClient {
     suspend inline fun <reified T> fetch(
@@ -17,7 +16,7 @@ class SlackcatNetworkClient {
 
     suspend inline fun post(
         url: String,
-        body: String
+        body: String,
     ): String {
         return NetworkGraph.networkClient.post(url, body)
     }

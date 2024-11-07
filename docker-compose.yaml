@@ -8,13 +8,14 @@ services:
     image: slack-bot:latest
     container_name: slack-bot
     environment:
-      - SLACK_BOT_TOKEN=your-slack-bot-token
-      - SLACK_SIGNING_SECRET=your-signing-secret
+      - SLACK_BOT_TOKEN=Fix_me
+      - SLACK_APP_TOKEN=Fix_me
     volumes:
       - ./slackcat.db:/slackcat.db # Mount slackcat.db to /app/slackcat.db in the container
 
     ports:
       - "8080:8080" # Adjust if your bot needs to expose any ports
-    entrypoint: [ "tail", "-f", "/dev/null" ]  # Keep container running without any actions
+    # Debugggin
+    # entrypoint: [ "tail", "-f", "/dev/null" ]  # Keep container running without any actions
 
     restart: unless-stopped

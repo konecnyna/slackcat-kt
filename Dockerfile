@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy the entire project into the Docker container
 COPY . /app
 
+RUN gradle :app:shadowJar --no-daemon
 # Switch to a smaller JDK image for the final container
 FROM openjdk:17-jdk-slim
 
@@ -14,12 +15,11 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy all files from the builder stage
-COPY --from=builder /app /app
 COPY --from=builder /app/app/build/libs/*.jar /app/app.jar
 
 # Expose port (optional, only if your application needs it)
 EXPOSE 8080
 
+
 # Start a shell so you can manually run commands inside the container
-ENTRYPOINT ["/bin/sh"]
-# ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

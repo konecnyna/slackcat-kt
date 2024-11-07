@@ -18,12 +18,13 @@ class NetworkClient(val httpClient: HttpClient) {
 
     suspend inline fun post(
         url: String,
-        body: String
+        body: String,
     ): String {
-        val response: HttpResponse = httpClient.post(url) {
-            contentType(ContentType.Application.Json)
-            setBody(body)
-        }
+        val response: HttpResponse =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
         return response.bodyAsText()
     }
 }

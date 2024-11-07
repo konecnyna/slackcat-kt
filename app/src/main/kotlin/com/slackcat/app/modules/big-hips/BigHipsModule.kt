@@ -8,9 +8,10 @@ class BigHipsModule : SlackcatModule() {
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val id = extractUserIds(incomingChatMessage.userText)
         println(incomingChatMessage)
-        val text = """:alphabet-white-b::alphabet-white-i::alphabet-white-g:
+        val text =
+            """:alphabet-white-b::alphabet-white-i::alphabet-white-g:
             | :alphabet-white-h::alphabet-white-i::alphabet-white-p::alphabet-white-s:
-        """.trimMargin()
+            """.trimMargin()
 
         sendMessage(
             OutgoingChatMessage(

@@ -6,8 +6,8 @@ import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.ping.PingModule
-import com.slackcat.app.modules.translate.TranslateModule
 import com.slackcat.app.modules.status.StatusModule
+import com.slackcat.app.modules.translate.TranslateModule
 import kotlin.reflect.KClass
 
 class SlackcatApp {

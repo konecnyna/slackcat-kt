@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
-
 class TranslateModule : SlackcatModule() {
     @Serializable
     sealed class ApiResponse
@@ -18,18 +17,20 @@ class TranslateModule : SlackcatModule() {
     @Serializable
     data class SuccessResponse(
         val success: Success,
-        val contents: Contents
+        val contents: Contents,
     ) : ApiResponse()
 
     @Serializable
     data class ErrorResponse(
-        val error: Error
+        val error: Error,
     ) : ApiResponse()
 
     @Serializable
     data class Success(val total: Int)
+
     @Serializable
     data class Contents(val translated: String, val text: String, val translation: String)
+
     @Serializable
     data class Error(val code: Int, val message: String)
 
@@ -37,18 +38,22 @@ class TranslateModule : SlackcatModule() {
         globalScope.launch {
             val userText = extractUserText(incomingChatMessage.userText)
             val translationType = extractUserTranslateType(incomingChatMessage.userText)
-            val response = if (translationType != null && userText != null) {
-                post(userText, translationType)
-            } else { null }
-           val outgoingText = buildString {
-                if (response is SuccessResponse) {
-                    append(response.contents.translated)
-                } else if (response is ErrorResponse) {
-                    append(response.error.message)
+            val response =
+                if (translationType != null && userText != null) {
+                    post(userText, translationType)
                 } else {
-                    append("Translate failed: sorry bub")
+                    null
                 }
-            }
+            val outgoingText =
+                buildString {
+                    if (response is SuccessResponse) {
+                        append(response.contents.translated)
+                    } else if (response is ErrorResponse) {
+                        append(response.error.message)
+                    } else {
+                        append("Translate failed: sorry bub")
+                    }
+                }
 
             sendMessage(
                 OutgoingChatMessage(
@@ -59,11 +64,15 @@ class TranslateModule : SlackcatModule() {
         }
     }
 
-    private suspend fun post(text: String, translationType: String): ApiResponse {
-        val response = slackcatNetworkClient.post(
-            "https://api.funtranslations.com/translate/$translationType",
-            """{"text":"$text"}"""
-        )
+    private suspend fun post(
+        text: String,
+        translationType: String,
+    ): ApiResponse {
+        val response =
+            slackcatNetworkClient.post(
+                "https://api.funtranslations.com/translate/$translationType",
+                """{"text":"$text"}""",
+            )
         return deserialize(response)
     }
 
