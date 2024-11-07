@@ -31,7 +31,8 @@ class SlackcatBot(
     }
 
     private fun setupChatModule(args: String?) {
-        chatEngine = if (!args.isNullOrEmpty()) {
+        chatEngine =
+            if (!args.isNullOrEmpty()) {
                 CliChatEngine(args)
             } else {
                 SlackChatEngine(coroutineScope)

@@ -2,7 +2,6 @@ package com.slackcat.chat.engine.slack
 
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
-import com.slack.api.model.event.AppMentionEvent
 import com.slack.api.model.event.MessageEvent
 import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.ChatUser
@@ -12,9 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.WebSocket
-
 
 class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
@@ -50,14 +46,15 @@ class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
     }
 
     override suspend fun eventFlow() = messagesFlow
+
     override fun provideEngineName(): String = "SlackRTM"
 
-
-    fun MessageEvent.toDomain() = IncomingChatMessage(
-        channeId = channel,
-        chatUser = ChatUser(userId = user),
-        messageId = ts,
-        rawMessage = text,
-        threadId = ts,
-    )
+    fun MessageEvent.toDomain() =
+        IncomingChatMessage(
+            channeId = channel,
+            chatUser = ChatUser(userId = user),
+            messageId = ts,
+            rawMessage = text,
+            threadId = ts,
+        )
 }
