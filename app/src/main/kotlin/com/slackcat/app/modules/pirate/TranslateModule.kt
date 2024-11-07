@@ -37,10 +37,9 @@ class TranslateModule : SlackcatModule() {
         globalScope.launch {
             val userText = extractUserText(incomingChatMessage.userText)
             val translationType = extractUserTranslateType(incomingChatMessage.userText)
-            var response: ApiResponse? = null;
-            if (translationType != null && userText != null) {
-                response = post(userText, translationType)
-            }
+            val response = if (translationType != null && userText != null) {
+                post(userText, translationType)
+            } else { null }
            val outgoingText = buildString {
                 if (response is SuccessResponse) {
                     append(response.contents.translated)
