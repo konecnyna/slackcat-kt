@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     //id("com.slackcat.plugins.application")
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("com.github.johnrengelman.shadow")
     kotlin("plugin.serialization") version "1.5.21"
     application
     id("com.slackcat.plugins.base-internal")
@@ -80,8 +80,10 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveVersion.set("")
     mergeServiceFiles()
     manifest {
-        attributes(mapOf(
-            "Main-Class" to "com.slackcat.app.MainKt"
-        ))
+        attributes(
+            mapOf(
+                "Main-Class" to "com.slackcat.app.MainKt"
+            )
+        )
     }
 }

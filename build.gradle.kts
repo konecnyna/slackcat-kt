@@ -3,6 +3,8 @@ plugins {
     id("com.slackcat.plugins.root")
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.5.21"
+    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
+
 }
 
 allprojects {

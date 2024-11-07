@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Copy all files from the builder stage
 COPY --from=builder /app /app
-# COPY --from=builder /app/app/build/libs/*-all.jar /app/app.jar
+COPY --from=builder /app/app/build/libs/*.jar /app/app.jar
 
 # Expose port (optional, only if your application needs it)
 EXPOSE 8080
