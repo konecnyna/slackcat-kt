@@ -17,10 +17,3 @@ dependencies {
 
 }
 
-if (JavaVersion.current().majorVersion != "17") {
-    throw GradleException(
-        """
-        The Java version used ${JavaVersion.current()} is not the expected version 17.
-        """.trimIndent(),
-    )
-}

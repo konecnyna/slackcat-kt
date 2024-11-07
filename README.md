@@ -79,3 +79,8 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
 ```shell
 docker-compose --env-file path/to/your/.env up --build
 ```
+
+Testing
+```shell
+docker-compose up --build -d && docker exec -it slack-bot /bin/sh
+```

@@ -4,27 +4,22 @@ FROM gradle:7.6-jdk17 AS builder
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy Gradle wrapper and settings files first for dependency caching
-COPY settings.gradle.kts build.gradle.kts /app/
-COPY gradle /app/gradle
+# Copy the entire project into the Docker container
+COPY . /app
 
-# Copy the source code of all modules
-COPY . .
-
-# Build the project, compiling all modules and creating JAR files
-RUN gradle assemble --no-daemon
-
-# Use a smaller final image
+# Switch to a smaller JDK image for the final container
 FROM openjdk:17-jdk-slim
 
-# Set the working directory for the app
+# Set the working directory for the final container
 WORKDIR /app
 
-# Copy all JARs from each module's build/libs folder
-COPY --from=builder /app/*/build/libs/*.jar /app/libs/
+# Copy all files from the builder stage
+COPY --from=builder /app /app
+# COPY --from=builder /app/app/build/libs/*-all.jar /app/app.jar
 
-# Expose port 8080 (adjust if needed)
+# Expose port (optional, only if your application needs it)
 EXPOSE 8080
 
-# Run the application. Adjust to run multiple JARs if required
-ENTRYPOINT ["java", "-cp", "/app/libs/*", "com.slackcat.app.MainKt"]
+# Start a shell so you can manually run commands inside the container
+ENTRYPOINT ["/bin/sh"]
+# ENTRYPOINT ["java", "-jar", "/app/app.jar"]
