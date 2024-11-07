@@ -1,7 +1,11 @@
 package com.features.slackcat.client
 
 import com.slackcat.network.NetworkGraph
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 
 class SlackcatNetworkClient {
     suspend inline fun <reified T> fetch(
@@ -9,5 +13,12 @@ class SlackcatNetworkClient {
         serializer: KSerializer<T>,
     ): T {
         return NetworkGraph.networkClient.fetch(url, serializer)
+    }
+
+    suspend inline fun post(
+        url: String,
+        body: String
+    ): String {
+        return NetworkGraph.networkClient.post(url, body)
     }
 }

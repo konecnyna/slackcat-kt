@@ -2,9 +2,11 @@ package com.slackcat.app
 
 import com.features.slackcat.SlackcatBot
 import com.features.slackcat.models.SlackcatModule
+import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.ping.PingModule
+import com.slackcat.app.modules.translate.TranslateModule
 import com.slackcat.app.modules.status.StatusModule
 import kotlin.reflect.KClass
 
@@ -15,6 +17,8 @@ class SlackcatApp {
             KudosModule::class,
             PingModule::class,
             StatusModule::class,
+            BigHipsModule::class,
+            TranslateModule::class,
         )
 
     fun onCreate(args: String?) {

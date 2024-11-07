@@ -1,8 +1,9 @@
 package com.slackcat.network
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
@@ -13,5 +14,16 @@ class NetworkClient(val httpClient: HttpClient) {
     ): T {
         val jsonResponse = httpClient.get(url)
         return Json { ignoreUnknownKeys = true }.decodeFromString(serializer, jsonResponse.bodyAsText())
+    }
+
+    suspend inline fun post(
+        url: String,
+        body: String
+    ): String {
+        val response: HttpResponse = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }
+        return response.bodyAsText()
     }
 }
