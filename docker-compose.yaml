@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  slack-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: slack-bot:latest
+    container_name: slack-bot
+    environment:
+      - SLACK_BOT_TOKEN=your-slack-bot-token
+      - SLACK_SIGNING_SECRET=your-signing-secret
+    ports:
+      - "8080:8080" # Adjust if your bot needs to expose any ports
+    restart: unless-stopped

@@ -10,7 +10,7 @@ plugins {
     kotlin("jvm")
 }
 
-application { mainClass.set("MainKt") }
+application { mainClass.set("com.slackcat.app.MainKt") }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {

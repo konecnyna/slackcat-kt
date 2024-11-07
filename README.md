@@ -71,3 +71,11 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
 
 1. Ensure that your bot is a member of the channels where it needs to listen to messages.
 2. You can invite the bot to a channel by typing `/invite @YourBotName` in Slack.
+
+
+
+# Docker
+
+```shell
+docker-compose --env-file path/to/your/.env up --build
+```
