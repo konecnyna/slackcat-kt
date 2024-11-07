@@ -1,4 +1,4 @@
-package com.slackcat.app.modules.bighips
+package com.slackcat.app.modules.bigHips
 
 import com.features.slackcat.models.SlackcatModule
 import com.slackcat.chat.models.IncomingChatMessage
