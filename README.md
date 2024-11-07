@@ -8,6 +8,19 @@ The`*Graphs.kt` classes are a very simple global singleton dependency graph.
 For a real app, you would use something like Dagger instead.# slackcat-kt
 Slackcat but strongly typed
 
+## Run locally
+
+You can run commands locally without using SlackRTM webscoket by adding your command to the program arguments in the run config
+
+For instance if you add `?ping` to program arguments you should get
+
+```shell
+Cli is connected
+Starting slackcat using Cli engine
+Incoming message: ?ping
+Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
+```
+
 
 # Setup
 ## Add env vars

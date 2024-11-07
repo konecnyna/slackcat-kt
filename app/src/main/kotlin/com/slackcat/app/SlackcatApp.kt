@@ -18,11 +18,10 @@ class SlackcatApp {
         )
 
     fun onCreate(args: String?) {
-        val slackcatBot =
-            SlackcatBot(
-                modules = modules,
-                coroutineScope = SlackcatAppGraph.globalScope,
-            )
+        val slackcatBot = SlackcatBot(
+            modules = modules,
+            coroutineScope = SlackcatAppGraph.globalScope,
+        )
         slackcatBot.start(args)
     }
 }
