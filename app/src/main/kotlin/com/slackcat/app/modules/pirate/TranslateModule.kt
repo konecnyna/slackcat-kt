@@ -41,13 +41,14 @@ class TranslateModule : SlackcatModule() {
             if (translationType != null && userText != null) {
                 response = post(userText, translationType)
             }
-            var outgoingText = ""
-            if (response is SuccessResponse) {
-                outgoingText = response.contents.translated
-            }else if (response is ErrorResponse) {
-                outgoingText = response.error.message
-            } else {
-                outgoingText = "Translate failed: sorry bub"
+           val outgoingText = buildString {
+                if (response is SuccessResponse) {
+                    append(response.contents.translated)
+                } else if (response is ErrorResponse) {
+                    append(response.error.message)
+                } else {
+                    append("Translate failed: sorry bub")
+                }
             }
 
             sendMessage(
