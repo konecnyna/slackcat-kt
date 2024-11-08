@@ -9,10 +9,7 @@ import com.slackcat.database.DatabaseGraph
 import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -65,14 +62,16 @@ class SlackcatBot(
     }
 
     private fun observeRealTimeMessages() {
-        // Run blocking it to keep the service alive.
         runBlocking {
             println("Starting slackcat using ${chatEngine.provideEngineName()} engine")
-            chatEngine.eventFlow().collect {
-                val handled = router.onMessage(it)
-                if (!handled && chatEngine is CliChatEngine) {
-                    //throw Error(CliChatEngine.ERROR_MESSAGE)
-                    println("🚨 ${CliChatEngine.ERROR_MESSAGE}")
+            supervisorScope {
+                chatEngine.eventFlow().collect { event ->
+                    launch {
+                        val handled = router.onMessage(event)
+                        if (!handled && chatEngine is CliChatEngine) {
+                            println("🚨 ${CliChatEngine.ERROR_MESSAGE}")
+                        }
+                    }
                 }
             }
         }

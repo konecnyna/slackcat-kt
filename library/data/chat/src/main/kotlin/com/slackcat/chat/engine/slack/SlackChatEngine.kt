@@ -4,6 +4,7 @@ import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.event.MessageEvent
 import com.slackcat.chat.engine.ChatEngine
+import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
@@ -46,11 +47,16 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         val jsonObjectConverter = JsonToBlockConverter()
         val blocks = jsonObjectConverter.jsonObjectToBlocks(message.blocks)
         client.chatPostMessage { req ->
-            req.channel(message.channelId)
-                .text(message.text)
-                .blocks(blocks)
-                .username(message.userName)
-                .iconUrl(message.iconUrl)
+            req.apply {
+                channel(message.channelId)
+                text(message.text)
+                blocks(blocks)
+                username(message.botName)
+                when (val icon = message.botIcon) {
+                    is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
+                    is BotIcon.BotImageIcon -> iconUrl(icon.url)
+                }
+            }
         }
     }
 
