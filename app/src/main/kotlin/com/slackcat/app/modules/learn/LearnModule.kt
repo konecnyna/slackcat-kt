@@ -12,9 +12,8 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
     private val learnDAO = LearnDAO()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val learnRequest =
-            makeLearnRequest(incomingChatMessage)
-                ?: return postHelpMessage(incomingChatMessage.channelId)
+        val learnRequest = makeLearnRequest(incomingChatMessage)
+            ?: return postHelpMessage(incomingChatMessage.channelId)
 
         val message =
             OutgoingChatMessage(
