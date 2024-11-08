@@ -10,23 +10,31 @@ import kotlinx.coroutines.launch
 class StatusModule : SlackcatModule() {
     private val statusClient = StatusClient()
 
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        globalScope.launch {
-            val response = statusClient.fetch()
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    text = "Slack Status: ${response.status}",
-                ),
-            )
-        }
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        val statusService = getStatusSource(incomingChatMessage.arguments)
+            ?: return postHelpMessage(incomingChatMessage.channelId)
+
+        val response = statusClient.fetch(statusService)
+        sendMessage(
+            OutgoingChatMessage(
+                channelId = incomingChatMessage.channelId,
+                text = response.toMessage(),
+            ),
+        )
     }
 
     override fun provideCommand(): String = "status"
 
-    override fun help(): String =
-        buildMessage {
-            title("StatusModule Help")
-            text("Quickly check slacks status page with ?status command.")
+    override fun help(): String = buildMessage {
+        title("StatusModule Help")
+        text("Quickly check slacks status page with ?status command.")
+        text("Usage: ?status --github")
+    }
+
+
+    private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
+        return StatusClient.Service.entries.find { service ->
+            service.argument.any { arg -> arguments.contains(arg) }
         }
+    }
 }

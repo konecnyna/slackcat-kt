@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class DateModule : SlackcatModule() {
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val dateFormat = SimpleDateFormat("MMMM dd, hh:mm a")
         val currentDate = Date()
         val dateString = dateFormat.format(currentDate)

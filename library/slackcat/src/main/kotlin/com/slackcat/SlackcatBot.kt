@@ -71,7 +71,8 @@ class SlackcatBot(
             chatEngine.eventFlow().collect {
                 val handled = router.onMessage(it)
                 if (!handled && chatEngine is CliChatEngine) {
-                    throw Error(CliChatEngine.ERROR_MESSAGE)
+                    //throw Error(CliChatEngine.ERROR_MESSAGE)
+                    println("🚨 ${CliChatEngine.ERROR_MESSAGE}")
                 }
             }
         }

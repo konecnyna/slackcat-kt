@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
 
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         globalScope.launch {
             val ids = extractUserIds(incomingChatMessage.userText)
             ids.forEach {

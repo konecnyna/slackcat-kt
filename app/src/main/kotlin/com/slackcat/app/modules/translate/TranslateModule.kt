@@ -13,7 +13,7 @@ import kotlinx.serialization.json.jsonObject
 class TranslateModule : SlackcatModule() {
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         globalScope.launch {
             val userText = extractUserText(incomingChatMessage.userText)
             val translationType = extractUserTranslateType(incomingChatMessage.userText)

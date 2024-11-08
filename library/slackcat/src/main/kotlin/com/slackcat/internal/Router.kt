@@ -4,6 +4,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import com.slackcat.models.SlackcatModule
+import com.slackcat.presentation.buildMessage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class Router(modules: List<SlackcatModule>) {
     private val featureCommandMap: MutableMap<String, SlackcatModule> = mutableMapOf()
@@ -22,25 +25,40 @@ class Router(modules: List<SlackcatModule>) {
      * true -> message was handled
      * false -> message was NOT handled
      */
-
-    fun onMessage(incomingMessage: IncomingChatMessage): Boolean {
+    suspend fun onMessage(incomingMessage: IncomingChatMessage): Boolean {
         val command = CommandParser.extractCommand(incomingMessage.rawMessage)
         if (!CommandParser.validateCommandMessage(incomingMessage.rawMessage) || command == null) {
             return false
         }
 
         val feature = featureCommandMap[command] ?: return false
-        when {
-            incomingMessage.arguments.contains("--help") -> {
-                val message =
-                    OutgoingChatMessage(
+        return try {
+            when {
+                incomingMessage.arguments.contains("--help") -> {
+                    val helpMessage = OutgoingChatMessage(
                         channelId = incomingMessage.channelId,
-                        text = feature.help(),
+                        text = feature.help()
                     )
-                feature.sendMessage(message = message)
+                    feature.sendMessage(helpMessage)
+                }
+                else -> withContext(Dispatchers.IO) {
+                    feature.onInvoke(incomingMessage)
+                }
             }
-            else -> feature.onInvoke(incomingMessage)
+            true
+        } catch (exception: Exception) {
+            val errorMessage = buildMessage {
+                title("🚨 Error")
+                text("The ${feature::class.java.canonicalName} module encountered an error!")
+                text("Error: '${exception.message}'")
+            }
+            feature.sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingMessage.channelId,
+                    text = errorMessage
+                )
+            )
+            false
         }
-        return true
     }
 }

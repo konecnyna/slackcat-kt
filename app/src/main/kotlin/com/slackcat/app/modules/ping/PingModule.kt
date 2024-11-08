@@ -6,7 +6,7 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
 
 class PingModule : SlackcatModule() {
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,

@@ -6,9 +6,8 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
 
 class BigHipsModule : SlackcatModule() {
-    override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val text =
-            """:alphabet-white-b::alphabet-white-i::alphabet-white-g:
+    override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        val text = """:alphabet-white-b::alphabet-white-i::alphabet-white-g:
             | :alphabet-white-h::alphabet-white-i::alphabet-white-p::alphabet-white-s:
             """.trimMargin()
 

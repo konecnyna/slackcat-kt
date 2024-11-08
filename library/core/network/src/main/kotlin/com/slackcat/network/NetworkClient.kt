@@ -8,12 +8,18 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 class NetworkClient(val httpClient: HttpClient) {
+    val json = Json { ignoreUnknownKeys = true }
     suspend inline fun <reified T> fetch(
         url: String,
         serializer: KSerializer<T>,
     ): T {
         val jsonResponse = httpClient.get(url)
-        return Json { ignoreUnknownKeys = true }.decodeFromString(serializer, jsonResponse.bodyAsText())
+        return json.decodeFromString(serializer, jsonResponse.bodyAsText())
+    }
+
+    suspend inline fun fetchString(url: String): String {
+        val jsonResponse = httpClient.get(url)
+        return jsonResponse.bodyAsText()
     }
 
     suspend inline fun post(
