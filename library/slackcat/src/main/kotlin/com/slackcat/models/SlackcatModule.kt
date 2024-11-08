@@ -9,6 +9,7 @@ abstract class SlackcatModule {
     abstract fun provideCommand(): String
     abstract fun help(): String
 
+
     // Fix this.
     internal lateinit var chatClient: ChatClient
 
@@ -24,4 +25,6 @@ abstract class SlackcatModule {
             )
         )
     }
+
+    open fun aliases(): List<String> = emptyList()
 }

@@ -15,14 +15,23 @@ import org.mockito.Mockito.*
 class RouterTest {
     private lateinit var router: Router
     private lateinit var mockModule: SlackcatModule
-
+    private lateinit var aliasModule: SlackcatModule
     @BeforeEach
     fun setup() {
         // Create a mock SlackcatModule with a command "testCommand"
+        // Create a mock SlackcatModule with a command "testCommand"
         mockModule = mock(SlackcatModule::class.java).apply {
-                `when`(provideCommand()).thenReturn("testCommand")
-            }
-        router = Router(listOf(mockModule))
+            `when`(provideCommand()).thenReturn("testCommand")
+        }
+
+        // Create a separate mock SlackcatModule for an alias
+        aliasModule = mock(SlackcatModule::class.java).apply {
+            `when`(provideCommand()).thenReturn("anotherCommand")
+            `when`(aliases()).thenReturn(listOf("testCommand")) // This module is an alias
+        }
+
+        // Pass both modules to the Router
+        router = Router(listOf(mockModule, aliasModule))
     }
 
     @Test
@@ -31,7 +40,7 @@ class RouterTest {
         val message =
             IncomingChatMessage(
                 arguments = emptyList(),
-                command = "?ping",
+                command = "?testCommand",
                 channelId = "channel1",
                 chatUser = chatUser,
                 messageId = "msg123",
@@ -53,7 +62,7 @@ class RouterTest {
         val message =
             IncomingChatMessage(
                 arguments = emptyList(),
-                command = "?ping",
+                command = "testCommand",
                 channelId = "channel1",
                 chatUser = chatUser,
                 messageId = "msg123",
@@ -129,5 +138,67 @@ class RouterTest {
         // Verify that the command was not handled
         assertFalse(result)
         verify(mockModule, never()).onInvoke(message)
+    }
+
+
+    @Test
+    fun `onMessage should prioritize featureCommandMap over aliasCommandMap`() = runTest {
+        val chatUser = ChatUser("user123")
+        val message = IncomingChatMessage(
+            arguments = emptyList(),
+            command = "?testCommand",
+            channelId = "channel1",
+            chatUser = chatUser,
+            messageId = "msg123",
+            userText = "foo bar",
+            rawMessage = "?testCommand Do something",
+        )
+
+        val result = router.onMessage(message)
+
+        assertTrue(result)
+        verify(mockModule, times(1)).onInvoke(message)
+        verify(aliasModule, never()).onInvoke(message)
+    }
+
+    @Test
+    fun `onMessage should use aliasCommandMap when featureCommandMap does not have the command`() = runTest {
+        val chatUser = ChatUser("user123")
+        val message = IncomingChatMessage(
+            arguments = emptyList(),
+            command = "?anotherCommand",
+            channelId = "channel1",
+            chatUser = chatUser,
+            messageId = "msg123",
+            userText = "foo bar",
+            rawMessage = "?anotherCommand Do something",
+        )
+
+        // When `anotherCommand` is called, it should resolve to `aliasModule` (from aliasCommandMap)
+        val result = router.onMessage(message)
+
+        assertTrue(result)
+        verify(aliasModule, times(1)).onInvoke(message)
+        verify(mockModule, never()).onInvoke(message)
+    }
+
+    @Test
+    fun `onMessage should return false when command is not in featureCommandMap or aliasCommandMap`() = runTest {
+        val chatUser = ChatUser("user123")
+        val message = IncomingChatMessage(
+            arguments = emptyList(),
+            command = "?unknownCommand",
+            channelId = "channel1",
+            chatUser = chatUser,
+            messageId = "msg123",
+            userText = "foo bar",
+            rawMessage = "?unknownCommand Do something",
+        )
+
+        val result = router.onMessage(message)
+
+        assertFalse(result)
+        verify(mockModule, never()).onInvoke(message)
+        verify(aliasModule, never()).onInvoke(message)
     }
 }

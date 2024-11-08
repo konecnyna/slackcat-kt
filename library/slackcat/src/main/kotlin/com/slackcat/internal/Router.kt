@@ -9,12 +9,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class Router(modules: List<SlackcatModule>) {
-    private val featureCommandMap: MutableMap<String, SlackcatModule> = mutableMapOf()
-
-    init {
-        modules.map {
+    private val featureCommandMap: Map<String, SlackcatModule> = buildMap {
+        modules.forEach { module ->
             try {
-                featureCommandMap[it.provideCommand()] = it
+                put(module.provideCommand(), module)
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
+    private val aliasCommandMap: Map<String, SlackcatModule> = buildMap {
+        modules.forEach { module ->
+            try {
+                module.aliases().forEach { alias ->
+                    put(alias, module)
+                }
             } catch (e: Exception) {
                 throw e
             }
@@ -22,8 +32,8 @@ class Router(modules: List<SlackcatModule>) {
     }
 
     /**
-     * true -> message was handled
-     * false -> message was NOT handled
+     * true -> message was handled by module
+     * false -> message was NOT handled module
      */
     suspend fun onMessage(incomingMessage: IncomingChatMessage): Boolean {
         val command = CommandParser.extractCommand(incomingMessage.rawMessage)
@@ -31,7 +41,10 @@ class Router(modules: List<SlackcatModule>) {
             return false
         }
 
-        val feature = featureCommandMap[command] ?: return false
+        val feature = featureCommandMap[command] // Primary commands take precedence
+            ?: aliasCommandMap[command] // Check alias modules next
+            ?: return false // Nothing to handle so bail.
+
         return try {
             when {
                 incomingMessage.arguments.contains("--help") -> {
@@ -47,18 +60,25 @@ class Router(modules: List<SlackcatModule>) {
             }
             true
         } catch (exception: Exception) {
-            val errorMessage = buildMessage {
-                title("🚨 Error")
-                text("The ${feature::class.java.canonicalName} module encountered an error!")
-                text("Error: '${exception.message}'")
-            }
-            feature.sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingMessage.channelId,
-                    text = errorMessage
-                )
-            )
+            handleError(feature, incomingMessage, exception)
             false
         }
+    }
+
+    private fun handleError(
+        feature: SlackcatModule,
+        incomingMessage: IncomingChatMessage,
+        exception: Exception) {
+        val errorMessage = buildMessage {
+            title("🚨 Error")
+            text("The ${feature::class.java.canonicalName} module encountered an error!")
+            text("Error: '${exception.message}'")
+        }
+        feature.sendMessage(
+            OutgoingChatMessage(
+                channelId = incomingMessage.channelId,
+                text = errorMessage
+            )
+        )
     }
 }
