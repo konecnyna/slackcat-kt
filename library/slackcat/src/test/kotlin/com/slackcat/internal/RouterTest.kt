@@ -1,8 +1,11 @@
 package com.slackcat.internal
 
+
+import kotlinx.coroutines.test.runTest
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.models.SlackcatModule
+import io.mockk.coEvery
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -16,15 +19,14 @@ class RouterTest {
     @BeforeEach
     fun setup() {
         // Create a mock SlackcatModule with a command "testCommand"
-        mockModule =
-            mock(SlackcatModule::class.java).apply {
+        mockModule = mock(SlackcatModule::class.java).apply {
                 `when`(provideCommand()).thenReturn("testCommand")
             }
         router = Router(listOf(mockModule))
     }
 
     @Test
-    fun `onMessage should return true when a valid command is processed`() {
+    fun `onMessage should return true when a valid command is processed`() = runTest {
         val chatUser = ChatUser("user123")
         val message =
             IncomingChatMessage(
@@ -37,8 +39,6 @@ class RouterTest {
                 rawMessage = "?testCommand Do something",
             )
 
-        // Mock onInvoke to do nothing
-        doNothing().`when`(mockModule).onInvoke(message)
 
         val result = router.onMessage(message)
 
@@ -48,7 +48,7 @@ class RouterTest {
     }
 
     @Test
-    fun `onMessage should return false when message does not start with question mark`() {
+    fun `onMessage should return false when message does not start with question mark`() = runTest {
         val chatUser = ChatUser("user123")
         val message =
             IncomingChatMessage(
@@ -69,7 +69,7 @@ class RouterTest {
     }
 
     @Test
-    fun `onMessage should return false when command does not exist in featureCommandMap`() {
+    fun `onMessage should return false when command does not exist in featureCommandMap`() = runTest {
         val chatUser = ChatUser("user123")
         val message =
             IncomingChatMessage(
@@ -90,7 +90,7 @@ class RouterTest {
     }
 
     @Test
-    fun `onMessage should return false when command extraction fails`() {
+    fun `onMessage should return false when command extraction fails`() = runTest {
         val chatUser = ChatUser("user123")
         val message =
             IncomingChatMessage(
@@ -111,7 +111,7 @@ class RouterTest {
     }
 
     @Test
-    fun `onMessage should return false when message is empty`() {
+    fun `onMessage should return false when message is empty`() = runTest  {
         val chatUser = ChatUser("user123")
         val message =
             IncomingChatMessage(

@@ -27,12 +27,18 @@ class StatusModule : SlackcatModule() {
         title("StatusModule Help")
         text("Quickly check slacks status page with ?status command.")
         text("Usage: ?status --github")
+
+        val entries = StatusClient.Service.entries
+            .map { "${it.label} (${it.arguments.joinToString(", ")})" }
+            .joinToString(", ")
+        text("Availiable services: $entries")
+
     }
 
 
     private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
         return StatusClient.Service.entries.find { service ->
-            service.argument.any { arg -> arguments.contains(arg) }
+            service.arguments.any { arg -> arguments.contains(arg) }
         }
     }
 }

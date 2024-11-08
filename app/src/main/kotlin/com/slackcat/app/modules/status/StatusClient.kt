@@ -4,7 +4,6 @@ import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
 import com.slackcat.presentation.buildMessage
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
 class StatusClient {
@@ -18,11 +17,11 @@ class StatusClient {
         val service: String
     )
 
-    enum class Service(val label: String, val url: String, val argument: List<String>) {
-        SLACK(label = "Slack", url ="https://status.slack.com/api/v2.0.0/current", argument = listOf("--slack")),
-        GITHUB(label = "Github", url ="https://www.githubstatus.com/api/v2/status.json", argument = listOf("--gh","--github")),
-//        TWITCH(name = " url ="https://status.twitch.tv/api/v2/status.json", argument = listOf("--twitch")),
-//        SPOTIFY( url ="https://spotify.statuspage.io/api/v2/status.json", argument = listOf("--spotify"))
+    enum class Service(val label: String, val url: String, val arguments: List<String>) {
+        Slack(label = "Slack", url ="https://status.slack.com/api/v2.0.0/current", arguments = listOf("--slack")),
+        Github(label = "Github", url ="https://www.githubstatus.com/api/v2/status.json", arguments = listOf("--gh","--github")),
+        CircleCi(label = "CircleCi", url ="https://status.circleci.com/api/v2/status.json", arguments = listOf("--circle","--circle-ci")),
+        CloudFlare(label = "CloudFlare", url ="https://www.cloudflarestatus.com/api/v2/status.json", arguments = listOf("--cf", "--cloud-flare")),
     }
 
     data class Status(
@@ -39,7 +38,7 @@ class StatusClient {
         val responseText = slackcatNetworkClient.fetchString(service.url)
 
         return when (service) {
-            Service.SLACK -> {
+            Service.Slack -> {
                 val slackResponse = Json.decodeFromString(SlackStatusResponse.serializer(), responseText)
                 Status(
                     service = service,
@@ -47,16 +46,14 @@ class StatusClient {
                     updatedAt = slackResponse.dateUpdated.toString() ?: "unknown"
                 )
             }
-            Service.GITHUB -> {
-                val githubResponse = Json.decodeFromString(GitHubStatusResponse.serializer(), responseText)
+            Service.Github, Service.CircleCi, Service.CloudFlare -> {
+                val githubResponse = Json.decodeFromString(PageStatusResponse.serializer(), responseText)
                 Status(
                     service = service,
                     status = githubResponse.status.description,
                     updatedAt = githubResponse.page.updatedAt
                 )
             }
-            // Implement cases for TWITCH, SPOTIFY, etc. as needed
-            else -> throw IllegalArgumentException("Unsupported service")
         }
     }
 }
@@ -71,7 +68,7 @@ data class SlackStatusResponse(
 )
 
 @Serializable
-data class GitHubStatusResponse(
+data class PageStatusResponse(
     val page: Page,
     val status: Status
 ) {
