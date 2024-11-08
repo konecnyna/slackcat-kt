@@ -1,14 +1,15 @@
 package com.slackcat.app.modules.kudos
 
-import com.features.slackcat.models.SlackcatModule
-import com.features.slackcat.models.StorageModule
 import com.slackcat.app.SlackcatAppGraph.globalScope
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.models.SlackcatModule
+import com.slackcat.models.StorageModule
+import com.slackcat.presentation.buildMessage
 import kotlinx.coroutines.launch
 
 class KudosModule : SlackcatModule(), StorageModule {
-    val kudosDAO = KudosDAO()
+    private val kudosDAO = KudosDAO()
 
     override fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         globalScope.launch {
@@ -17,7 +18,7 @@ class KudosModule : SlackcatModule(), StorageModule {
                 val updatedKudos = kudosDAO.upsertKudos(it)
                 sendMessage(
                     OutgoingChatMessage(
-                        channelId = incomingChatMessage.channeId,
+                        channelId = incomingChatMessage.channelId,
                         text = "Bob now has $updatedKudos",
                     ),
                 )
@@ -26,6 +27,12 @@ class KudosModule : SlackcatModule(), StorageModule {
     }
 
     override fun provideCommand(): String = "++"
+
+    override fun help(): String =
+        buildMessage {
+            title("KudosModule Help")
+            text("Give kudos to your friends by using ?++ @username . See who can get the most!")
+        }
 
     override fun provideTable() = KudosDAO.KudosTable
 

@@ -1,11 +1,9 @@
 import com.slackcat.SlackcatProperties
-import com.slackcat.plugins.extentsion.SlackcatExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.slackcat.plugins.application")
     id("com.github.johnrengelman.shadow")
-    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("plugin.serialization")
 }
 
 
@@ -34,10 +32,10 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":features:slackcat"))
-    implementation(project(":data:chat"))
+    implementation(projects.library.slackcat)
+    implementation(projects.library.data.chat)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    implementation(libs.serialization.json)
 }
 
 
