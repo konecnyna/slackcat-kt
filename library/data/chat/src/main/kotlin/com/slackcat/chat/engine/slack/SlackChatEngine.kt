@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
+
 class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     private val messagesFlow = _messagesFlow.asSharedFlow()
@@ -42,9 +43,14 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
+        val jsonObjectConverter = JsonToBlockConverter()
+        val blocks = jsonObjectConverter.jsonObjectToBlocks(message.blocks)
         client.chatPostMessage { req ->
             req.channel(message.channelId)
                 .text(message.text)
+                .blocks(blocks)
+                .username(message.userName)
+                .iconUrl(message.iconUrl)
         }
     }
 

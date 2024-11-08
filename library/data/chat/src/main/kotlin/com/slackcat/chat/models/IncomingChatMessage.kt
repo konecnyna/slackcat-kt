@@ -1,5 +1,8 @@
 package com.slackcat.chat.models
 
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+
 data class IncomingChatMessage(
     val arguments: List<String>,
     val command: String,
@@ -14,6 +17,9 @@ data class IncomingChatMessage(
 data class OutgoingChatMessage(
     val channelId: String,
     val text: String,
+    val blocks: JsonObject = buildJsonObject { },
+    val userName: String? = "slackcat",
+    val iconUrl: String? = null,
 )
 
 data class ChatUser(val userId: String)
