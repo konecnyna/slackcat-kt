@@ -39,16 +39,15 @@ class RouterTest {
     fun `onMessage should return true when a valid command is processed`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?testCommand",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "?testCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?testCommand",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "?testCommand Do something",
+            )
 
             val result = router.onMessage(message)
 
@@ -61,16 +60,15 @@ class RouterTest {
     fun `onMessage should return false when message does not start with question mark`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "testCommand",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "testCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "testCommand",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "testCommand Do something",
+            )
 
             val result = router.onMessage(message)
 
@@ -83,16 +81,15 @@ class RouterTest {
     fun `onMessage should return false when command does not exist in featureCommandMap`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?ping",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "?unknownCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?ping",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "?unknownCommand Do something",
+            )
 
             val result = router.onMessage(message)
 
@@ -105,16 +102,15 @@ class RouterTest {
     fun `onMessage should return false when command extraction fails`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?ping",
-                    userText = "foo bar",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    rawMessage = "? Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?ping",
+                userText = "foo bar",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                rawMessage = "? Do something",
+            )
 
             val result = router.onMessage(message)
 
@@ -127,16 +123,15 @@ class RouterTest {
     fun `onMessage should return false when message is empty`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?ping",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?ping",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "",
+            )
 
             val result = router.onMessage(message)
 
@@ -149,16 +144,15 @@ class RouterTest {
     fun `onMessage should prioritize featureCommandMap over aliasCommandMap`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?testCommand",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "?testCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?testCommand",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "?testCommand Do something",
+            )
 
             val result = router.onMessage(message)
 
@@ -171,16 +165,15 @@ class RouterTest {
     fun `onMessage should use aliasCommandMap when featureCommandMap does not have the command`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?anotherCommand",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "?anotherCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?anotherCommand",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "?anotherCommand Do something",
+            )
 
             // When `anotherCommand` is called, it should resolve to `aliasModule` (from aliasCommandMap)
             val result = router.onMessage(message)
@@ -194,16 +187,15 @@ class RouterTest {
     fun `onMessage should return false when command is not in featureCommandMap or aliasCommandMap`() =
         runTest {
             val chatUser = ChatUser("user123")
-            val message =
-                IncomingChatMessage(
-                    arguments = emptyList(),
-                    command = "?unknownCommand",
-                    channelId = "channel1",
-                    chatUser = chatUser,
-                    messageId = "msg123",
-                    userText = "foo bar",
-                    rawMessage = "?unknownCommand Do something",
-                )
+            val message = IncomingChatMessage(
+                arguments = emptyList(),
+                command = "?unknownCommand",
+                channelId = "channel1",
+                chatUser = chatUser,
+                messageId = "msg123",
+                userText = "foo bar",
+                rawMessage = "?unknownCommand Do something",
+            )
 
             val result = router.onMessage(message)
 
