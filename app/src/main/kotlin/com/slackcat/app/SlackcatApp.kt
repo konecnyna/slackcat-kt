@@ -4,6 +4,7 @@ import com.slackcat.SlackcatBot
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.kudos.KudosModule
+import com.slackcat.app.modules.learn.LearnModule
 import com.slackcat.app.modules.ping.PingModule
 import com.slackcat.app.modules.pokecat.PokeCatModule
 import com.slackcat.app.modules.status.StatusModule
@@ -21,6 +22,7 @@ class SlackcatApp {
             BigHipsModule::class,
             TranslateModule::class,
             PokeCatModule::class,
+            LearnModule::class,
         )
 
     fun onCreate(args: String?) {

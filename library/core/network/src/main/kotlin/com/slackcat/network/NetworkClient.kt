@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 
 class NetworkClient(val httpClient: HttpClient) {
     val json = Json { ignoreUnknownKeys = true }
+
     suspend inline fun <reified T> fetch(
         url: String,
         serializer: KSerializer<T>,

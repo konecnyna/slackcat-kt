@@ -17,17 +17,19 @@ class TranslateModule : SlackcatModule() {
         globalScope.launch {
             val userText = extractUserText(incomingChatMessage.userText)
             val translationType = extractUserTranslateType(incomingChatMessage.userText)
-            val response = if (translationType != null && userText != null) {
-                post(userText, translationType)
-            } else {
-                null
-            }
+            val response =
+                if (translationType != null && userText != null) {
+                    post(userText, translationType)
+                } else {
+                    null
+                }
 
-            val outgoingText = when (response) {
-                is ErrorResponseFunTranslation -> response.error.message
-                is SuccessResponseFunTranslation -> response.contents.translated
-                null -> "Translate failed: sorry bub"
-            }
+            val outgoingText =
+                when (response) {
+                    is ErrorResponseFunTranslation -> response.error.message
+                    is SuccessResponseFunTranslation -> response.contents.translated
+                    null -> "Translate failed: sorry bub"
+                }
 
             sendMessage(
                 OutgoingChatMessage(
@@ -42,10 +44,11 @@ class TranslateModule : SlackcatModule() {
         text: String,
         translationType: String,
     ): FunTranslationApiResponse? {
-        val response = slackcatNetworkClient.post(
-            "https://api.funtranslations.com/translate/$translationType",
-            """{"text":"$text"}""",
-        )
+        val response =
+            slackcatNetworkClient.post(
+                "https://api.funtranslations.com/translate/$translationType",
+                """{"text":"$text"}""",
+            )
 
         return response.getOrNull()?.let {
             deserialize(it)
