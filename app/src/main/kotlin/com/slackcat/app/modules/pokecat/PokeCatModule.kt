@@ -70,11 +70,10 @@ class PokeCatModule : SlackcatModule() {
 
     override fun provideCommand(): String = "pokemon"
 
-    override fun help(): String =
-        buildMessage {
-            title("Pokemon Help")
-            text("Get stats on your favorite pokemon")
-            text("- Usage: `?pokemon <number>`")
-            text("- Ex: `?pokemon 69`")
-        }
+    override fun help(): String = buildMessage {
+        title("Pokemon Help")
+        text("Get stats on your favorite pokemon")
+        text("- Usage: `?pokemon <number>`")
+        text("- Ex: `?pokemon 69`")
+    }
 }

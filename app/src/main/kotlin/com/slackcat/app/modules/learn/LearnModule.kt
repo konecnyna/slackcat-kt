@@ -15,11 +15,10 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
         val learnRequest = makeLearnRequest(incomingChatMessage)
             ?: return postHelpMessage(incomingChatMessage.channelId)
 
-        val message =
-            OutgoingChatMessage(
-                channelId = incomingChatMessage.channelId,
-                text = "I got $learnRequest",
-            )
+        val message = OutgoingChatMessage(
+            channelId = incomingChatMessage.channelId,
+            text = "I got $learnRequest",
+        )
         sendMessage(message)
     }
 
