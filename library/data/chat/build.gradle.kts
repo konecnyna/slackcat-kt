@@ -31,4 +31,5 @@ dependencies {
     implementation(projects.library.core.common)
 
     implementation(libs.bundles.slack)
+    implementation(libs.bundles.testing)
 }

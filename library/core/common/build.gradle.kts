@@ -26,5 +26,5 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.bundles.slack)
+    implementation(libs.bundles.testing)
 }
