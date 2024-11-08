@@ -3,8 +3,9 @@ rootProject.name = "slackcat-kt"
 includeBuild("slackcat-gradle-plugin")
 include(
     ":app",
-    ":library:features:slackcat",
+    ":library:slackcat",
     ":library:data:chat",
+    ":library:core:common",
     ":library:core:database",
     ":library:core:network",
     ":library:core:server"

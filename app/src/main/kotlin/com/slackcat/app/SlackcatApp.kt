@@ -1,7 +1,7 @@
 package com.slackcat.app
 
-import com.features.slackcat.SlackcatBot
-import com.features.slackcat.models.SlackcatModule
+import com.slackcat.SlackcatBot
+import com.slackcat.models.SlackcatModule
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.kudos.KudosModule

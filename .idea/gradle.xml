@@ -22,13 +22,13 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/library/core" />
+            <option value="$PROJECT_DIR$/library/core/common" />
             <option value="$PROJECT_DIR$/library/core/database" />
             <option value="$PROJECT_DIR$/library/core/network" />
             <option value="$PROJECT_DIR$/library/core/server" />
             <option value="$PROJECT_DIR$/library/data" />
             <option value="$PROJECT_DIR$/library/data/chat" />
-            <option value="$PROJECT_DIR$/library/features" />
-            <option value="$PROJECT_DIR$/library/features/slackcat" />
+            <option value="$PROJECT_DIR$/library/slackcat" />
             <option value="$PROJECT_DIR$/slackcat-gradle-plugin" />
           </set>
         </option>

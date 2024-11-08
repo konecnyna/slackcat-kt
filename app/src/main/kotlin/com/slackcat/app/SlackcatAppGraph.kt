@@ -1,6 +1,6 @@
 package com.slackcat.app
 
-import com.features.slackcat.client.SlackcatNetworkClient
+import com.slackcat.client.SlackcatNetworkClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 

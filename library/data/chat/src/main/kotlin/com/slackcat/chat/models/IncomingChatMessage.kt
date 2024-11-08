@@ -1,15 +1,15 @@
 package com.slackcat.chat.models
 
 data class IncomingChatMessage(
-    val channeId: String,
+    val arguments: List<String>,
+    val command: String,
+    val channelId: String,
     val chatUser: ChatUser,
     val messageId: String,
     val rawMessage: String,
     var threadId: String? = null,
-) {
-    val command: String? = """\?\s*(\w+)""".toRegex().find(rawMessage)?.groups?.get(1)?.value
-    val userText: String = rawMessage.replace(command ?: "", "")
-}
+    val userText: String
+)
 
 data class OutgoingChatMessage(
     val channelId: String,

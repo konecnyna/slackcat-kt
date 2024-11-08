@@ -7,12 +7,13 @@ import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.CommandParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
+class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     private val messagesFlow = _messagesFlow.asSharedFlow()
 
@@ -27,7 +28,9 @@ class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
                 return@event ctx.ack()
             }
             globalCoroutineScope.launch {
-                _messagesFlow.emit(message.toDomain())
+                CommandParser.extractCommand(message.text)?.let {
+                    _messagesFlow.emit(message.toDomain(it))
+                }
             }
             ctx.ack()
         }
@@ -49,12 +52,14 @@ class SlackChatEngine(val globalCoroutineScope: CoroutineScope) : ChatEngine {
 
     override fun provideEngineName(): String = "SlackRTM"
 
-    fun MessageEvent.toDomain() =
-        IncomingChatMessage(
-            channeId = channel,
-            chatUser = ChatUser(userId = user),
-            messageId = ts,
-            rawMessage = text,
-            threadId = ts,
-        )
+    fun MessageEvent.toDomain(command: String) = IncomingChatMessage(
+        command = command,
+        channelId = channel,
+        chatUser = ChatUser(userId = user),
+        messageId = ts,
+        rawMessage = text,
+        threadId = ts,
+        arguments = CommandParser.extractArguments(text),
+        userText = CommandParser.extractUserText(text)
+    )
 }

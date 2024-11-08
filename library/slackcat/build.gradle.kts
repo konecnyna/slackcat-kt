@@ -1,6 +1,4 @@
 import com.slackcat.SlackcatProperties
-import com.slackcat.plugins.extentsion.SlackcatExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.slackcat.plugins.library")
@@ -15,7 +13,7 @@ slackcat {
     features {
         coroutines()
         exposed()
-        ktorServer()
+        ktorClient()
     }
 }
 
@@ -27,8 +25,16 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.library.core.server)
+    implementation(projects.library.data.chat)
+    implementation(projects.library.core.database)
     implementation(projects.library.core.common)
+    implementation(projects.library.core.network)
 
-    implementation(libs.bundles.slack)
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito:mockito-inline:4.5.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

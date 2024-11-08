@@ -15,8 +15,7 @@ import java.time.Instant
 
 class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
     companion object {
-        val commandNotHandledErrorMessage =
-            "\n\nThe incoming message wasn't handled.\n" +
+        const val ERROR_MESSAGE = "\n\nThe incoming message wasn't handled.\n" +
                 "* Please check to make sure its in the proper format. E.g. '?ping'\n" +
                 "* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
     }
@@ -30,10 +29,13 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
             println("Incoming message: $args")
             _messagesFlow.emit(
                 IncomingChatMessage(
-                    channeId = "123456789",
+                    command = "?pg",
+                    channelId = "123456789",
                     chatUser = CliMockData.defaultCliUser,
                     messageId = Instant.now().toString(),
                     rawMessage = args,
+                    arguments = emptyList(),
+                    userText = "foo bar"
                 ),
             )
         }
@@ -43,7 +45,10 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
         println("${provideEngineName()} is connected")
     }
 
-    override suspend fun sendMessage(message: OutgoingChatMessage) = println("Outgoing message: $message")
+    override suspend fun sendMessage(message: OutgoingChatMessage) {
+        println("Outgoing message: $message")
+        println("User sees: ${message.text}")
+    }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
 

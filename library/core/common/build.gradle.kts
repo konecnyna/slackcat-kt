@@ -15,7 +15,6 @@ slackcat {
     features {
         coroutines()
         exposed()
-        ktorServer()
     }
 }
 
@@ -27,8 +26,5 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.library.core.server)
-    implementation(projects.library.core.common)
-
     implementation(libs.bundles.slack)
 }

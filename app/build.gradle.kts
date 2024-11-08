@@ -1,6 +1,4 @@
 import com.slackcat.SlackcatProperties
-import com.slackcat.plugins.extentsion.SlackcatExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.slackcat.plugins.application")
@@ -34,10 +32,10 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.library.features.slackcat)
+    implementation(projects.library.slackcat)
     implementation(projects.library.data.chat)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    implementation(libs.serialization.json)
 }
 
 

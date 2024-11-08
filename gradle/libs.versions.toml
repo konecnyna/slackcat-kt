@@ -11,15 +11,20 @@ sqlite = "3.34.0"
 ktor = "2.3.6"
 serialization = "1.6.1"
 logback = "1.4.14"
-
+mockito = "5.14.2"
+mockito-inline = "4.5.1"
+junit = "5.10.0"
 
 [libraries]
 slack-api-client = { module = "com.slack.api:slack-api-client", version.ref = "slack-api" }
 slack-bolt = { module = "com.slack.api:bolt", version.ref = "slack-bolt" }
 slack-bolt-socket = { module = "com.slack.api:bolt-socket-mode", version.ref = "slack-bolt" }
+
 websocket-api = { module = "javax.websocket:javax.websocket-api", version.ref = "websocket" }
 tyrus-standalone-client = { module = "org.glassfish.tyrus.bundles:tyrus-standalone-client", version.ref = "tyrus" }
+
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
@@ -40,7 +45,20 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-
-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito-inline" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+
+[bundles]
+
+slack = ["slack-api-client", "slack-bolt", "slack-bolt-socket", "websocket-api", "tyrus-standalone-client", "slf4j-simple"]
+websocket = ["websocket-api", "tyrus-standalone-client"]
+logging = ["slf4j-simple", "logback-classic"]
+database = ["exposed-core", "exposed-dao", "exposed-jdbc", "sqlite-jdbc"]
+ktor-client = ["ktor-client-core", "ktor-client-cio", "ktor-client-serialization", "ktor-client-content-negotiation", "ktor-client-logging"]
+ktor-server = ["ktor-server-netty", "ktor-server-core", "ktor-server-content-negotiation", "ktor-serialization-json"]
+kotlin = ["serialization-json", "kotlin-reflect", "kotlin-gradle-plugin"]
+testing = ["mockito-core", "mockito-inline", "junit-jupiter"]
