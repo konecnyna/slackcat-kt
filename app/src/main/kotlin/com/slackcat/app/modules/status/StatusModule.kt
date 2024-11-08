@@ -13,12 +13,18 @@ class StatusModule : SlackcatModule() {
             ?: return postHelpMessage(incomingChatMessage.channelId)
 
         val response = statusClient.fetch(statusService)
-        sendMessage(
+
+        val message = response?.let {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 text = response.toMessage(),
-            ),
+            )
+        } ?: OutgoingChatMessage(
+            channelId = incomingChatMessage.channelId,
+            text = "Got en error when trying fetch status...",
         )
+
+        sendMessage(message)
     }
 
     override fun provideCommand(): String = "status"

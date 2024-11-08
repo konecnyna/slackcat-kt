@@ -2,28 +2,43 @@ package com.slackcat.app.modules.pokecat
 
 
 import PokemonData
-import com.slackcat.app.SlackcatAppGraph
-import com.slackcat.app.SlackcatAppGraph.globalScope
 import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
-import com.slackcat.app.modules.translate.ApiResponse
 import com.slackcat.models.SlackcatModule
 
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.presentation.buildMessage
 
 class PokeCatModule : SlackcatModule() {
+    val baseurl = "https://pokeapi.co/api/v2/pokemon"
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        globalScope.launch {
-            val baseurl = "https://pokeapi.co/api/v2/pokemon"
-            val pokemonIdentifier = incomingChatMessage.userText
+        val pokemonIdentifier = incomingChatMessage.userText
+        if (pokemonIdentifier.isBlank()) {
+            postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
 
-            val pokemon = slackcatNetworkClient.fetch("$baseurl/$pokemonIdentifier", PokemonData.serializer())
+        val pokemonResult = slackcatNetworkClient.fetch("$baseurl/$pokemonIdentifier", PokemonData.serializer())
+        val pokemon = pokemonResult.getOrNull() ?: return this.postHelpMessage(incomingChatMessage.channelId)
+        sendMessage(
+            OutgoingChatMessage(
+                channelId = incomingChatMessage.channelId,
+                text = "pokemon",
+                blocks = buildPokemonMessage(pokemon),
+                userName = "PokéCat",
+                iconUrl = "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"
+            ),
+        )
 
-            val blocks = """
+    }
+
+
+    private fun buildPokemonMessage(pokemon: PokemonData): JsonObject {
+        val blocks = """
                 {
                     "blocks": [
                         {
@@ -48,18 +63,8 @@ class PokeCatModule : SlackcatModule() {
                 }
             """
 
-            val jsonObject: JsonObject = Json.parseToJsonElement(blocks).jsonObject
-            println(jsonObject)
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    text = "pokemon",
-                    blocks = jsonObject,
-                    userName = "PokéCat",
-                    iconUrl = "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"
-                ),
-            )
-        }
+        return Json.parseToJsonElement(blocks).jsonObject
+
     }
 
 
@@ -69,7 +74,10 @@ class PokeCatModule : SlackcatModule() {
     }
 
     override fun provideCommand(): String = "pokemon"
-    override fun help(): String {
-        TODO("Not yet implemented")
+    override fun help(): String = buildMessage {
+        title("Pokemon Help")
+        text("Get stats on your favorite pokemon")
+        text("- Usage: `?pokemon <number>`")
+        text("- Ex: `?pokemon 69`")
     }
 }

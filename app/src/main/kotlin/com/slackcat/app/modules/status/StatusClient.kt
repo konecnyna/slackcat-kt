@@ -18,10 +18,22 @@ class StatusClient {
     )
 
     enum class Service(val label: String, val url: String, val arguments: List<String>) {
-        Slack(label = "Slack", url ="https://status.slack.com/api/v2.0.0/current", arguments = listOf("--slack")),
-        Github(label = "Github", url ="https://www.githubstatus.com/api/v2/status.json", arguments = listOf("--gh","--github")),
-        CircleCi(label = "CircleCi", url ="https://status.circleci.com/api/v2/status.json", arguments = listOf("--circle","--circle-ci")),
-        CloudFlare(label = "CloudFlare", url ="https://www.cloudflarestatus.com/api/v2/status.json", arguments = listOf("--cf", "--cloud-flare")),
+        Slack(label = "Slack", url = "https://status.slack.com/api/v2.0.0/current", arguments = listOf("--slack")),
+        Github(
+            label = "Github",
+            url = "https://www.githubstatus.com/api/v2/status.json",
+            arguments = listOf("--gh", "--github")
+        ),
+        CircleCi(
+            label = "CircleCi",
+            url = "https://status.circleci.com/api/v2/status.json",
+            arguments = listOf("--circle", "--circle-ci")
+        ),
+        CloudFlare(
+            label = "CloudFlare",
+            url = "https://www.cloudflarestatus.com/api/v2/status.json",
+            arguments = listOf("--cf", "--cloud-flare")
+        ),
     }
 
     data class Status(
@@ -34,25 +46,26 @@ class StatusClient {
         }
     }
 
-    suspend fun fetch(service: Service): Status {
-        val responseText = slackcatNetworkClient.fetchString(service.url)
+    suspend fun fetch(service: Service): Status? {
+        return slackcatNetworkClient.fetchString(service.url).getOrNull()?.let {
+            when (service) {
+                Service.Slack -> {
+                    val slackResponse = Json.decodeFromString(SlackStatusResponse.serializer(), it)
+                    Status(
+                        service = service,
+                        status = slackResponse.status,
+                        updatedAt = slackResponse.dateUpdated.toString() ?: "unknown"
+                    )
+                }
 
-        return when (service) {
-            Service.Slack -> {
-                val slackResponse = Json.decodeFromString(SlackStatusResponse.serializer(), responseText)
-                Status(
-                    service = service,
-                    status = slackResponse.status,
-                    updatedAt = slackResponse.dateUpdated.toString() ?: "unknown"
-                )
-            }
-            Service.Github, Service.CircleCi, Service.CloudFlare -> {
-                val githubResponse = Json.decodeFromString(PageStatusResponse.serializer(), responseText)
-                Status(
-                    service = service,
-                    status = githubResponse.status.description,
-                    updatedAt = githubResponse.page.updatedAt
-                )
+                Service.Github, Service.CircleCi, Service.CloudFlare -> {
+                    val githubResponse = Json.decodeFromString(PageStatusResponse.serializer(), it)
+                    Status(
+                        service = service,
+                        status = githubResponse.status.description,
+                        updatedAt = githubResponse.page.updatedAt
+                    )
+                }
             }
         }
     }

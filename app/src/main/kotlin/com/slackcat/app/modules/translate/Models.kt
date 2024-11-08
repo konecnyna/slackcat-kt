@@ -3,18 +3,18 @@ package com.slackcat.app.modules.translate
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class ApiResponse
+sealed class FunTranslationApiResponse
 
 @Serializable
-data class SuccessResponse(
+data class SuccessResponseFunTranslation(
     val success: Success,
     val contents: Contents,
-) : ApiResponse()
+) : FunTranslationApiResponse()
 
 @Serializable
-data class ErrorResponse(
+data class ErrorResponseFunTranslation(
     val error: Error,
-) : ApiResponse()
+) : FunTranslationApiResponse()
 
 @Serializable
 data class Success(val total: Int)
