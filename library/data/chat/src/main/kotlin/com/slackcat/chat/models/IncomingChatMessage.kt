@@ -25,6 +25,7 @@ data class OutgoingChatMessage(
 )
 
 
+
 sealed interface BotIcon {
     data class BotEmojiIcon(val emoji: String): BotIcon
     data class BotImageIcon(val url: String): BotIcon
