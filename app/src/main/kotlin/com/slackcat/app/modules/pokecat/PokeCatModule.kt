@@ -3,6 +3,7 @@ package com.slackcat.app.modules.pokecat
 
 import PokemonData
 import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
+import com.slackcat.chat.models.BotIcon
 import com.slackcat.models.SlackcatModule
 
 import kotlinx.serialization.json.Json
@@ -29,8 +30,8 @@ class PokeCatModule : SlackcatModule() {
                 channelId = incomingChatMessage.channelId,
                 text = "pokemon",
                 blocks = buildPokemonMessage(pokemon),
-                userName = "PokéCat",
-                iconUrl = "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"
+                botName = "PokéCat",
+                botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"),
             ),
         )
 
