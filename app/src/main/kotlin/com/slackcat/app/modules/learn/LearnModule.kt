@@ -12,19 +12,19 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
     private val learnDAO = LearnDAO()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val learnRequest = makeLearnRequest(incomingChatMessage)
-            ?: return postHelpMessage(incomingChatMessage.channelId)
+        val learnRequest =
+            makeLearnRequest(incomingChatMessage)
+                ?: return postHelpMessage(incomingChatMessage.channelId)
 
-        val message = OutgoingChatMessage(
-            channelId = incomingChatMessage.channelId,
-            text = "I got $learnRequest"
-
-        )
+        val message =
+            OutgoingChatMessage(
+                channelId = incomingChatMessage.channelId,
+                text = "I got $learnRequest",
+            )
         sendMessage(message)
     }
 
     override fun onUnhandledCommand(message: IncomingChatMessage) {
-
     }
 
     override fun provideCommand(): String = "learn"
@@ -39,7 +39,6 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
 
     override fun provideTable() = LearnDAO.LearnTable
 
-
     private fun makeLearnRequest(incomingChatMessage: IncomingChatMessage): LearnInsertRow? {
         if (incomingChatMessage.userText.isEmpty()) return null
 
@@ -53,13 +52,11 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
                 LearnInsertRow(
                     learnedBy = incomingChatMessage.chatUser.userId,
                     learnKey = learnKey,
-                    learnText = learnText
+                    learnText = learnText,
                 )
             } else {
                 null
             }
         }
     }
-
-
 }

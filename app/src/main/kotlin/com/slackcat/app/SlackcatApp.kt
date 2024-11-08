@@ -13,16 +13,17 @@ import com.slackcat.models.SlackcatModule
 import kotlin.reflect.KClass
 
 class SlackcatApp {
-    val modules: Array<KClass<out SlackcatModule>> = arrayOf(
-        DateModule::class,
-        KudosModule::class,
-        PingModule::class,
-        StatusModule::class,
-        BigHipsModule::class,
-        TranslateModule::class,
-        PokeCatModule::class,
-        LearnModule::class
-    )
+    val modules: Array<KClass<out SlackcatModule>> =
+        arrayOf(
+            DateModule::class,
+            KudosModule::class,
+            PingModule::class,
+            StatusModule::class,
+            BigHipsModule::class,
+            TranslateModule::class,
+            PokeCatModule::class,
+            LearnModule::class,
+        )
 
     fun onCreate(args: String?) {
         val slackcatBot =
