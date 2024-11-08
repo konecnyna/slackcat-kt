@@ -8,7 +8,7 @@ data class IncomingChatMessage(
     val messageId: String,
     val rawMessage: String,
     var threadId: String? = null,
-    val userText: String
+    val userText: String,
 )
 
 data class OutgoingChatMessage(

@@ -1,6 +1,5 @@
 package com.slackcat.presentation
 
-
 class MessageBuilder {
     private val content = StringBuilder()
 
@@ -17,7 +16,10 @@ class MessageBuilder {
         content.append("*$text*\n")
     }
 
-    fun url(url: String, text: String) {
+    fun url(
+        url: String,
+        text: String,
+    ) {
         content.append("<$url|$text>\n")
     }
 

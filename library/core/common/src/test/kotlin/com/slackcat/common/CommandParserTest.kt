@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class CommandParserTest {
-
     @Test
     fun `extractCommand should return the correct command when message starts with question mark`() {
         val result = CommandParser.extractCommand("?ping --help")

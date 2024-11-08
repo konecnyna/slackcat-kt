@@ -52,14 +52,15 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     override fun provideEngineName(): String = "SlackRTM"
 
-    fun MessageEvent.toDomain(command: String) = IncomingChatMessage(
-        command = command,
-        channelId = channel,
-        chatUser = ChatUser(userId = user),
-        messageId = ts,
-        rawMessage = text,
-        threadId = ts,
-        arguments = CommandParser.extractArguments(text),
-        userText = CommandParser.extractUserText(text)
-    )
+    fun MessageEvent.toDomain(command: String) =
+        IncomingChatMessage(
+            command = command,
+            channelId = channel,
+            chatUser = ChatUser(userId = user),
+            messageId = ts,
+            rawMessage = text,
+            threadId = ts,
+            arguments = CommandParser.extractArguments(text),
+            userText = CommandParser.extractUserText(text),
+        )
 }

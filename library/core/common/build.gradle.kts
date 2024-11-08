@@ -26,5 +26,5 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.bundles.testing)
+    implementation(libs.bundles.testing)g
 }

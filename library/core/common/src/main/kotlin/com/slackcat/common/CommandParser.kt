@@ -20,10 +20,8 @@ object CommandParser {
         return argumentRegex.findAll(input).map { it.value }.toList()
     }
 
-
     fun extractUserText(rawMessage: String): String {
         val command = extractCommand(rawMessage)
         return rawMessage.replaceFirst("\\?\\s*${Regex.escape(command ?: "")}".toRegex(), "").trim()
     }
-
 }

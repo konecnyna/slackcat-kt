@@ -1,11 +1,11 @@
 package com.slackcat.app.modules.kudos
 
-import com.slackcat.models.SlackcatModule
-import com.slackcat.models.StorageModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.app.SlackcatAppGraph.globalScope
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.models.SlackcatModule
+import com.slackcat.models.StorageModule
+import com.slackcat.presentation.buildMessage
 import kotlinx.coroutines.launch
 
 class KudosModule : SlackcatModule(), StorageModule {
@@ -27,10 +27,12 @@ class KudosModule : SlackcatModule(), StorageModule {
     }
 
     override fun provideCommand(): String = "++"
-    override fun help(): String = buildMessage {
-        title("KudosModule Help")
-        text("Give kudos to your friends by using ?++ @username . See who can get the most!")
-    }
+
+    override fun help(): String =
+        buildMessage {
+            title("KudosModule Help")
+            text("Give kudos to your friends by using ?++ @username . See who can get the most!")
+        }
 
     override fun provideTable() = KudosDAO.KudosTable
 

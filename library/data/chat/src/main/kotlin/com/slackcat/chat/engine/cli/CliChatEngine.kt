@@ -16,7 +16,8 @@ import java.time.Instant
 
 class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
     companion object {
-        const val ERROR_MESSAGE = "\n\nThe incoming message wasn't handled.\n" +
+        const val ERROR_MESSAGE =
+            "\n\nThe incoming message wasn't handled.\n" +
                 "* Please check to make sure its in the proper format. E.g. '?ping'\n" +
                 "* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
     }
@@ -27,18 +28,19 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
     init {
         scope.launch {
             delay(Duration.ofSeconds(1))
-            val command  = CommandParser.extractCommand(args) ?: throw IllegalArgumentException("No valid command given. Commands should be prefixed with ?")
+            val command = CommandParser.extractCommand(args) ?: throw IllegalArgumentException("No valid command given. Commands should be prefixed with ?")
 
             println("Incoming message: $args")
-            val incomingMessage = IncomingChatMessage(
-                command = command,
-                channelId = "123456789",
-                chatUser = CliMockData.defaultCliUser,
-                messageId = Instant.now().toString(),
-                rawMessage = args,
-                arguments = CommandParser.extractArguments(args),
-                userText = CommandParser.extractUserText(args)
-            )
+            val incomingMessage =
+                IncomingChatMessage(
+                    command = command,
+                    channelId = "123456789",
+                    chatUser = CliMockData.defaultCliUser,
+                    messageId = Instant.now().toString(),
+                    rawMessage = args,
+                    arguments = CommandParser.extractArguments(args),
+                    userText = CommandParser.extractUserText(args),
+                )
 
             println("Emitting: $incomingMessage")
             _messagesFlow.emit(incomingMessage)

@@ -1,9 +1,9 @@
 package com.slackcat.app.modules.date
 
-import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.models.SlackcatModule
+import com.slackcat.presentation.buildMessage
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -22,8 +22,10 @@ class DateModule : SlackcatModule() {
     }
 
     override fun provideCommand(): String = "date"
-    override fun help(): String = buildMessage {
-        title("DateModule Help")
-        text("This module returns the local date where the server is which is useful for debugging")
-    }
+
+    override fun help(): String =
+        buildMessage {
+            title("DateModule Help")
+            text("This module returns the local date where the server is which is useful for debugging")
+        }
 }

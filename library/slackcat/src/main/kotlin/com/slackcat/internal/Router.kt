@@ -1,9 +1,9 @@
 package com.slackcat.internal
 
-import com.slackcat.models.SlackcatModule
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
+import com.slackcat.models.SlackcatModule
 
 class Router(modules: List<SlackcatModule>) {
     private val featureCommandMap: MutableMap<String, SlackcatModule> = mutableMapOf()
@@ -32,15 +32,15 @@ class Router(modules: List<SlackcatModule>) {
         val feature = featureCommandMap[command] ?: return false
         when {
             incomingMessage.arguments.contains("--help") -> {
-                val message = OutgoingChatMessage(
-                    channelId = incomingMessage.channelId,
-                    text = feature.help()
-                )
+                val message =
+                    OutgoingChatMessage(
+                        channelId = incomingMessage.channelId,
+                        text = feature.help(),
+                    )
                 feature.sendMessage(message = message)
             }
             else -> feature.onInvoke(incomingMessage)
         }
         return true
     }
-
 }
