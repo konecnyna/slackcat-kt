@@ -1,7 +1,7 @@
 package com.slackcat.chat.models
 
-import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_EMOJI_ICON
 import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_NAME
+import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
@@ -21,7 +21,7 @@ data class OutgoingChatMessage(
     val text: String,
     val blocks: JsonObject = buildJsonObject { },
     val botName: String = DEFAULT_BOT_NAME,
-    val botIcon: BotIcon = BotIcon.BotEmojiIcon(DEFAULT_BOT_EMOJI_ICON),
+    val botIcon: BotIcon = BotIcon.BotImageIcon(DEFAULT_BOT_IMAGE_ICON),
 )
 
 
