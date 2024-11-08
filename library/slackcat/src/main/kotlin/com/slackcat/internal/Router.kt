@@ -2,6 +2,7 @@ package com.slackcat.internal
 
 import com.slackcat.models.SlackcatModule
 import com.slackcat.chat.models.IncomingChatMessage
+import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 
 class Router(modules: List<SlackcatModule>) {
@@ -22,14 +23,23 @@ class Router(modules: List<SlackcatModule>) {
      * false -> message was NOT handled
      */
 
-    fun onMessage(message: IncomingChatMessage): Boolean {
-        val command = CommandParser.extractCommand(message.rawMessage)
-        if (!CommandParser.validateCommandMessage(message.rawMessage) || command == null) {
+    fun onMessage(incomingMessage: IncomingChatMessage): Boolean {
+        val command = CommandParser.extractCommand(incomingMessage.rawMessage)
+        if (!CommandParser.validateCommandMessage(incomingMessage.rawMessage) || command == null) {
             return false
         }
 
         val feature = featureCommandMap[command] ?: return false
-        feature.onInvoke(message)
+        when {
+            incomingMessage.arguments.contains("--help") -> {
+                val message = OutgoingChatMessage(
+                    channelId = incomingMessage.channelId,
+                    text = feature.help()
+                )
+                feature.sendMessage(message = message)
+            }
+            else -> feature.onInvoke(incomingMessage)
+        }
         return true
     }
 

@@ -3,6 +3,7 @@ package com.slackcat.chat.engine.cli
 import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.CommandParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,18 +27,21 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
     init {
         scope.launch {
             delay(Duration.ofSeconds(1))
+            val command  = CommandParser.extractCommand(args) ?: throw IllegalArgumentException("No valid command given. Commands should be prefixed with ?")
+
             println("Incoming message: $args")
-            _messagesFlow.emit(
-                IncomingChatMessage(
-                    command = "?pg",
-                    channelId = "123456789",
-                    chatUser = CliMockData.defaultCliUser,
-                    messageId = Instant.now().toString(),
-                    rawMessage = args,
-                    arguments = emptyList(),
-                    userText = "foo bar"
-                ),
+            val incomingMessage = IncomingChatMessage(
+                command = command,
+                channelId = "123456789",
+                chatUser = CliMockData.defaultCliUser,
+                messageId = Instant.now().toString(),
+                rawMessage = args,
+                arguments = CommandParser.extractArguments(args),
+                userText = CommandParser.extractUserText(args)
             )
+
+            println("Emitting: $incomingMessage")
+            _messagesFlow.emit(incomingMessage)
         }
     }
 
@@ -47,7 +51,9 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
         println("Outgoing message: $message")
-        println("User sees: ${message.text}")
+        println("--------------------------------------")
+        println("User sees:\n${message.text.trim()}")
+        println("--------------------------------------")
     }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow

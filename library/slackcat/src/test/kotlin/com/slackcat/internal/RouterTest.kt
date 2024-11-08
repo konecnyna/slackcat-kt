@@ -32,6 +32,7 @@ class RouterTest {
             channelId = "channel1",
             chatUser = chatUser,
             messageId = "msg123",
+            userText = "foo bar",
             rawMessage = "?testCommand Do something"
         )
 
@@ -55,6 +56,7 @@ class RouterTest {
             channelId = "channel1",
             chatUser = chatUser,
             messageId = "msg123",
+            userText = "foo bar",
             rawMessage = "testCommand Do something"
         )
 
@@ -71,10 +73,10 @@ class RouterTest {
         val message = IncomingChatMessage(
             arguments = emptyList(),
             command = "?ping",
-
             channelId = "channel1",
             chatUser = chatUser,
             messageId = "msg123",
+            userText = "foo bar",
             rawMessage = "?unknownCommand Do something"
         )
 
@@ -91,7 +93,7 @@ class RouterTest {
         val message = IncomingChatMessage(
             arguments = emptyList(),
             command = "?ping",
-
+            userText = "foo bar",
             channelId = "channel1",
             chatUser = chatUser,
             messageId = "msg123",
@@ -114,6 +116,7 @@ class RouterTest {
             channelId = "channel1",
             chatUser = chatUser,
             messageId = "msg123",
+            userText = "foo bar",
             rawMessage = ""
         )
 
