@@ -28,11 +28,10 @@ class KudosModule : SlackcatModule(), StorageModule {
 
     override fun provideCommand(): String = "++"
 
-    override fun help(): String =
-        buildMessage {
-            title("KudosModule Help")
-            text("Give kudos to your friends by using ?++ @username . See who can get the most!")
-        }
+    override fun help(): String = buildMessage {
+        title("KudosModule Help")
+        text("Give kudos to your friends by using ?++ @username . See who can get the most!")
+    }
 
     override fun provideTable() = KudosDAO.KudosTable
 

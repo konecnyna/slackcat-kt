@@ -6,9 +6,10 @@ import com.slackcat.chat.models.OutgoingChatMessage
 
 abstract class SlackcatModule {
     abstract suspend fun onInvoke(incomingChatMessage: IncomingChatMessage)
-    abstract fun provideCommand(): String
-    abstract fun help(): String
 
+    abstract fun provideCommand(): String
+
+    abstract fun help(): String
 
     // Fix this.
     internal lateinit var chatClient: ChatClient
@@ -21,8 +22,8 @@ abstract class SlackcatModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                text = help()
-            )
+                text = help(),
+            ),
         )
     }
 

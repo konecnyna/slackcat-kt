@@ -27,7 +27,7 @@ class PingModule : SlackcatModule() {
     override fun aliases(): List<String> = listOf(
         "bing",
         "ding",
-        "ring"
+        "ring",
     )
 
     override fun help(): String = buildMessage {

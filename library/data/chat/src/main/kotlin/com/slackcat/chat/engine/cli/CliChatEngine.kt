@@ -16,10 +16,12 @@ import java.time.Instant
 
 class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
     companion object {
-        const val ERROR_MESSAGE =
-            "\n\nThe incoming message wasn't handled.\n" +
+        const val DIVIDER = "-----------------------------"
+        const val ERROR_MESSAGE = "\n${DIVIDER}\n 🚨The incoming message wasn't handled.\n" +
                 "* Please check to make sure its in the proper format. E.g. '?ping'\n" +
-                "* Make sure to add your feature to 'FeatureGraph.kt'\n\n"
+                "* Make sure to add your feature to 'FeatureGraph.kt'\n" +
+                "* Make sure you added it to  modules list - val modules: Array<KClass<out SlackcatModule>> = arrayOf(DateModule::class,...)\n" +
+                DIVIDER
     }
 
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
@@ -28,7 +30,9 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
     init {
         scope.launch {
             delay(Duration.ofSeconds(1))
-            val command = CommandParser.extractCommand(args) ?: throw IllegalArgumentException("No valid command given. Commands should be prefixed with ?")
+            val command =
+                CommandParser.extractCommand(args)
+                    ?: throw IllegalArgumentException("No valid command given. Commands should be prefixed with ?")
 
             println("Incoming message: $args")
             val incomingMessage =

@@ -1,17 +1,15 @@
 package com.slackcat.app.modules.pokecat
 
-
 import PokemonData
 import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
 import com.slackcat.chat.models.BotIcon
+import com.slackcat.chat.models.IncomingChatMessage
+import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
-
+import com.slackcat.presentation.buildMessage
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import com.slackcat.chat.models.IncomingChatMessage
-import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.presentation.buildMessage
 
 class PokeCatModule : SlackcatModule() {
     val baseurl = "https://pokeapi.co/api/v2/pokemon"
@@ -34,9 +32,7 @@ class PokeCatModule : SlackcatModule() {
                 botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"),
             ),
         )
-
     }
-
 
     private fun buildPokemonMessage(pokemon: PokemonData): JsonObject {
         val blocks = """
@@ -65,9 +61,7 @@ class PokeCatModule : SlackcatModule() {
             """
 
         return Json.parseToJsonElement(blocks).jsonObject
-
     }
-
 
     private fun extractPokemonIdentifier(userText: String): String? {
         val regex = """^\S+\s+(\S+)""".toRegex()
@@ -75,6 +69,7 @@ class PokeCatModule : SlackcatModule() {
     }
 
     override fun provideCommand(): String = "pokemon"
+
     override fun help(): String = buildMessage {
         title("Pokemon Help")
         text("Get stats on your favorite pokemon")

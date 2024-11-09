@@ -1,9 +1,9 @@
-package com.slackcat.chat.engine.slack;
+package com.slackcat.chat.engine.slack
 
-import com.slack.api.model.block.LayoutBlock
-import com.slack.api.model.block.SectionBlock
 import com.slack.api.model.block.DividerBlock
 import com.slack.api.model.block.ImageBlock
+import com.slack.api.model.block.LayoutBlock
+import com.slack.api.model.block.SectionBlock
 import com.slack.api.model.block.composition.MarkdownTextObject
 import com.slack.api.model.block.composition.PlainTextObject
 import com.slack.api.model.block.element.ImageElement
@@ -21,10 +21,11 @@ class JsonToBlockConverter {
                     val text = textObject?.get("text")?.jsonPrimitive?.content
                     val textType = textObject?.get("type")?.jsonPrimitive?.content
 
-                    val fields = block["fields"]?.jsonArray?.map { field ->
-                        val fieldText = field.jsonObject["text"]?.jsonPrimitive?.content ?: ""
-                        MarkdownTextObject(fieldText, true)
-                    }
+                    val fields =
+                        block["fields"]?.jsonArray?.map { field ->
+                            val fieldText = field.jsonObject["text"]?.jsonPrimitive?.content ?: ""
+                            MarkdownTextObject(fieldText, true)
+                        }
 
                     val sectionBlockBuilder = SectionBlock.builder()
 
@@ -48,7 +49,7 @@ class JsonToBlockConverter {
                                     ImageElement.builder()
                                         .imageUrl(imageUrl)
                                         .altText(altText)
-                                        .build()
+                                        .build(),
                                 )
                             }
                         }
@@ -69,7 +70,7 @@ class JsonToBlockConverter {
                             ImageBlock.builder()
                                 .imageUrl(imageUrl)
                                 .altText(altText)
-                                .build()
+                                .build(),
                         )
                     }
                 }
@@ -79,7 +80,6 @@ class JsonToBlockConverter {
         return blocks
     }
 }
-
 
 fun main() {
     val json = """
