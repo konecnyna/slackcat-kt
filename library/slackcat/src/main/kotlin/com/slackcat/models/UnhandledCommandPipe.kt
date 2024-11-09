@@ -7,5 +7,5 @@ interface UnhandledCommandPipe {
      * Return true handled command
      * Return false to delegate command
      */
-    fun onUnhandledCommand(message: IncomingChatMessage)
+    fun onUnhandledCommand(message: IncomingChatMessage): Boolean
 }

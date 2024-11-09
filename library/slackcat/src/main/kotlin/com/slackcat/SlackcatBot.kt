@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class SlackcatBot(
-    val modules: Array<KClass<out SlackcatModule>>,
+    val modulesClasses: Array<KClass<out SlackcatModule>>,
     val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     lateinit var chatEngine: ChatEngine
@@ -22,42 +22,40 @@ class SlackcatBot(
     lateinit var router: Router
 
     fun start(args: String?) {
-        setupChatModule(args)
-        connectDatabase()
+        val modules = setupChatModule(args)
+        connectDatabase(modules)
         observeRealTimeMessages()
     }
 
-    private fun setupChatModule(args: String?) {
-        chatEngine =
-            if (!args.isNullOrEmpty()) {
-                CliChatEngine(args)
-            } else {
-                SlackChatEngine(coroutineScope)
-            }
+    private fun setupChatModule(args: String?): List<SlackcatModule> {
+        chatEngine = if (!args.isNullOrEmpty()) {
+            CliChatEngine(args)
+        } else {
+            SlackChatEngine(coroutineScope)
+        }
 
-        chatClient =
-            object : ChatClient {
-                override fun sendMessage(message: OutgoingChatMessage) {
-                    coroutineScope.launch { chatEngine.sendMessage(message) }
-                }
+        chatClient = object : ChatClient {
+            override fun sendMessage(message: OutgoingChatMessage) {
+                coroutineScope.launch { chatEngine.sendMessage(message) }
             }
+        }
 
-        val slackcatModules: List<SlackcatModule> =
-            modules.map {
-                it.createInstance().also { module -> module.chatClient = chatClient }
-            }
+        val slackcatModules: List<SlackcatModule> = modulesClasses.map {
+            it.createInstance().also { module -> module.chatClient = chatClient }
+        }
         router = Router(slackcatModules)
 
         chatEngine.connect()
+        return slackcatModules
     }
 
-    private fun connectDatabase() {
-        val databaseFeatures: List<StorageModule> =
-            modules
-                .filter { it is StorageModule }
-                .map { it as StorageModule }
+    private fun connectDatabase(modules: List<SlackcatModule>) {
+        val databaseFeatures: List<StorageModule> = modules
+            .filter { it is StorageModule }
+            .map { it as StorageModule }
 
         val exposedTables = databaseFeatures.map { it.provideTable() }
+        println(exposedTables)
         DatabaseGraph.connectDatabase(exposedTables)
     }
 
@@ -69,7 +67,7 @@ class SlackcatBot(
                     launch {
                         val handled = router.onMessage(event)
                         if (!handled && chatEngine is CliChatEngine) {
-                            println("🚨 ${CliChatEngine.ERROR_MESSAGE}")
+                            println(CliChatEngine.ERROR_MESSAGE)
                         }
                     }
                 }

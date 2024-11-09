@@ -48,39 +48,39 @@ class Router(modules: List<SlackcatModule>) {
             return false
         }
 
-        val feature =
-            featureCommandMap[command] // Primary commands take precedence
-                ?: aliasCommandMap[command] // Check alias modules next
-                ?: return false // Nothing to handle so bail.
+        val feature = featureCommandMap[command] // Primary commands take precedence
+            ?: aliasCommandMap[command] // Check alias modules next
 
-        val handled =
-            try {
-                when {
-                    incomingMessage.arguments.contains("--help") -> {
-                        val helpMessage =
-                            OutgoingChatMessage(
-                                channelId = incomingMessage.channelId,
-                                text = feature.help(),
-                            )
-                        feature.sendMessage(helpMessage)
-                    }
-
-                    else ->
-                        withContext(Dispatchers.IO) {
-                            feature.onInvoke(incomingMessage)
-                        }
+        if (feature == null) {
+            var handled = false
+            unhandledCommandPipeModule.forEach {
+                if (it.onUnhandledCommand(incomingMessage)) {
+                    handled = true
                 }
-                true
-            } catch (exception: Exception) {
-                handleError(feature, incomingMessage, exception)
-                false
             }
-
-        if (!handled) {
-            unhandledCommandPipeModule.forEach { it.onUnhandledCommand(incomingMessage) }
+            return handled
         }
 
-        return handled
+        return try {
+            when {
+                incomingMessage.arguments.contains("--help") -> {
+                    val helpMessage =
+                        OutgoingChatMessage(
+                            channelId = incomingMessage.channelId,
+                            text = feature.help(),
+                        )
+                    feature.sendMessage(helpMessage)
+                }
+
+                else -> withContext(Dispatchers.IO) {
+                    feature.onInvoke(incomingMessage)
+                }
+            }
+            true
+        } catch (exception: Exception) {
+            handleError(feature, incomingMessage, exception)
+            false
+        }
     }
 
     private fun handleError(
