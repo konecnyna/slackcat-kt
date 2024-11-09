@@ -49,10 +49,10 @@ class SummonClient {
                     results?.forEach {
                         add(
                             SummonImage(
-                                image = it.jsonObject["image"].toString(),
-                                thumbnail = it.jsonObject["thumbnail"].toString(),
-                                title = it.jsonObject["title"].toString(),
-                                source = it.jsonObject["url"].toString()
+                                image = it.jsonObject["image"]?.jsonPrimitive?.content ?: "",
+                                thumbnail = it.jsonObject["thumbnail"]?.jsonPrimitive?.content ?: "",
+                                title = it.jsonObject["title"]?.jsonPrimitive?.content ?: "",
+                                source = it.jsonObject["url"]?.jsonPrimitive?.content ?: ""
                             )
                         )
                     }
