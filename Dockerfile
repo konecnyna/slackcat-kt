@@ -1,5 +1,5 @@
 # Use Gradle with JDK 17 as the base image
-FROM gradle:8.3-jdk21 AS builder
+FROM gradle:8.5-jdk21 AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,8 +8,9 @@ WORKDIR /app
 COPY . /app
 
 RUN gradle :app:shadowJar --no-daemon
+
 # Switch to a smaller JDK image for the final container
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
 # Set the working directory for the final container
 WORKDIR /app
