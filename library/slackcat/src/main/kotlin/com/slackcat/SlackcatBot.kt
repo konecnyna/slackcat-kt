@@ -10,12 +10,14 @@ import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import kotlinx.coroutines.*
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class SlackcatBot(
     val modulesClasses: Array<KClass<out SlackcatModule>>,
     val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    val databaseConfig: DataSource
 ) {
     lateinit var chatEngine: ChatEngine
     lateinit var chatClient: ChatClient
@@ -23,7 +25,7 @@ class SlackcatBot(
 
     fun start(args: String?) {
         val modules = setupChatModule(args)
-        connectDatabase(modules)
+        connectDatabase(modules, databaseConfig)
         observeRealTimeMessages()
     }
 
@@ -49,13 +51,14 @@ class SlackcatBot(
         return slackcatModules
     }
 
-    private fun connectDatabase(modules: List<SlackcatModule>) {
+    private fun connectDatabase(modules: List<SlackcatModule>, databaseConfig: DataSource) {
         val databaseFeatures: List<StorageModule> = modules
             .filter { it is StorageModule }
             .map { it as StorageModule }
 
         val exposedTables = databaseFeatures.map { it.provideTable() }
-        DatabaseGraph.connectDatabase(exposedTables)
+        println(exposedTables)
+        DatabaseGraph.connectDatabase(exposedTables, databaseConfig)
     }
 
     private fun observeRealTimeMessages() {

@@ -36,6 +36,8 @@ dependencies {
     implementation(projects.library.data.chat)
 
     implementation(libs.serialization.json)
+    implementation("org.apache.commons:commons-dbcp2:2.9.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
 }
 
 

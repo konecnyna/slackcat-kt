@@ -42,6 +42,8 @@ abstract class FeaturesHandler
                     dependencies.add("runtimeOnly", "org.jetbrains.exposed:exposed-dao:0.44.1")
                     dependencies.add("runtimeOnly", "org.jetbrains.exposed:exposed-jdbc:0.44.1")
                     dependencies.add("runtimeOnly", "org.xerial:sqlite-jdbc:3.34.0")
+                    dependencies.add("runtimeOnly", "org.postgresql:postgresql:42.6.0")
+//                    dependencies.add("runtimeOnly", "org.apache.commons:commons-dbcp2:2.9.0")
                 }
 
                 if (ktorClient.get()) {
