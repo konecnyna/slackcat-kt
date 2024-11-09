@@ -13,19 +13,20 @@ class SlackcatNetworkClient() {
     suspend inline fun <reified T> fetch(
         url: String,
         serializer: KSerializer<T>,
+        headers: Map<String, String> = emptyMap()
     ): Result<T> {
-        return runCatching { networkClient.fetch(url, serializer) }
+        return runCatching { networkClient.fetch(url, serializer, headers) }
     }
 
-    suspend inline fun fetchString(url: String): Result<String> =
-        runCatching {
-            networkClient.fetchString(url)
-        }
+    suspend inline fun fetchString(url: String, headers: Map<String, String> = emptyMap()): Result<String> = runCatching {
+        networkClient.fetchString(url, headers)
+    }
 
     suspend inline fun post(
         url: String,
         body: String,
+        headers: Map<String, String> = emptyMap()
     ): Result<String> {
-        return runCatching { networkClient.post(url, body) }
+        return runCatching { networkClient.post(url, body, headers) }
     }
 }

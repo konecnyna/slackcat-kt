@@ -7,15 +7,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class StatusClient {
-    @Serializable
-    data class StatusResponse(
-        val status: String,
-        val date_created: String? = null,
-        val date_updated: String? = null,
-        val active_incidents: List<String?>? = null,
-        val service: String,
-    )
-
     enum class Service(val label: String, val url: String, val arguments: List<String>) {
         Slack(label = "Slack", url = "https://status.slack.com/api/v2.0.0/current", arguments = listOf("--slack")),
         Github(
