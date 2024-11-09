@@ -4,6 +4,8 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import kotlin.random.Random
 
 class SummonModule : SlackcatModule() {
@@ -21,10 +23,32 @@ class SummonModule : SlackcatModule() {
             images[Random.nextInt(images.size)].thumbnail
         }
 
+        val json = Json.parseToJsonElement("""
+            {
+            "blocks": [
+               
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": " "
+                    },
+                    "accessory": {
+                        "type": "image",
+                        "image_url": "${images[Random.nextInt(images.size)].thumbnail}",
+                        "alt_text": "summon image"
+                    }
+                }              
+            ]
+        }
+        """.trimIndent())
+
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = message
+                text = message,
+                blocks = json.jsonObject
             )
         )
     }
