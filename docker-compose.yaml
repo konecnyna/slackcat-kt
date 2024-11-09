@@ -10,8 +10,9 @@ services:
     environment:
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+      - ENV=PRODUCTION
     volumes:
-      - ./slackcat.db:/slackcat.db # Mount slackcat.db to /app/slackcat.db in the container
+      - ./slackcat-prod.db:/slackcat-prod.db # Mount slackcat.db to /app/slackcat.db in the container
 
     ports:
       - "8080:8080" # Adjust if your bot needs to expose any ports

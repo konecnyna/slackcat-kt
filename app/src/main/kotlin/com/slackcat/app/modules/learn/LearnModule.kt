@@ -29,24 +29,24 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     }
 
     override fun onUnhandledCommand(message: IncomingChatMessage): Boolean {
-        learnDAO.getLearn(message.command).fold({
+        val index = try {
+            message.userText.toInt() - 1
+        } catch (exception: NumberFormatException) {
+            null
+        }
+
+        learnDAO.getLearn(key = message.command, index = index).fold({
             sendMessage(
                 OutgoingChatMessage(
                     channelId = message.channelId,
                     text = it.learnText
                 )
             )
+
+            return true
         }, {
-
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = message.channelId,
-                    text = "Error: ${it.message}"
-                )
-            )
+            return false
         })
-
-        return true
     }
 
     override fun provideCommand(): String = "learn"

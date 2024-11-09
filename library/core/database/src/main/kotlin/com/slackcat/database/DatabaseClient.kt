@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class DatabaseClient {
     companion object {
-        const val DATABASE_NAME = "slackcat"
+        val DATABASE_NAME = "slackcat-${System.getenv("ENV")?.lowercase() ?: "development"}"
     }
 
     fun initialize(storageClients: List<Table>) {

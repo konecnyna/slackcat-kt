@@ -55,7 +55,6 @@ class SlackcatBot(
             .map { it as StorageModule }
 
         val exposedTables = databaseFeatures.map { it.provideTable() }
-        println(exposedTables)
         DatabaseGraph.connectDatabase(exposedTables)
     }
 
