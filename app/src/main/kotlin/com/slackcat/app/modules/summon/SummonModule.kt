@@ -26,20 +26,11 @@ class SummonModule : SlackcatModule() {
         val json = Json.parseToJsonElement("""
             {
             "blocks": [
-               
                 {
-                    "type": "section",
-                    "block_id": "section567",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": " "
-                    },
-                    "accessory": {
-                        "type": "image",
-                        "image_url": "${images[Random.nextInt(images.size)].thumbnail}",
-                        "alt_text": "summon image"
-                    }
-                }              
+                    "type": "image",
+                    "image_url": "${images[Random.nextInt(images.size)].thumbnail}",
+                    "alt_text": "summon image"
+                }
             ]
         }
         """.trimIndent())
