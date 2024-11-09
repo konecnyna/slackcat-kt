@@ -17,7 +17,7 @@ class SlackcatNetworkClient() {
         return runCatching { networkClient.fetch(url, serializer) }
     }
 
-    suspend inline fun fetchString(url: String, headers: Map<String, String>): Result<String> = runCatching {
+    suspend inline fun fetchString(url: String, headers: Map<String, String> = emptyMap()): Result<String> = runCatching {
         networkClient.fetchString(url)
     }
 
