@@ -13,25 +13,32 @@ class NetworkClient(val httpClient: HttpClient) {
     suspend inline fun <reified T> fetch(
         url: String,
         serializer: KSerializer<T>,
+        headers: Map<String, String>
     ): T {
-        val jsonResponse = httpClient.get(url)
+        val jsonResponse = httpClient.get(url) {
+            headers.forEach { (key, value) -> header(key, value) }
+        }
         return json.decodeFromString(serializer, jsonResponse.bodyAsText())
     }
 
-    suspend inline fun fetchString(url: String): String {
-        val jsonResponse = httpClient.get(url)
-        return jsonResponse.bodyAsText()
+    suspend fun fetchString(url: String, headers: Map<String, String>): String {
+        val resposne = httpClient.get(url) {
+            headers.forEach { (key, value) -> header(key, value) }
+        }
+
+        return resposne.bodyAsText()
     }
 
-    suspend inline fun post(
+    suspend fun post(
         url: String,
         body: String,
+        headers: Map<String, String>
     ): String {
-        val response: HttpResponse =
-            httpClient.post(url) {
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }
+        val response: HttpResponse = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            headers.forEach { (key, value) -> header(key, value) }
+        }
         return response.bodyAsText()
     }
 }
