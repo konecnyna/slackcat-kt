@@ -7,16 +7,43 @@ services:
       dockerfile: Dockerfile
     image: slack-bot:latest
     container_name: slack-bot
+    networks:
+      - custom_docker_network
     environment:
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
       - ENV=PRODUCTION
+      - DATABASE_NAME=slackcatdb
+      - DATABASE_URL=jdbc:postgresql://postgres_container:5432
+      - DATABASE_USER=newuser
+      - DATABASE_PASSWORD=password
+
     volumes:
       - ./slackcat-prod.db:/slackcat-prod.db # Mount slackcat.db to /app/slackcat.db in the container
-
     ports:
       - "8080:8080" # Adjust if your bot needs to expose any ports
     # Debugggin
     # entrypoint: [ "tail", "-f", "/dev/null" ]  # Keep container running without any actions
 
     restart: unless-stopped
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME} # need to do env dependent?
+    networks:
+      - custom_docker_network
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+networks:
+  custom_docker_network:
+    driver: bridge
