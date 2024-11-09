@@ -2,7 +2,7 @@ package com.slackcat.models
 
 import com.slackcat.chat.models.IncomingChatMessage
 
-interface UnhandledCommandPipe {
+interface UnhandledCommandModule {
     /**
      * Return true handled command
      * Return false to delegate command

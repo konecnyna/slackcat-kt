@@ -4,7 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import com.slackcat.models.SlackcatModule
-import com.slackcat.models.UnhandledCommandPipe
+import com.slackcat.models.UnhandledCommandModule
 import com.slackcat.presentation.buildMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,9 +34,9 @@ class Router(modules: List<SlackcatModule>) {
             }
         }
 
-    private val unhandledCommandPipeModule: List<UnhandledCommandPipe> =
-        modules.filter { it is UnhandledCommandPipe }
-            .map { it as UnhandledCommandPipe }
+    private val unhandledCommandModuleModules: List<UnhandledCommandModule> =
+        modules.filter { it is UnhandledCommandModule }
+            .map { it as UnhandledCommandModule }
 
     /**
      * true -> message was handled by module
@@ -53,7 +53,7 @@ class Router(modules: List<SlackcatModule>) {
 
         if (feature == null) {
             var handled = false
-            unhandledCommandPipeModule.forEach {
+            unhandledCommandModuleModules.forEach {
                 if (it.onUnhandledCommand(incomingMessage)) {
                     handled = true
                 }

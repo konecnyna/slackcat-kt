@@ -4,11 +4,10 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import com.slackcat.models.UnhandledCommandPipe
+import com.slackcat.models.UnhandledCommandModule
 import com.slackcat.presentation.buildMessage
-import com.slackcat.app.modules.learn.LearnInsertRow as LearnInsertRow
 
-class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandPipe {
+class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     private val learnFactory = LearnFactory()
     private val learnDAO = LearnDAO()
 
