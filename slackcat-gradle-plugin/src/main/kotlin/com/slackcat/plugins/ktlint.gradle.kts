@@ -48,7 +48,7 @@ tasks.register("ktlint", JavaExec::class) {
 
 tasks.register("ktlintFormat", JavaExec::class) {
     dependsOn("copyKtlintConfig")
-    val arguments = listOf("-F", "--editorconfig=${configFile.get().asFile.absolutePath}", "--disabled_rules=wrapping") + patterns
+    val arguments = listOf("-F", "--editorconfig=${configFile.get().asFile.absolutePath}", "--disabled_rules=wrapping,trailing-comma-on-declaration-site") + patterns
     description = "Fix Kotlin code style deviations."
     classpath = ktlint
     jvmArgs = listOf("--add-opens=java.base/java.lang=ALL-UNNAMED")
