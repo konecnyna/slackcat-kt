@@ -11,11 +11,3 @@ plugins {
 }
 
 application { mainClass.set("com.slackcat.app.ApplicationKt") }
-
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget("17"))
-        suppressWarnings.set(true)
-        freeCompilerArgs.set(defaultKotlinCompilerArguments)
-    }
-}

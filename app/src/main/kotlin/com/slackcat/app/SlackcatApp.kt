@@ -8,6 +8,7 @@ import com.slackcat.app.modules.learn.LearnModule
 import com.slackcat.app.modules.ping.PingModule
 import com.slackcat.app.modules.pokecat.PokeCatModule
 import com.slackcat.app.modules.status.StatusModule
+import com.slackcat.app.modules.summon.SummonModule
 import com.slackcat.app.modules.translate.TranslateModule
 import com.slackcat.models.SlackcatModule
 import org.apache.commons.dbcp2.BasicDataSource
@@ -25,6 +26,7 @@ class SlackcatApp {
             TranslateModule::class,
             PokeCatModule::class,
             LearnModule::class,
+            SummonModule::class
         )
 
     private fun createDataSource(): DataSource {
