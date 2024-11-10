@@ -4,8 +4,6 @@ import org.apache.commons.dbcp2.BasicDataSource
 import javax.sql.DataSource
 
 class DatasourceFactory {
-    enum class Environment { Production, Development }
-
     fun makeDatabaseSource(env: Environment): DataSource {
         return when (env) {
             Environment.Production -> makePostgresSource()

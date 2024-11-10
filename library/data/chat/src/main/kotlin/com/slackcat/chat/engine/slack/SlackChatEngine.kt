@@ -1,7 +1,10 @@
 package com.slackcat.chat.engine.slack
 
+import com.slack.api.app_backend.events.payload.EventsApiPayload
 import com.slack.api.bolt.App
+import com.slack.api.bolt.context.builtin.EventContext
 import com.slack.api.bolt.socket_mode.SocketModeApp
+import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageEvent
 import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.BotIcon
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
+
 class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     private val messagesFlow = _messagesFlow.asSharedFlow()
@@ -23,6 +27,11 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val client = app.client
 
     override fun connect(ready: () -> Unit) {
+        app.event(MessageBotEvent::class.java) { _, ctx ->
+            // No - op. Need to handle it from the logs
+            ctx.ack()
+        }
+
         app.event(MessageEvent::class.java) { payload, ctx ->
             val message = payload.event
 
@@ -50,8 +59,10 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
         val blocks = if (message.richText.text.isNotEmpty()) {
             val jsonObjectConverter = JsonToBlockConverter()
-             jsonObjectConverter.jsonObjectToBlocks(message.richText.text)
-        } else { null }
+            jsonObjectConverter.jsonObjectToBlocks(message.richText.text)
+        } else {
+            null
+        }
 
         client.chatPostMessage { req ->
             req.apply {
