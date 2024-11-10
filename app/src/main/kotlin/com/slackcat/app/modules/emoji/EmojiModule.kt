@@ -40,7 +40,7 @@ class EmojiModule : SlackcatModule() {
 
     override fun help(): String = buildMessage {
         title("EmojiModule Help")
-        text("Grab emoji from this fun <https://gist.githubusercontent.com/konecnyna/9968c5a3457b4ef39a824222269f82f3/raw/ae599516d75899365318ce882f5be165a5083d2f/emojis.json|fun list>")
+        text("Grab emoji from this fun <https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3|fun list>")
     }
 
 }
