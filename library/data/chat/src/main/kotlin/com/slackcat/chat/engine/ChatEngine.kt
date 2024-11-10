@@ -5,7 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import kotlinx.coroutines.flow.SharedFlow
 
 interface ChatEngine {
-    fun connect()
+    fun connect(ready: () -> Unit)
 
     suspend fun sendMessage(message: OutgoingChatMessage)
 

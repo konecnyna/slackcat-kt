@@ -21,7 +21,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val app = App()
     private val client = app.client
 
-    override fun connect() {
+    override fun connect(ready: () -> Unit) {
         app.event(MessageEvent::class.java) { payload, ctx ->
             val message = payload.event
 
@@ -39,6 +39,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         val socketModeApp = SocketModeApp(app)
         globalCoroutineScope.launch {
             socketModeApp.start()
+            ready()
         }
     }
 

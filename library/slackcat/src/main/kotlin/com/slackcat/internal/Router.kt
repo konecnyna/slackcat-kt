@@ -3,14 +3,23 @@ package com.slackcat.internal
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
+import com.slackcat.common.SlackcatEvent
+import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.UnhandledCommandModule
 import com.slackcat.presentation.buildMessage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class Router(modules: List<SlackcatModule>) {
-    private val featureCommandMap: Map<String, SlackcatModule> =
+class Router(
+    private val modules: List<SlackcatModule>,
+    private val coroutineScope: CoroutineScope,
+    private val eventsFlow: SharedFlow<SlackcatEvent>
+) {
+    private val featureCommandMap: Map<String, SlackcatModule> by lazy {
         buildMap {
             modules.forEach { module ->
                 try {
@@ -20,8 +29,9 @@ class Router(modules: List<SlackcatModule>) {
                 }
             }
         }
+    }
 
-    private val aliasCommandMap: Map<String, SlackcatModule> =
+    private val aliasCommandMap: Map<String, SlackcatModule> by lazy {
         buildMap {
             modules.forEach { module ->
                 try {
@@ -33,10 +43,25 @@ class Router(modules: List<SlackcatModule>) {
                 }
             }
         }
+    }
 
-    private val unhandledCommandModuleModules: List<UnhandledCommandModule> =
-        modules.filter { it is UnhandledCommandModule }
+
+    private val eventModules: List<SlackcatEventsModule> by lazy {
+        featureCommandMap
+            .toList()
+            .filter { it.second is SlackcatEventsModule }
+            .map { it.second as SlackcatEventsModule }
+    }
+
+    private val unhandledCommandModuleModules: List<UnhandledCommandModule>
+        get() = modules.filter { it is UnhandledCommandModule }
             .map { it as UnhandledCommandModule }
+
+
+    init {
+        subscribeToEvents()
+    }
+
 
     /**
      * true -> message was handled by module
@@ -100,5 +125,11 @@ class Router(modules: List<SlackcatModule>) {
                 text = errorMessage,
             ),
         )
+    }
+
+    private fun subscribeToEvents() = coroutineScope.launch {
+        eventsFlow.collect { event ->
+            eventModules.forEach { module -> module.onEvent(event) }
+        }
     }
 }

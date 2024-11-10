@@ -32,7 +32,7 @@ class RouterTest {
             }
 
         // Pass both modules to the Router
-        router = Router(listOf(mockModule, aliasModule))
+        router = Router(listOf(mockModule, aliasModule), eventsFlow)
     }
 
     @Test

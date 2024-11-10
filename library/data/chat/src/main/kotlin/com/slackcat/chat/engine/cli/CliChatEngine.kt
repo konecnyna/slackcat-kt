@@ -5,7 +5,6 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -14,7 +13,10 @@ import kotlinx.coroutines.time.delay
 import java.time.Duration
 import java.time.Instant
 
-class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) : ChatEngine {
+class CliChatEngine(
+    private val args: String,
+    scope: CoroutineScope,
+) : ChatEngine {
     companion object {
         const val DIVIDER = "-----------------------------"
         const val ERROR_MESSAGE = "\n${DIVIDER}\n 🚨The incoming message wasn't handled.\n" +
@@ -51,8 +53,9 @@ class CliChatEngine(private val args: String, scope: CoroutineScope = CoroutineS
         }
     }
 
-    override fun connect() {
+    override fun connect(ready: () -> Unit) {
         println("${provideEngineName()} is connected")
+        ready()
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {

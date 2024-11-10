@@ -3,6 +3,7 @@ package com.slackcat.app
 import com.slackcat.SlackcatBot
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.date.DateModule
+import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.learn.LearnModule
 import com.slackcat.app.modules.ping.PingModule
@@ -27,7 +28,8 @@ class SlackcatApp {
             TranslateModule::class,
             PokeCatModule::class,
             LearnModule::class,
-            SummonModule::class
+            SummonModule::class,
+            DeployBotModule::class
         )
 
     fun onCreate(args: String?) {

@@ -5,11 +5,14 @@ import com.slackcat.chat.engine.cli.CliChatEngine
 import com.slackcat.chat.engine.slack.SlackChatEngine
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.SlackcatEvent
 import com.slackcat.database.DatabaseGraph
 import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -23,6 +26,10 @@ class SlackcatBot(
     lateinit var chatClient: ChatClient
     lateinit var router: Router
 
+    private val _events = MutableSharedFlow<SlackcatEvent>()
+    private val eventsFlow = _events.asSharedFlow()
+
+
     fun start(args: String?) {
         val modules = setupChatModule(args)
         connectDatabase(modules, databaseConfig)
@@ -31,7 +38,7 @@ class SlackcatBot(
 
     private fun setupChatModule(args: String?): List<SlackcatModule> {
         chatEngine = if (!args.isNullOrEmpty()) {
-            CliChatEngine(args)
+            CliChatEngine(args, coroutineScope)
         } else {
             SlackChatEngine(coroutineScope)
         }
@@ -45,9 +52,14 @@ class SlackcatBot(
         val slackcatModules: List<SlackcatModule> = modulesClasses.map {
             it.createInstance().also { module -> module.chatClient = chatClient }
         }
-        router = Router(slackcatModules)
 
-        chatEngine.connect()
+        router = Router(
+            modules = slackcatModules,
+            coroutineScope = coroutineScope,
+            eventsFlow = eventsFlow
+        )
+
+        chatEngine.connect { coroutineScope.launch { _events.emit(SlackcatEvent.STARTED) } }
         return slackcatModules
     }
 

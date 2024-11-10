@@ -28,10 +28,10 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.library.data.chat)
-    implementation(projects.library.core.database)
-    implementation(projects.library.core.common)
-    implementation(projects.library.core.network)
+    api(projects.library.data.chat)
+    api(projects.library.core.database)
+    api(projects.library.core.common)
+    api(projects.library.core.network)
 
     testImplementation(libs.bundles.testing)
 }
