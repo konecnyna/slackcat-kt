@@ -4,9 +4,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.buildRichMessage
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
-import kotlin.random.Random
 
 class EmojiModule : SlackcatModule() {
     private val emojiClient = EmojiClient()
@@ -15,23 +15,15 @@ class EmojiModule : SlackcatModule() {
         val emoji = emojiClient.fetchEmoji(incomingChatMessage.userText)
             ?: return postHelpMessage(incomingChatMessage.channelId)
 
-        val jsonString = """
-            {
-            "blocks": [
-                {
-                    "type": "image",
-                    "image_url": "$emoji",
-                    "alt_text": "summon image"
-                }
-            ]
-        }"""
-        val json = Json.parseToJsonElement(jsonString)
-
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = emoji,
-                blocks = json.jsonObject
+                richText = buildRichMessage {
+                    image(
+                        imageUrl = emoji,
+                        altText = "summon image"
+                    )
+                }
             )
         )
     }

@@ -60,9 +60,16 @@ class CliChatEngine(
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
         println("Outgoing message: $message")
-        println("--------------------------------------")
-        println("User sees:\n${message.text.trim()}")
-        println("--------------------------------------")
+        if (message.text.isNotEmpty()) {
+            println("--------------------------------------")
+            println("User sees text:\n${message.text}")
+
+        }
+        if (message.richText.text.isNotEmpty()) {
+            println("--------------------------------------")
+            println("User sees rich text:\n${message.richText.text}")
+            println("--------------------------------------")
+        }
     }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow

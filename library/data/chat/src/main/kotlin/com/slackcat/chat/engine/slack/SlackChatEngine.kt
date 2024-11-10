@@ -47,7 +47,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
         val jsonObjectConverter = JsonToBlockConverter()
-        val blocks = jsonObjectConverter.jsonObjectToBlocks(message.blocks)
+        val blocks = jsonObjectConverter.jsonObjectToBlocks(message.richText.text)
         client.chatPostMessage { req ->
             req.apply {
                 channel(message.channelId)

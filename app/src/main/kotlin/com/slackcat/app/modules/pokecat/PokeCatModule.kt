@@ -5,11 +5,11 @@ import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.RichTextMessage
 import com.slackcat.models.SlackcatModule
+import com.slackcat.presentation.RichMessageText
 import com.slackcat.presentation.buildMessage
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
+import com.slackcat.presentation.buildRichMessage
 
 class PokeCatModule : SlackcatModule() {
     val baseurl = "https://pokeapi.co/api/v2/pokemon"
@@ -26,41 +26,23 @@ class PokeCatModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = "pokemon",
-                blocks = buildPokemonMessage(pokemon),
+                richText = buildPokemonMessage(pokemon),
                 botName = "PokéCat",
                 botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"),
             ),
         )
     }
 
-    private fun buildPokemonMessage(pokemon: PokemonData): JsonObject {
-        val blocks = """
-                {
-                    "blocks": [
-                        {
-                            "type": "divider"
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n *Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* "
-                            },
-                            "accessory": {
-                                "type": "image",
-                                "image_url": "${pokemon.sprites.front_default}",
-                                "alt_text": "${pokemon.sprites.front_default}"
-                            }
-                        },
-                        {
-                            "type": "divider"
-                        }
-                    ]
-                }
-            """
-
-        return Json.parseToJsonElement(blocks).jsonObject
+    private fun buildPokemonMessage(pokemon: PokemonData): RichTextMessage {
+        return buildRichMessage {
+            divider()
+            section(
+                text = "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n *Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* ",
+                imageUrl = pokemon.sprites.front_default,
+                altText = pokemon.sprites.front_default
+            )
+            divider()
+        }
     }
 
     private fun extractPokemonIdentifier(userText: String): String? {
