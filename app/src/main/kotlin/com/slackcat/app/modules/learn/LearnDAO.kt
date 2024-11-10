@@ -1,6 +1,8 @@
 package com.slackcat.app.modules.learn
 
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -49,6 +51,36 @@ class LearnDAO {
                 it[learnText] = learnRequest.learnText
             }
             inserted.insertedCount > 0 // Returns true if insert was successful
+        }
+    }
+
+    fun getEntriesByLearnKey(key: String): List<LearnRow> {
+        return transaction {
+            LearnTable.select { LearnTable.learnKey eq key }
+                .map {
+                    LearnRow(
+                        id = it[LearnTable.id],
+                        learnedBy = it[LearnTable.learnedBy],
+                        learnKey = it[LearnTable.learnKey],
+                        learnText = it[LearnTable.learnText]
+                    )
+                }
+        }
+    }
+
+    fun removeEntryByIndex(key: String, index: Int): Boolean {
+        return transaction {
+            val entries = LearnTable.select { LearnTable.learnKey eq key }
+                .map { it[LearnTable.id] }
+
+            if (index in entries.indices) {
+                // Get the ID of the entry at the specified index
+                val entryId = entries[index]
+                // Delete the entry
+                LearnTable.deleteWhere { LearnTable.id eq entryId } > 0
+            } else {
+                false // Index out of range
+            }
         }
     }
 }

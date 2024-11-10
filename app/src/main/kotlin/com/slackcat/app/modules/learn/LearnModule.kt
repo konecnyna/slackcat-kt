@@ -6,12 +6,21 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
 import com.slackcat.presentation.buildMessage
+import org.jetbrains.exposed.sql.Alias
 
 class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     private val learnFactory = LearnFactory()
     private val learnDAO = LearnDAO()
+    private val aliasHandler = AliasHandler(learnDAO)
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        val aliasMessage = aliasHandler.handleAliases(incomingChatMessage)
+        if (aliasMessage != null) {
+            sendMessage(aliasMessage)
+            return
+        }
+
+
         val learnRequest = learnFactory.makeLearnRequest(incomingChatMessage)
             ?: return postHelpMessage(incomingChatMessage.channelId)
 
@@ -28,6 +37,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         )
     }
 
+
     override fun onUnhandledCommand(message: IncomingChatMessage): Boolean {
         val index = try {
             message.userText.toInt() - 1
@@ -42,14 +52,12 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                     text = it.learnText
                 )
             )
-
             return true
         }, {
             return false
         })
     }
 
-    override fun provideCommand(): String = "learn"
 
     override fun help(): String = buildMessage {
         title("LearnModule Help")
@@ -58,5 +66,21 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         text("You can then recall the text ?<key>")
     }
 
+    override fun provideCommand(): String = "learn"
     override fun provideTable() = LearnDAO.LearnTable
+    override fun aliases(): List<String> =  LearnAliases.entries.map { it.alias }
+
+}
+
+
+enum class LearnAliases(val alias: String) {
+    Unlearn("unlearn"),
+    List("list");
+
+    companion object {
+        private val aliasMap = entries.associateBy { it.alias }
+        fun fromAlias(alias: String): LearnAliases? {
+            return aliasMap[alias.lowercase()]
+        }
+    }
 }
