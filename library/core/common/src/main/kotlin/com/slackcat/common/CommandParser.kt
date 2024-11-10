@@ -2,7 +2,7 @@ package com.slackcat.common
 
 object CommandParser {
     fun extractCommand(input: String): String? {
-        val regex = "\\?(\\S+)".toRegex()
+        val regex = "\\?\\s*(\\S+)".toRegex()
         val matchResult = regex.find(input)
         return matchResult?.groups?.get(1)?.value
     }

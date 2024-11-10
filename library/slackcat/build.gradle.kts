@@ -17,6 +17,7 @@ slackcat {
         coroutines()
         exposed()
         ktorClient()
+        enableJunitTesting()
     }
 }
 
@@ -33,9 +34,5 @@ dependencies {
     api(projects.library.core.common)
     api(projects.library.core.network)
 
-    testImplementation(libs.bundles.testing)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}

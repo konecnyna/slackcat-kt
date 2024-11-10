@@ -5,7 +5,9 @@ import com.slackcat.utils.setDisallowChanges
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
 abstract class FeaturesHandler
@@ -19,6 +21,7 @@ abstract class FeaturesHandler
         private val ktorClient: Property<Boolean> = objects.property<Boolean>().convention(false)
         private val ktorServer: Property<Boolean> = objects.property<Boolean>().convention(false)
         private val reflection: Property<Boolean> = objects.property<Boolean>().convention(false)
+        private val testing: Property<Boolean> = objects.property<Boolean>().convention(false)
 
         fun coroutines() = coroutines.setDisallowChanges(true)
 
@@ -29,6 +32,8 @@ abstract class FeaturesHandler
         fun ktorServer() = ktorServer.setDisallowChanges(true)
 
         fun reflection() = reflection.setDisallowChanges(true)
+
+        fun enableJunitTesting() = testing.setDisallowChanges(true)
 
         internal fun applyTo(project: Project) =
             with(project) {
@@ -66,6 +71,14 @@ abstract class FeaturesHandler
 
                 if (reflection.get()) {
                     dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect")
+                }
+
+                if (testing.get()) {
+                    if (testing.get()) {
+                        tasks.withType<Test>().configureEach {
+                            useJUnitPlatform()
+                        }
+                    }
                 }
             }
     }

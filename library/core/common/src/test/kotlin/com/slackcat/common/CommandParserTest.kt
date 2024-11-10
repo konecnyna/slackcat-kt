@@ -13,9 +13,9 @@ class CommandParserTest {
     }
 
     @Test
-    fun `extractCommand should return null when there is no command after question mark`() {
-        val result = CommandParser.extractCommand("? --help")
-        assertEquals(null, result)
+    fun `extractCommand should return the correct command when message starts with question mark but has space between command`() {
+        val result = CommandParser.extractCommand("? ping --help")
+        assertEquals("ping", result)
     }
 
     @Test

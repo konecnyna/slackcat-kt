@@ -15,6 +15,7 @@ slackcat {
     features {
         coroutines()
         exposed()
+        enableJunitTesting()
     }
 }
 
