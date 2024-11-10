@@ -28,7 +28,7 @@ class SummonModule : SlackcatModule() {
             "blocks": [
                 {
                     "type": "image",
-                    "image_url": "${images[Random.nextInt(images.size)].thumbnail}",
+                    "image_url": "${images[Random.nextInt(images.size)].image}",
                     "alt_text": "summon image"
                 }
             ]
