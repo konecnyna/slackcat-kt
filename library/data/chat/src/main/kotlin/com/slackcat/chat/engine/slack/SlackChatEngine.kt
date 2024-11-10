@@ -10,6 +10,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -38,7 +39,8 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
         val socketModeApp = SocketModeApp(app)
         globalCoroutineScope.launch {
-            socketModeApp.start()
+            socketModeApp.startAsync()
+            delay(2000)
             ready()
         }
     }
