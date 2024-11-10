@@ -16,11 +16,11 @@ class SummonModule : SlackcatModule() {
             return postHelpMessage(incomingChatMessage.channelId)
         }
 
-        val images = summonClient.getHtml(incomingChatMessage.userText)
+        val images = summonClient.getHtml(incomingChatMessage.userText, incomingChatMessage.command == "gif")
         val message = if (images.isEmpty()) {
             "No results found found for `${incomingChatMessage.userText}`"
         } else {
-            images[Random.nextInt(images.size)].thumbnail
+            images[Random.nextInt(images.size)].image
         }
 
         val json = Json.parseToJsonElement("""
@@ -45,6 +45,7 @@ class SummonModule : SlackcatModule() {
     }
 
     override fun provideCommand(): String = "summon"
+    override fun aliases(): List<String> = SummonModuleAliases.entries.map { it.alias }
 
     override fun help(): String = buildMessage {
         title("Summon Help")
@@ -52,4 +53,9 @@ class SummonModule : SlackcatModule() {
         text("Usage: ?summon slackcat")
     }
 
+}
+
+
+enum class SummonModuleAliases(val alias: String) {
+    Gif("gif")
 }

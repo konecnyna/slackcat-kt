@@ -22,53 +22,56 @@ class SummonClient {
         "accept-language" to "en-US,en;q=0.9"
     )
 
-    suspend fun getHtml(query: String): List<SummonImage> {
+    suspend fun getHtml(query: String, animated: Boolean): List<SummonImage> {
         val vqdToken = getToken("$baseUrl/?q=$query") ?: return emptyList()
-        val params = mapOf(
-            "l" to "us-en",
-            "o" to "json",
-            "q" to query,
-            "vqd" to vqdToken,
-            "f" to ",,,",
-            "p" to "1",
-            "v7exp" to "a"
+        val filters = if (animated) {
+            ",,,type:gif,,"
+        } else {
+            ",,,"
+        }
+
+        val params = mutableMapOf(
+            "l" to "us-en",       // "l" specifies the language; "us-en" means US English results.
+            "o" to "json",        // "o" indicates the output format; "json" returns the results in JSON format.
+            "q" to query, // "q" is the search query itself, which you’re passing from the function argument.
+            "vqd" to vqdToken,    // "vqd" is a unique token DuckDuckGo uses to validate the query; this token must be retrieved before sending the search request.
+            "f" to filters,             // "f" is typically used to apply search filters; leaving it as ",,," indicates no specific filters.
+            "p" to "1",           // "p" is for "safe search" filtering; "1" enables moderate filtering, while "0" disables it.
+            "v7exp" to "a",       // "v7exp" is used for experimental DuckDuckGo features; "a" might indicate a default or "beta" experiment.
+
         )
 
-        var requestUrl = baseUrl + "/i.js" + "?" + params.entries.joinToString("&") { "${it.key}=${it.value}" }
+        val requestUrl = baseUrl + "/i.js" + "?" + params.entries.joinToString("&") { "${it.key}=${it.value}" }
         return buildList {
             try {
-                while (true) {
-                    // Fetch response as string from URL
-                    val response = slackcatNetworkClient.fetchString(requestUrl, headers).getOrNull() ?: break
+                // Fetch response as string from URL
+                val response = slackcatNetworkClient.fetchString(requestUrl, headers).getOrNull() ?: return emptyList()
 
-                    // Parse the JSON response
-                    val jsonObject = Json.parseToJsonElement(response).jsonObject
-                    val results = jsonObject["results"]?.jsonArray
+                // Parse the JSON response
+                val jsonObject = Json.parseToJsonElement(response).jsonObject
+                val results = jsonObject["results"]?.jsonArray
 
-                    // Print out results
-                    results?.forEach {
-                        add(
-                            SummonImage(
-                                image = it.jsonObject["image"]?.jsonPrimitive?.content ?: "",
-                                thumbnail = it.jsonObject["thumbnail"]?.jsonPrimitive?.content ?: "",
-                                title = it.jsonObject["title"]?.jsonPrimitive?.content ?: "",
-                                source = it.jsonObject["url"]?.jsonPrimitive?.content ?: ""
-                            )
+                // Print out results
+                results?.forEach {
+                    add(
+                        SummonImage(
+                            image = it.jsonObject["image"]?.jsonPrimitive?.content ?: "",
+                            thumbnail = it.jsonObject["thumbnail"]?.jsonPrimitive?.content ?: "",
+                            title = it.jsonObject["title"]?.jsonPrimitive?.content ?: "",
+                            source = it.jsonObject["url"]?.jsonPrimitive?.content ?: ""
                         )
-                    }
-
-                    // Check for "next" field to continue pagination
-                    val nextUrl = jsonObject["next"]?.jsonPrimitive?.contentOrNull
-                    if (nextUrl == null) {
-                        break
-                    } else {
-                        requestUrl = "$baseUrl/$nextUrl"
-                    }
+                    )
                 }
             } catch (exception: Exception) {
 
             }
+        }.filter {
+            when (animated) {
+                true -> it.image.endsWith("gif")
+                false -> true
+            }
         }
+
     }
 
 
