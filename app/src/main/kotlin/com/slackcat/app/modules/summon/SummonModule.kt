@@ -19,19 +19,23 @@ class SummonModule : SlackcatModule() {
             return postHelpMessage(incomingChatMessage.channelId)
         }
 
-        val images = summonClient.getHtml(incomingChatMessage.userText, incomingChatMessage.command == "gif")
-        val message = if (images.isEmpty()) {
-            "No results found found for `${incomingChatMessage.userText}`"
-        } else {
-            images[Random.nextInt(images.size)].image
+        val images = summonClient.getHtml(
+            incomingChatMessage.userText,
+            incomingChatMessage.command == "gif"
+        ).take(10)
+        
+        val message = when {
+            images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
+            incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image
+            else -> images[0].image
         }
 
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText =  buildRichMessage {
+                richText = buildRichMessage {
                     image(
-                        imageUrl = images[Random.nextInt(images.size)].image,
+                        imageUrl = message,
                         altText = "summon image"
                     )
                 }
