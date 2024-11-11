@@ -5,7 +5,10 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
+import com.slackcat.presentation.RichMessage
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.buildRichMessage
+import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Alias
 
 class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
@@ -46,16 +49,43 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         }
 
         learnDAO.getLearn(key = message.command, index = index).fold({
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = message.channelId,
-                    text = it.learnText
-                )
-            )
+            sendLearnMessage(channelId = message.channelId, learnItem = it)
             return true
         }, {
             return false
         })
+    }
+
+    private fun sendLearnMessage(
+        channelId: String,
+        learnItem: LearnDAO.LearnRow
+    ) {
+        val isImage = learnItem.learnText.matches(Regex("https?://.*\\.(jpg|jpeg|png|gif|bmp|svg)$"))
+        when (isImage) {
+            true -> {
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = channelId,
+                        richText = buildRichMessage {
+                            image(
+                                imageUrl = learnItem.learnText,
+                                altText = "learn image"
+                            )
+                        }
+                    )
+                )
+            }
+
+            false -> {
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = channelId,
+                        text = learnItem.learnText
+                    )
+                )
+            }
+        }
+
     }
 
 
@@ -68,7 +98,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
 
     override fun provideCommand(): String = "learn"
     override fun provideTable() = LearnDAO.LearnTable
-    override fun aliases(): List<String> =  LearnAliases.entries.map { it.alias }
+    override fun aliases(): List<String> = LearnAliases.entries.map { it.alias }
 
 }
 
