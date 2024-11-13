@@ -23,7 +23,7 @@ class SummonModule : SlackcatModule() {
             incomingChatMessage.userText,
             incomingChatMessage.command == "gif"
         ).take(10)
-        
+
         val message = when {
             images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
             incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image

@@ -60,7 +60,8 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         channelId: String,
         learnItem: LearnDAO.LearnRow
     ) {
-        val isImage = learnItem.learnText.matches(Regex("https?://.*\\.(jpg|jpeg|png|gif|bmp|svg)$"))
+        val text = learnItem.learnText.replace("<", "").replace(">", "")
+        val isImage = text.matches(Regex("https?://.*\\.(jpg|jpeg|png|gif|bmp|svg)$"))
         when (isImage) {
             true -> {
                 sendMessage(
