@@ -10,14 +10,17 @@ class WeatherModule : SlackcatModule() {
     private val weatherClient = WeatherClient()
     private val weatherMessageFactory = WeatherMessageFactory()
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        weatherClient.getForecast("10280")?.let {
-            val richMessage = weatherMessageFactory.makeMessage(it)
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    text = richMessage
+        when (val result = weatherClient.getForecast(incomingChatMessage.userText)) {
+            null -> postHelpMessage(channelId = incomingChatMessage.channelId)
+            else -> {
+                val richMessage = weatherMessageFactory.makeMessage(result)
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = incomingChatMessage.channelId,
+                        text = richMessage
+                    )
                 )
-            )
+            }
         }
     }
 
