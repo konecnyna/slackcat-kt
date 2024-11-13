@@ -12,6 +12,7 @@ import com.slackcat.app.modules.pokecat.PokeCatModule
 import com.slackcat.app.modules.status.StatusModule
 import com.slackcat.app.modules.summon.SummonModule
 import com.slackcat.app.modules.translate.TranslateModule
+import com.slackcat.app.modules.weather.WeatherModule
 import com.slackcat.models.SlackcatModule
 import kotlin.reflect.KClass
 
@@ -28,7 +29,8 @@ class SlackcatApp {
         LearnModule::class,
         SummonModule::class,
         DeployBotModule::class,
-        EmojiModule::class
+        EmojiModule::class,
+        WeatherModule::class
     )
 
     fun onCreate(args: String?) {

@@ -26,6 +26,11 @@ data class OutgoingChatMessage(
     val botIcon: BotIcon = BotIcon.BotImageIcon(DEFAULT_BOT_IMAGE_ICON),
 )
 
+fun RichTextMessage.outgoingMessage(chanelId: String) = OutgoingChatMessage(
+    channelId = chanelId,
+    richText = this
+)
+
 sealed interface BotIcon {
     data class BotEmojiIcon(val emoji: String) : BotIcon
 

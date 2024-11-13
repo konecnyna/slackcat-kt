@@ -21,6 +21,7 @@ class RichTextMessageBuilder {
         blocks.add(section)
     }
 
+
     fun image(imageUrl: String, altText: String) {
         blocks.add(Block.Image(image_url = imageUrl, alt_text = altText))
     }
