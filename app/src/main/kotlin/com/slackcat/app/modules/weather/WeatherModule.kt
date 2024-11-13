@@ -11,7 +11,12 @@ class WeatherModule : SlackcatModule() {
     private val weatherMessageFactory = WeatherMessageFactory()
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         when (val result = weatherClient.getForecast(incomingChatMessage.userText)) {
-            null -> postHelpMessage(channelId = incomingChatMessage.channelId)
+            null -> sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    text = "Could not find location ${incomingChatMessage.userText}.\nVerify it <https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\nYou may need to use a bigger city."
+                )
+            )
             else -> {
                 val richMessage = weatherMessageFactory.makeMessage(result)
                 sendMessage(

@@ -25,7 +25,7 @@ data class Period(
 data class GeocodeResponse(val results: List<Result>)
 
 @Serializable
-data class Result(val latitude: Double, val longitude: Double)
+data class Result(val latitude: Double, val longitude: Double, val name: String)
 
 @Serializable
 data class PointResponse(val properties: PointProperties)
@@ -37,6 +37,7 @@ data class GridPoints(val gridId: String, val gridX: Int, val gridY: Int, val fo
 
 data class CurrentForecast(
     val name: String,
+    val locationName: String,
     val temperature: Int,
     val temperatureUnit: String,
     val windSpeed: String,
@@ -44,4 +45,12 @@ data class CurrentForecast(
     val shortForecast: String,
     val detailedForecast: String,
     val iconUrl: String
+)
+
+
+data class LocationData(
+    val locationName: String,
+    val latitude: Double,
+    val longitude: Double,
+    val gridPoints: GridPoints
 )

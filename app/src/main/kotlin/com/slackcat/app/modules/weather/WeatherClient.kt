@@ -4,21 +4,24 @@ import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
 import kotlinx.serialization.Serializable
 
 class WeatherClient {
-    private val zipToGridPointsCache = mutableMapOf<String, GridPoints>()
+    private val zipToLocationDataCache = mutableMapOf<String, LocationData>()
 
     suspend fun getForecast(zipCode: String): CurrentForecast? {
-        val gridPoints = zipToGridPointsCache[zipCode] ?: run {
-            val (latitude, longitude) = getLatLonFromZip(zipCode) ?: return null
-            getGridPoints(latitude, longitude)?.also {
-                zipToGridPointsCache[zipCode] = it
+        // Retrieve location data from cache or fetch if not available
+        val locationData = zipToLocationDataCache[zipCode] ?: run {
+            val (locationName, latitude, longitude) = getLatLonFromZip(zipCode) ?: return null
+            val gridPoints = getGridPoints(latitude, longitude) ?: return null
+            LocationData(locationName, latitude, longitude, gridPoints).also {
+                zipToLocationDataCache[zipCode] = it
             }
-        } ?: return null
+        }
 
-        val forecast = fetchForecast(gridPoints) ?: return null
+        val forecast = fetchForecast(locationData.gridPoints) ?: return null
         val currentPeriod = forecast.properties.periods.firstOrNull() ?: return null
 
         return CurrentForecast(
             name = currentPeriod.name,
+            locationName = locationData.locationName,
             temperature = currentPeriod.temperature,
             temperatureUnit = currentPeriod.temperatureUnit,
             windSpeed = currentPeriod.windSpeed,
@@ -29,11 +32,11 @@ class WeatherClient {
         )
     }
 
-    private suspend fun getLatLonFromZip(zipCode: String): Pair<Double, Double>? {
+    private suspend fun getLatLonFromZip(zipCode: String): Triple<String, Double, Double>? {
         val url = "https://geocoding-api.open-meteo.com/v1/search?name=$zipCode&country=US"
         val geocodeResponse = slackcatNetworkClient.fetch(url, GeocodeResponse.serializer())
         return geocodeResponse.getOrNull()?.results?.firstOrNull()?.let {
-            it.latitude to it.longitude
+            Triple(it.name ?: "Unknown Location", it.latitude, it.longitude)
         }
     }
 

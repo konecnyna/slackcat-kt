@@ -10,7 +10,7 @@ class WeatherMessageFactory {
 
     private fun formatForecastAsMarkdown(forecast: CurrentForecast): String {
         return """
-        *${forecast.name} Forecast*
+        *${forecast.name} Forecast for ${forecast.locationName}*
         
         *Temperature:* ${forecast.temperature}°${forecast.temperatureUnit}
         *Wind:* ${forecast.windSpeed} from ${forecast.windDirection}
