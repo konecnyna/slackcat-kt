@@ -69,7 +69,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                         channelId = channelId,
                         richText = buildRichMessage {
                             image(
-                                imageUrl = learnItem.learnText,
+                                imageUrl = text,
                                 altText = "learn image"
                             )
                         }
