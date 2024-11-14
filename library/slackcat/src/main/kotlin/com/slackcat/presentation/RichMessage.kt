@@ -13,10 +13,10 @@ class RichTextMessageBuilder {
         blocks.add(Block.Divider)
     }
 
-    fun section(text: String, imageUrl: String? = null, altText: String? = null) {
+    fun section(text: String, type: String, imageUrl: String? = null, altText: String? = null) {
         val section = Block.Section(
-            text = TextObject(text = text),
-            accessory = imageUrl?.let { Accessory(image_url = it, alt_text = altText ?: "") }
+            text = TextObject(text = text, type = type),
+            accessory = imageUrl?.let { Accessory(type = "image", image_url = it, alt_text = altText ?: "") }
         )
         blocks.add(section)
     }
@@ -65,7 +65,7 @@ sealed class Block {
 }
 
 @Serializable
-data class TextObject(val type: String = "mrkdwn", val text: String)
+data class TextObject(val type: String, val text: String)
 
 @Serializable
-data class Accessory(val type: String = "image", val image_url: String, val alt_text: String)
+data class Accessory(val type: String, val image_url: String, val alt_text: String)

@@ -13,6 +13,7 @@ import com.slackcat.models.StorageModule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.jetbrains.exposed.sql.Table
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -67,8 +68,7 @@ class SlackcatBot(
         val databaseFeatures: List<StorageModule> = modules
             .filter { it is StorageModule }
             .map { it as StorageModule }
-
-        val exposedTables = databaseFeatures.map { it.provideTable() }
+        val exposedTables = databaseFeatures.map { it.provideTables() }.flatMap { it }
         println(exposedTables)
         DatabaseGraph.connectDatabase(exposedTables, databaseConfig)
     }

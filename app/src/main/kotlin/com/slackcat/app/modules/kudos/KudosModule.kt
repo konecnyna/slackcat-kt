@@ -33,7 +33,7 @@ class KudosModule : SlackcatModule(), StorageModule {
         text("Give kudos to your friends by using ?++ @username . See who can get the most!")
     }
 
-    override fun provideTable() = KudosDAO.KudosTable
+    override fun provideTables() = listOf(KudosDAO.KudosTable)
 
     private fun extractUserIds(userText: String): List<String> {
         val pattern = """<@(\w+)>""".toRegex()
