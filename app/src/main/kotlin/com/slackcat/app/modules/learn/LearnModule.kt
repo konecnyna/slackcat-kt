@@ -98,7 +98,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     }
 
     override fun provideCommand(): String = "learn"
-    override fun provideTable() = LearnDAO.LearnTable
+    override fun provideTables() = listOf(LearnDAO.LearnTable)
     override fun aliases(): List<String> = LearnAliases.entries.map { it.alias }
 
 }

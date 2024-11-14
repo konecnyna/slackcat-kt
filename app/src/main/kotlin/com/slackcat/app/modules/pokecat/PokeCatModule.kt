@@ -7,7 +7,6 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.RichTextMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.RichMessageText
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
@@ -38,6 +37,7 @@ class PokeCatModule : SlackcatModule() {
             divider()
             section(
                 text = "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n *Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* ",
+                type = "mrkdwn",
                 imageUrl = pokemon.sprites.front_default,
                 altText = pokemon.sprites.front_default
             )
