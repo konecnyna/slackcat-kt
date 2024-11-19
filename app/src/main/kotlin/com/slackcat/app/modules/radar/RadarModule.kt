@@ -74,11 +74,7 @@ class RadarModule : SlackcatModule() {
                 buildRichMessage {
                     section("Radar Not Found", type = "mrkdwn")
                     section(
-                        """
-                    Couldn't find radar for "$inputText".
-                    Available radars:
-                    ${radars.joinToString("\n") { it.state }}
-                    """.trimIndent(),
+                        """Couldn't find radar for "$inputText". Available radars:\n${radars.sortedBy { it.state }.joinToString("\n") { "- ${it.state}" }}""".trimIndent(),
                         type = "mrkdwn"
                     )
                 }
