@@ -10,6 +10,7 @@ import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.learn.LearnModule
 import com.slackcat.app.modules.ping.PingModule
 import com.slackcat.app.modules.pokecat.PokeCatModule
+import com.slackcat.app.modules.radar.RadarModule
 import com.slackcat.app.modules.status.StatusModule
 import com.slackcat.app.modules.summon.SummonModule
 import com.slackcat.app.modules.translate.TranslateModule
@@ -33,6 +34,7 @@ class SlackcatApp {
         EmojiModule::class,
         WeatherModule::class,
         JeopardyModule::class,
+        RadarModule::class
     )
 
     fun onCreate(args: String?) {
