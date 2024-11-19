@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 class EmojiTextModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val text = extractUserText(incomingChatMessage.userText)
+        val text = incomingChatMessage.userText
         val outgoingText =
             if (text != null) {
                 convertString(text)
@@ -20,11 +20,6 @@ class EmojiTextModule : SlackcatModule() {
                 text = outgoingText,
             ),
         )
-    }
-
-    private fun extractUserText(userText: String): String? {
-        val regex = """^\S+\s+(.*)""".toRegex()
-        return regex.find(userText)?.groupValues?.get(1)
     }
 
     private fun convertString(userText: String): String {
