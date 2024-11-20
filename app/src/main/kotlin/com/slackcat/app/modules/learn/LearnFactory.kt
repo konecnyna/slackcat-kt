@@ -6,8 +6,8 @@ class LearnFactory {
     fun makeLearnRequest(incomingChatMessage: IncomingChatMessage): LearnInsertRow? {
         if (incomingChatMessage.userText.isEmpty()) return null
 
-        val regex = """^"?(\w+)"?\s+"?(.+?)"?$""".toRegex()
-        val match = regex.matchEntire(incomingChatMessage.userText)
+        val regex = """^\?learn\s+"(\w+)"\s+"((?s).+)"$""".toRegex()
+        val match = regex.matchEntire(incomingChatMessage.userText.trim())
 
         return match?.let {
             val learnKey = it.groups[1]?.value
