@@ -2,6 +2,7 @@ package com.slackcat.app
 
 import com.slackcat.SlackcatBot
 import com.slackcat.app.modules.bighips.BigHipsModule
+import com.slackcat.app.modules.cryptoprice.CryptoPriceModule
 import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.emoji.EmojiModule
@@ -36,7 +37,8 @@ class SlackcatApp {
         WeatherModule::class,
         JeopardyModule::class,
         RadarModule::class,
-        EmojiTextModule::class
+        EmojiTextModule::class,
+        CryptoPriceModule::class
     )
 
     fun onCreate(args: String?) {
