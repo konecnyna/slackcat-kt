@@ -21,7 +21,7 @@ class CryptoPriceModule() : SlackcatModule() {
         val message = if (cryptoPrice != null) {
             // Format the price with commas and preserve precision
             val formattedPrice = formatPrice(cryptoPrice.price)
-            "The current price of $$formattedPrice"
+            "The current price of ${cryptoPrice.ticker}: $$formattedPrice"
         } else {
             "Could not fetch the price for $userText. Please ensure the ticker symbol is correct."
         }
