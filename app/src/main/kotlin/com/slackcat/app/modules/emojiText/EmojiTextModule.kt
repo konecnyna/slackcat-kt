@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 import kotlin.random.Random
 
 class EmojiTextModule : SlackcatModule() {
@@ -17,7 +18,7 @@ class EmojiTextModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = outgoingText,
+                message = text(outgoingText),
             ),
         )
     }

@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 
 class BigHipsModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -15,7 +16,7 @@ class BigHipsModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = text,
+                message = text(text),
             ),
         )
     }
@@ -23,7 +24,7 @@ class BigHipsModule : SlackcatModule() {
     override fun provideCommand(): String = "big-hips"
 
     override fun help(): String = buildMessage {
-            title("Big Hips Help")
-            text("This module is for tommy big hips only! If you have regular hips please don't use.")
-        }
+        title("Big Hips Help")
+        text("This module is for tommy big hips only! If you have regular hips please don't use.")
+    }
 }

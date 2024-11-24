@@ -3,6 +3,7 @@ package com.slackcat.models
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.presentation.text
 
 abstract class SlackcatModule {
     abstract suspend fun onInvoke(incomingChatMessage: IncomingChatMessage)
@@ -22,7 +23,7 @@ abstract class SlackcatModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                text = help(),
+                message = text(help())
             ),
         )
     }

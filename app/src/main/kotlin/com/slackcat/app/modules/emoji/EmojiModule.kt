@@ -5,8 +5,6 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
 
 class EmojiModule : SlackcatModule() {
     private val emojiClient = EmojiClient()
@@ -18,7 +16,7 @@ class EmojiModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText = buildRichMessage {
+                message = buildRichMessage {
                     image(
                         imageUrl = emoji,
                         altText = "summon image"

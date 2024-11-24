@@ -6,6 +6,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -34,7 +35,7 @@ class TranslateModule : SlackcatModule() {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    text = outgoingText,
+                    message = text(outgoingText)
                 ),
             )
         }

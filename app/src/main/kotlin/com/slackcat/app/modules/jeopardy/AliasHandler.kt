@@ -23,7 +23,7 @@ class AliasHandler(private val jeopardyDAO: JeopardyDAO) {
 
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
-            richText = message,
+            message = message,
             botName = "Alex Trebek",
             botIcon = BotIcon.BotImageIcon(alexTrebek),
         )
@@ -70,7 +70,6 @@ class AliasHandler(private val jeopardyDAO: JeopardyDAO) {
             divider()
             section(
                 text = message,
-                type = "mrkdwn",
                 imageUrl = imageUrl,
                 altText = "alex quebec"
             )

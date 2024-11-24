@@ -28,7 +28,7 @@ class JeopardyModule : SlackcatModule(), StorageModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText = message,
+                message = message,
                 botName = "Alex Trebek",
                 botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg"),
             ),
@@ -40,7 +40,6 @@ class JeopardyModule : SlackcatModule(), StorageModule {
             divider()
             section(
                 text = "*The category is '${question.category}' for $${question.value}:* \n ${question.question} \n Question ID: ${question.id}",
-                type = "mrkdwn",
                 imageUrl = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
                 altText = "alex quebec"
             )

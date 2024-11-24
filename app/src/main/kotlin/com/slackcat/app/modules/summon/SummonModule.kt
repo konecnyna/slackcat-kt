@@ -2,13 +2,9 @@ package com.slackcat.app.modules.summon
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.common.RichTextMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.RichMessage
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
 import kotlin.random.Random
 
 class SummonModule : SlackcatModule() {
@@ -33,7 +29,7 @@ class SummonModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText = buildRichMessage {
+                message = buildRichMessage {
                     image(
                         imageUrl = message,
                         altText = "summon image"

@@ -2,9 +2,9 @@ package com.slackcat.app.modules.weather
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.chat.models.outgoingMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 
 class WeatherModule : SlackcatModule() {
     private val weatherClient = WeatherClient()
@@ -14,15 +14,16 @@ class WeatherModule : SlackcatModule() {
             null -> sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    text = "Could not find location ${incomingChatMessage.userText}.\nVerify it <https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\nYou may need to use a bigger city."
+                    message = text("Could not find location ${incomingChatMessage.userText}.\nVerify it <https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\nYou may need to use a bigger city.")
                 )
             )
+
             else -> {
                 val richMessage = weatherMessageFactory.makeMessage(result)
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        text = richMessage
+                        message = text(richMessage)
                     )
                 )
             }

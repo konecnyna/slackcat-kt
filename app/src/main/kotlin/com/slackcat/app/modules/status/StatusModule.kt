@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 
 class StatusModule : SlackcatModule() {
     private val statusClient = StatusClient()
@@ -17,11 +18,11 @@ class StatusModule : SlackcatModule() {
         val message = response?.let {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = response.toMessage(),
+                message = text(response.toMessage())
             )
         } ?: OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
-            text = "Got en error when trying fetch status...",
+            message = text("Got en error when trying fetch status...")
         )
 
         sendMessage(message)

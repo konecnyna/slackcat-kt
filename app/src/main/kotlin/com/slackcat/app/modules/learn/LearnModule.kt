@@ -5,11 +5,9 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
-import com.slackcat.presentation.RichMessage
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
-import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.Alias
+import com.slackcat.presentation.text
 
 class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     private val learnFactory = LearnFactory()
@@ -39,7 +37,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = message
+                message = text(message)
             )
         )
     }
@@ -71,7 +69,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = channelId,
-                        richText = buildRichMessage {
+                        message = buildRichMessage {
                             image(
                                 imageUrl = text,
                                 altText = "learn image"
@@ -85,7 +83,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = channelId,
-                        text = learnItem.learnText
+                        message = text(learnItem.learnText)
                     )
                 )
             }

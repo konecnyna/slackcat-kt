@@ -1,7 +1,6 @@
 package com.slackcat.app.modules.deploybot
 
 import com.slackcat.app.BigHipsChannels
-import com.slackcat.app.DatasourceFactory
 import com.slackcat.app.Environment
 import com.slackcat.app.SlackcatAppGraph.ENV
 import com.slackcat.chat.models.IncomingChatMessage
@@ -10,6 +9,7 @@ import com.slackcat.common.SlackcatEvent
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 
 class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -34,7 +34,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = BigHipsChannels.SlackcatTesting.channelId,
-                text = message
+                message = text(message)
             )
         )
     }

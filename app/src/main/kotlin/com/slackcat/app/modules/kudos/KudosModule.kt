@@ -6,6 +6,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 import kotlinx.coroutines.launch
 
 class KudosModule : SlackcatModule(), StorageModule {
@@ -19,7 +20,7 @@ class KudosModule : SlackcatModule(), StorageModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        text = "Bob now has $updatedKudos",
+                        message = text("Bob now has $updatedKudos"),
                     ),
                 )
             }

@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
+import com.slackcat.presentation.text
 
 class PingModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -17,7 +18,7 @@ class PingModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                text = text,
+                message = text(text),
             ),
         )
     }

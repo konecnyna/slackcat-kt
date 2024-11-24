@@ -72,10 +72,9 @@ class RadarModule : SlackcatModule() {
             }
             else -> {
                 buildRichMessage {
-                    section("Radar Not Found", type = "mrkdwn")
+                    section("Radar Not Found")
                     section(
                         """Couldn't find radar for "$inputText". Available radars:\n${radars.sortedBy { it.state }.joinToString("\n") { "- ${it.state}" }}""".trimIndent(),
-                        type = "mrkdwn"
                     )
                 }
             }
@@ -85,7 +84,7 @@ class RadarModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText = message
+                message = message
             )
         )
     }

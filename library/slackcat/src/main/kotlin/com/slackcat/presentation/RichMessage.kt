@@ -4,8 +4,6 @@ import com.slackcat.common.RichTextMessage
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 
-typealias RichMessageText = String
-
 class RichTextMessageBuilder {
     private val blocks = mutableListOf<Block>()
 
@@ -13,14 +11,20 @@ class RichTextMessageBuilder {
         blocks.add(Block.Divider)
     }
 
-    fun section(text: String, type: String, imageUrl: String? = null, altText: String? = null) {
+    fun section(text: String, imageUrl: String? = null, altText: String? = null) {
         val section = Block.Section(
-            text = TextObject(text = text, type = type),
+            text = TextObject(text = text, type = "mrkdwn"),
             accessory = imageUrl?.let { Accessory(type = "image", image_url = it, alt_text = altText ?: "") }
         )
         blocks.add(section)
     }
 
+    fun text(text: String) {
+        val section = Block.Section(
+            text = TextObject(text = text, type = "mrkdwn"),
+        )
+        blocks.add(section)
+    }
 
     fun image(imageUrl: String, altText: String) {
         blocks.add(Block.Image(image_url = imageUrl, alt_text = altText))
@@ -37,6 +41,7 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
     return RichTextMessage(builder.build())
 }
 
+inline fun text(value: String) = buildRichMessage {  }
 
 
 // Define a structure to represent blocks

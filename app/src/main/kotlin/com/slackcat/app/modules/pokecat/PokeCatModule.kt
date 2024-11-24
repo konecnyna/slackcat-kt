@@ -25,7 +25,7 @@ class PokeCatModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                richText = buildPokemonMessage(pokemon),
+                message = buildPokemonMessage(pokemon),
                 botName = "PokéCat",
                 botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"),
             ),
@@ -37,7 +37,6 @@ class PokeCatModule : SlackcatModule() {
             divider()
             section(
                 text = "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n *Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* ",
-                type = "mrkdwn",
                 imageUrl = pokemon.sprites.front_default,
                 altText = pokemon.sprites.front_default
             )

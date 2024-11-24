@@ -1,8 +1,6 @@
 package com.slackcat.chat.engine.slack
 
-import com.slack.api.app_backend.events.payload.EventsApiPayload
 import com.slack.api.bolt.App
-import com.slack.api.bolt.context.builtin.EventContext
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageEvent
@@ -55,11 +53,9 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     }
 
     override suspend fun sendMessage(message: OutgoingChatMessage) {
-
-
-        val blocks = if (message.richText.text.isNotEmpty()) {
+        val messageBlocks = if (message.message.text.isNotEmpty()) {
             val jsonObjectConverter = JsonToBlockConverter()
-            jsonObjectConverter.jsonObjectToBlocks(message.richText.text)
+            jsonObjectConverter.jsonObjectToBlocks(message.message.text)
         } else {
             null
         }
@@ -67,10 +63,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         client.chatPostMessage { req ->
             req.apply {
                 channel(message.channelId)
-                text(message.text)
-                blocks?.let {
-                    blocks(it)
-                }
+                blocks(messageBlocks)
                 username(message.botName)
                 when (val icon = message.botIcon) {
                     is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
