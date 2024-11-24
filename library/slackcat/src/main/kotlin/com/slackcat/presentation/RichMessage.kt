@@ -41,7 +41,7 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
     return RichTextMessage(builder.build())
 }
 
-inline fun text(value: String) = buildRichMessage {  }
+inline fun text(value: String) = buildRichMessage { section(value) }
 
 
 // Define a structure to represent blocks
