@@ -48,7 +48,7 @@ class CryptoPriceModule() : SlackcatModule() {
         title("CryptoPriceModule Help")
         text("Fetch current cryptocurrency prices.")
         text("*Usage:* ?crypto <ticker>")
-        text("Example: `?crypto bitcoin` to get the price of Bitcoin.")
+        text("Example: `?crypto btc` to get the price of Bitcoin.")
     }
 
     override fun provideCommand(): String = "crypto"

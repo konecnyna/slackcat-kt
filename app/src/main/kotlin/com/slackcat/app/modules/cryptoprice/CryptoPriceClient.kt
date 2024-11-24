@@ -21,19 +21,17 @@ class CryptoPriceClient {
     }
 
     private suspend fun fetchPriceFromApi(ticker: String): CryptoPrice? {
-        val url = "https://api.coingecko.com/api/v3/simple/price?ids=${ticker.lowercase()}&vs_currencies=usd"
+        val url = "https://min-api.cryptocompare.com/data/price?fsym=${ticker.toUpperCase()}&tsyms=USD"
         val result = slackcatNetworkClient.fetch(
             url = url,
             serializer = MapSerializer(
                 String.serializer(),
-                MapSerializer(String.serializer(), Double.serializer())
+                Double.serializer()
             )
         ).getOrNull()
 
         return result?.let {
-            it[ticker.lowercase()]?.get("usd")?.let { price ->
-                CryptoPrice(ticker.uppercase(), price)
-            }
+            CryptoPrice(ticker.uppercase(), it["USD"]!!)
         }
     }
 }
