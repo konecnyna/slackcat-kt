@@ -24,6 +24,8 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         }
 
 
+
+
         println(incomingChatMessage.userText)
 
         val learnRequest = learnFactory.makeLearnRequest(incomingChatMessage)
