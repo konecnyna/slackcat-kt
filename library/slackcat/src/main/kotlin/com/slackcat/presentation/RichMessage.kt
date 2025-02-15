@@ -44,6 +44,8 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
 inline fun text(value: String) = buildRichMessage { section(value) }
 
 
+
+
 // Define a structure to represent blocks
 @Serializable
 data class RichMessage(val blocks: List<Block>)
