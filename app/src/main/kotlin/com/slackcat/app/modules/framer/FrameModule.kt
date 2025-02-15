@@ -10,7 +10,7 @@ class FrameModule : SlackcatModule() {
 
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val inputUrl = incomingChatMessage.userText
+        val inputUrl = incomingChatMessage.userText.replace("<", "").replace(">", "")
         val imageUrl = when (incomingChatMessage.command) {
             "nickelback" -> NICKELBACK_BASE + inputUrl
             FrameModuleAliases.Krang.alias -> KRANG_BASE + inputUrl
