@@ -20,7 +20,7 @@ class SummonModule : SlackcatModule() {
             incomingChatMessage.command == "gif"
         ).take(10)
 
-        val message = when {
+        val imageUrl = when {
             images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
             incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image
             else -> images[0].image
@@ -31,9 +31,10 @@ class SummonModule : SlackcatModule() {
                 channelId = incomingChatMessage.channelId,
                 message = buildRichMessage {
                     image(
-                        imageUrl = message,
-                        altText = "summon image"
+                        imageUrl = imageUrl,
+                        altText = "summon image: ${incomingChatMessage.userText}"
                     )
+                    context("Source: $imageUrl")
                 }
             )
         )

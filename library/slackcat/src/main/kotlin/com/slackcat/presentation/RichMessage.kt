@@ -26,6 +26,13 @@ class RichTextMessageBuilder {
         blocks.add(section)
     }
 
+    fun context(text: String) {
+        val section = Block.Context(
+            listOf(TextObject(text = text, type = "mrkdwn")),
+        )
+        blocks.add(section)
+    }
+
     fun image(imageUrl: String, altText: String) {
         blocks.add(Block.Image(image_url = imageUrl, alt_text = altText))
     }
@@ -69,6 +76,13 @@ sealed class Block {
         val image_url: String,
         val alt_text: String
     ) : Block()
+
+
+    @Serializable
+    @SerialName("caption")
+    data class Context(
+        val elements: List<TextObject>
+    ): Block()
 }
 
 @Serializable
