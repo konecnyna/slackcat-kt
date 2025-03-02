@@ -8,7 +8,6 @@ import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import emojiDictionary
 
-
 class EmojiTextModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val input = parseInput(incomingChatMessage.userText ?: "")
@@ -33,15 +32,29 @@ class EmojiTextModule : SlackcatModule() {
     }
 
     private fun renderText(letters: List<String>, emojiOne: String, emojiTwo: String): String {
-        // Convert letters to their emoji representations and merge them
-        var line = ""
-        for (letter in letters) {
-            val letterDisplay = getLetter(letter)
-            line = mergeLines(line, letterDisplay)
+        // Remove leading/trailing whitespace from dictionary patterns to avoid extra spaces
+        val cleanedDictionary = emojiDictionary.mapValues { (_, value) ->
+            value.trim()
         }
 
-        // Replace placeholders with actual emojis
-        return line.replace("#", emojiOne).replace(".", emojiTwo)
+        // Convert letters to their emoji representations and merge them
+        var result = ""
+        val letterDisplays = letters.map { letter ->
+            getLetter(letter, cleanedDictionary)
+        }
+
+        // Initialize with first letter
+        if (letterDisplays.isNotEmpty()) {
+            result = letterDisplays[0]
+        }
+
+        // Merge remaining letters
+        for (i in 1 until letterDisplays.size) {
+            result = mergeLines(result, letterDisplays[i])
+        }
+
+        // Replace placeholders with actual emojis - avoid issues with whitespace
+        return result.replace("#", emojiOne).replace(".", emojiTwo)
     }
 
     private fun parseInput(userText: String): EmojiInput? {
@@ -58,18 +71,14 @@ class EmojiTextModule : SlackcatModule() {
         val cleanText = userText.replace(textEmoji, "").replace(bgEmoji, "").trim()
 
         // Convert text to character array
-        val letterArray = cleanText.lowercase().toList().map { it.toString() }.toMutableList()
-
-        // Add spacing at start and end for better formatting
-        letterArray.add(0, " ")
-        letterArray.add(" ")
+        val letterArray = cleanText.lowercase().toList().map { it.toString() }
 
         return EmojiInput(textEmoji, bgEmoji, letterArray)
     }
 
-    private fun getLetter(letter: String): String {
+    private fun getLetter(letter: String, cleanedDictionary: Map<String, String>): String {
         // Get letter pattern from dictionary or default to space
-        return emojiDictionary[letter] ?: emojiDictionary["space"] ?: ""
+        return cleanedDictionary[letter] ?: cleanedDictionary["space"] ?: ""
     }
 
     private fun mergeLines(line: String, letter: String): String {
@@ -83,9 +92,9 @@ class EmojiTextModule : SlackcatModule() {
         val paddedLineArray = lineArray.padTo(maxSize, "")
         val paddedLetterArray = letterArray.padTo(maxSize, "")
 
-        // Merge the lines horizontally with proper spacing
+        // Merge the lines horizontally without adding extra spaces
         return paddedLineArray.zip(paddedLetterArray) { a, b ->
-            "${a.trimEnd()}${if (a.isNotEmpty()) "." else ""}${b.trimStart()}"
+            a + (if (a.isNotEmpty() && b.isNotEmpty()) "" else "") + b
         }.joinToString("\n")
     }
 
@@ -110,5 +119,5 @@ class EmojiTextModule : SlackcatModule() {
 data class EmojiInput(
     val emojiOne: String,
     val emojiTwo: String,
-    val letterArray: MutableList<String>
+    val letterArray: List<String>
 )
