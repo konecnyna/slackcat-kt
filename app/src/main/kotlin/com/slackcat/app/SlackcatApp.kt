@@ -7,7 +7,8 @@ import com.slackcat.app.modules.date.DateModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.emoji.EmojiModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
-import com.slackcat.app.modules.emojiText.EmojiTextModule
+import com.slackcat.app.modules.emojisentence.EmojiSentenceModule
+import com.slackcat.app.modules.emojitext.EmojiTextModule
 import com.slackcat.app.modules.framer.FrameModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.learn.LearnModule
@@ -38,6 +39,7 @@ class SlackcatApp {
         WeatherModule::class,
         JeopardyModule::class,
         RadarModule::class,
+        EmojiSentenceModule::class,
         EmojiTextModule::class,
         CryptoPriceModule::class,
         FrameModule::class

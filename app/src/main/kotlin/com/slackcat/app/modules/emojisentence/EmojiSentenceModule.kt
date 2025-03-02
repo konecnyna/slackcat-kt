@@ -1,4 +1,4 @@
-package com.slackcat.app.modules.emojiText
+package com.slackcat.app.modules.emojisentence
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
@@ -7,14 +7,10 @@ import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import kotlin.random.Random
 
-class EmojiTextModule : SlackcatModule() {
+class EmojiSentenceModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val text = incomingChatMessage.userText
-        val outgoingText =
-            if (text != null) {
-                convertString(text)
-            } else {"empty"}
-
+        val outgoingText = convertString(text)
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
@@ -34,10 +30,11 @@ class EmojiTextModule : SlackcatModule() {
         }.joinToString("")
         return converted
     }
-    override fun help(): String = buildMessage {
-        title("Emojitext Help")
-        text("Write some text braaa (Example '?emojitext what up braaa')")
-    }
-    override fun provideCommand(): String = "emojitext"
 
+    override fun help(): String = buildMessage {
+        title("Emojisentence Help")
+        text("Write some text braaa (Example '?emojisentence what up braaa')")
+    }
+
+    override fun provideCommand(): String = "emojisetence"
 }
