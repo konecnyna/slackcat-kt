@@ -84,3 +84,35 @@ Testing
 ```shell
 docker-compose up --build -d && docker exec -it slack-bot /bin/sh
 ```
+
+
+## Dump Databse
+
+```bash
+docker compose exec -T postgres \
+  pg_dump -U newuser -d slackcatdb \
+| gzip > slackcatdb_$(date +%F).sql.gz
+```
+
+## Restore Database
+
+```bash
+docker-compose exec postgres \
+  psql -U newuser -d postgres \
+  -c "SELECT pg_terminate_backend(pid)
+      FROM pg_stat_activity
+      WHERE datname='slackcatdb'
+        AND pid <> pg_backend_pid();"
+
+# Drop the DB (runs outside a transaction)
+docker-compose exec postgres \
+  dropdb -U newuser slackcatdb
+
+# Recreate it, owned by newuser
+docker-compose exec postgres \
+  createdb -U newuser -O newuser slackcatdb
+  
+gunzip -c slackcatdb_2025-05-27.sql.gz \
+  | docker compose exec -T postgres \
+      psql -U newuser -d slackcatdb
+```
