@@ -24,7 +24,8 @@ services:
       - "8080:8080" # Adjust if your bot needs to expose any ports
     # Debugggin
     # entrypoint: [ "tail", "-f", "/dev/null" ]  # Keep container running without any actions
-
+    depends_on:
+      - postgres
     restart: unless-stopped
 
   postgres:
