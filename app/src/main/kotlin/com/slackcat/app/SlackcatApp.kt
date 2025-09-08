@@ -1,5 +1,6 @@
 package com.slackcat.app
 
+import io.github.cdimascio.dotenv.dotenv
 import com.slackcat.SlackcatBot
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.cryptoprice.CryptoPriceModule
@@ -46,7 +47,12 @@ class SlackcatApp {
     )
 
     fun onCreate(args: String?) {
-
+        // Load environment variables from .env file
+        dotenv {
+            directory = "../"
+            ignoreIfMalformed = true
+            ignoreIfMissing = true
+        }
 
         val slackcatBot = SlackcatBot(
             modulesClasses = modules,

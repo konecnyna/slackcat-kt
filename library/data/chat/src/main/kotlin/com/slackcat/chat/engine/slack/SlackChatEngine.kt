@@ -44,7 +44,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             ctx.ack()
         }
 
-        val socketModeApp = SocketModeApp(app)
+        val socketModeApp = SocketModeApp(System.getenv("SLACK_APP_TOKEN"), app)
         globalCoroutineScope.launch {
             socketModeApp.startAsync()
             delay(2000)

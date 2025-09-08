@@ -70,7 +70,7 @@ abstract class FeaturesHandler
                 }
 
                 if (reflection.get()) {
-                    dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect")
+                    dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect:1.9.10")
                 }
 
                 if (testing.get()) {
