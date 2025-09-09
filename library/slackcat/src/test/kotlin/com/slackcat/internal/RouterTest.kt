@@ -3,7 +3,10 @@ package com.slackcat.internal
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.models.SlackcatModule
+import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +35,9 @@ class RouterTest {
             }
 
         // Pass both modules to the Router
-        router = Router(listOf(mockModule, aliasModule), eventsFlow)
+        val testScope = TestScope()
+        val eventsFlow = MutableSharedFlow<SlackcatEvent>()
+        router = Router(listOf(mockModule, aliasModule), testScope, eventsFlow)
     }
 
     @Test

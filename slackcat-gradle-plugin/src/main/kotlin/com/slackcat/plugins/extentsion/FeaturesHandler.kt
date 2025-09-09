@@ -38,8 +38,8 @@ abstract class FeaturesHandler
         internal fun applyTo(project: Project) =
             with(project) {
                 if (coroutines.get()) {
-                    dependencies.add("compileOnly", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
-                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                    dependencies.add("compileOnly", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.1")
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
                 }
 
                 if (exposed.get()) {
@@ -48,36 +48,38 @@ abstract class FeaturesHandler
                     dependencies.add("runtimeOnly", "org.jetbrains.exposed:exposed-jdbc:0.44.1")
                     dependencies.add("runtimeOnly", "org.xerial:sqlite-jdbc:3.34.0")
                     dependencies.add("runtimeOnly", "org.postgresql:postgresql:42.6.0")
-//                    dependencies.add("runtimeOnly", "org.apache.commons:commons-dbcp2:2.9.0")
                 }
 
                 if (ktorClient.get()) {
-                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
-                    dependencies.add("implementation", "io.ktor:ktor-client-core:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.6")
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+                    dependencies.add("implementation", "io.ktor:ktor-client-core:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-client-cio:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.12")
                 }
 
                 if (ktorServer.get()) {
-                    dependencies.add("implementation", "io.ktor:ktor-server-netty:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-server-core:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-server-content-negotiation:2.3.6")
-                    dependencies.add("implementation", "io.ktor:ktor-serialization-kotlinx-json:2.3.6")
-                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+                    dependencies.add("implementation", "io.ktor:ktor-server-netty:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-server-core:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-server-content-negotiation:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-serialization-kotlinx-json:2.3.12")
+                    dependencies.add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
                     dependencies.add("implementation", "ch.qos.logback:logback-classic:1.4.14")
                 }
 
                 if (reflection.get()) {
-                    dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect:1.9.10")
+                    dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect:2.0.21")
                 }
 
                 if (testing.get()) {
-                    if (testing.get()) {
-                        tasks.withType<Test>().configureEach {
-                            useJUnitPlatform()
-                        }
+                    dependencies.add("testImplementation", "org.junit.jupiter:junit-jupiter:5.10.0")
+                    dependencies.add("testImplementation", "org.mockito:mockito-core:5.14.2")
+                    dependencies.add("testImplementation", "org.mockito:mockito-inline:4.5.1")
+                    dependencies.add("testImplementation", "io.mockk:mockk:1.13.13")
+                    dependencies.add("testImplementation", "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+                    tasks.withType<Test>().configureEach {
+                        useJUnitPlatform()
                     }
                 }
             }

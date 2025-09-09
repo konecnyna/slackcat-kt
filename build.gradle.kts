@@ -1,7 +1,7 @@
 plugins {
     id("com.slackcat.plugins.root")
-    kotlin("jvm") version "1.9.21"
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
     id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 

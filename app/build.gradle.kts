@@ -35,8 +35,8 @@ dependencies {
     implementation(projects.library.slackcat)
 
     implementation(libs.serialization.json)
-    implementation("org.apache.commons:commons-dbcp2:2.9.0")
-    implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
+    implementation("org.apache.commons:commons-dbcp2:2.13.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 }
 
 
