@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import java.net.URL
+import java.net.URLEncoder
 import java.util.regex.Pattern
 
 class SummonClient {
@@ -23,7 +24,8 @@ class SummonClient {
     )
 
     suspend fun getHtml(query: String, animated: Boolean): List<SummonImage> {
-        val vqdToken = getToken("$baseUrl/?q=$query") ?: return emptyList()
+        val encodedQuery = URLEncoder.encode(query, "UTF-8")
+        val vqdToken = getToken("$baseUrl/?q=$encodedQuery") ?: return emptyList()
         val filters = if (animated) {
             ",,,type:gif,,"
         } else {
@@ -41,7 +43,9 @@ class SummonClient {
 
         )
 
-        val requestUrl = baseUrl + "/i.js" + "?" + params.entries.joinToString("&") { "${it.key}=${it.value}" }
+        val requestUrl = baseUrl + "/i.js" + "?" + params.entries.joinToString("&") { 
+            "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}" 
+        }
         return buildList {
             try {
                 // Fetch response as string from URL
