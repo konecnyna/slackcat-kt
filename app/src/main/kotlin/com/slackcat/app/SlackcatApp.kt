@@ -10,6 +10,7 @@ import com.slackcat.app.modules.emoji.EmojiModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.app.modules.emojisentence.EmojiSentenceModule
 import com.slackcat.app.modules.emojitext.EmojiTextModule
+import com.slackcat.app.modules.flip.FlipModule
 import com.slackcat.app.modules.framer.FrameModule
 import com.slackcat.app.modules.kudos.KudosModule
 import com.slackcat.app.modules.learn.LearnModule
@@ -43,6 +44,7 @@ class SlackcatApp {
         EmojiSentenceModule::class,
         EmojiTextModule::class,
         CryptoPriceModule::class,
+        FlipModule::class,
         FrameModule::class
     )
 
