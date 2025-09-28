@@ -33,9 +33,7 @@ class FlipModule : SlackcatModule() {
     )
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val inputText = incomingChatMessage.text.substringAfter("${incomingChatMessage.command} ").trim()
-
-        if (inputText.isEmpty()) {
+        if (incomingChatMessage.userText.isEmpty()) {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
@@ -45,7 +43,7 @@ class FlipModule : SlackcatModule() {
             return
         }
 
-        val flippedText = flipText(inputText)
+        val flippedText = flipText(incomingChatMessage.userText)
 
         sendMessage(
             OutgoingChatMessage(
