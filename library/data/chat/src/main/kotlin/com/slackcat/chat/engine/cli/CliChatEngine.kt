@@ -58,11 +58,16 @@ class CliChatEngine(
         ready()
     }
 
-    override suspend fun sendMessage(message: OutgoingChatMessage) {
-        println("--------------------------------------")
-        println("Outgoing message: $message")
-        println("User sees rich text:\n${message.message.text}")
-        println("--------------------------------------")
+    override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+        return try {
+            println("--------------------------------------")
+            println("Outgoing message: $message")
+            println("User sees rich text:\n${message.message.text}")
+            println("--------------------------------------")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow

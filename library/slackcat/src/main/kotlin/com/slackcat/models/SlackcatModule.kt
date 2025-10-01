@@ -15,12 +15,12 @@ abstract class SlackcatModule {
     // Fix this.
     internal lateinit var chatClient: ChatClient
 
-    fun sendMessage(message: OutgoingChatMessage) {
-        chatClient.sendMessage(message)
+    suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+        return chatClient.sendMessage(message)
     }
 
-    fun postHelpMessage(channelId: String) {
-        sendMessage(
+    suspend fun postHelpMessage(channelId: String): Result<Unit> {
+        return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
                 message = text(help())

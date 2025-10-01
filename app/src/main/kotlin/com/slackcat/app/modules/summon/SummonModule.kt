@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
+import com.slackcat.presentation.text
 import kotlin.random.Random
 
 class SummonModule : SlackcatModule() {
@@ -12,7 +13,8 @@ class SummonModule : SlackcatModule() {
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         if (incomingChatMessage.userText.isEmpty()) {
-            return postHelpMessage(incomingChatMessage.channelId)
+            postHelpMessage(incomingChatMessage.channelId)
+            return
         }
 
         val images = summonClient.getHtml(
@@ -26,7 +28,7 @@ class SummonModule : SlackcatModule() {
             else -> images[0].image
         }
 
-        sendMessage(
+        val result = sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = buildRichMessage {
@@ -37,6 +39,24 @@ class SummonModule : SlackcatModule() {
                     context("Source: $imageUrl")
                 }
             )
+        )
+
+        result.fold(
+            onSuccess = {
+                // Message sent successfully, nothing to do
+            },
+            onFailure = { error ->
+                // Send fallback message on failure
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = incomingChatMessage.channelId,
+                        message = buildRichMessage {
+                            text("❌ Failed to send summon message: ${error.message}")
+                            text("Original request: ${incomingChatMessage.userText}")
+                        }
+                    )
+                )
+            }
         )
     }
 

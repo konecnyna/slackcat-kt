@@ -21,7 +21,11 @@ class PokeCatModule : SlackcatModule() {
         }
 
         val pokemonResult = slackcatNetworkClient.fetch("$baseurl/$pokemonIdentifier", PokemonData.serializer())
-        val pokemon = pokemonResult.getOrNull() ?: return this.postHelpMessage(incomingChatMessage.channelId)
+        val pokemon = pokemonResult.getOrNull()
+        if (pokemon == null) {
+            postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,

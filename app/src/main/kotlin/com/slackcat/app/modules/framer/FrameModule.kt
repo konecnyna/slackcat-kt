@@ -18,7 +18,8 @@ class FrameModule : SlackcatModule() {
         }
 
         if (imageUrl == null) {
-            return postHelpMessage(incomingChatMessage.channelId)
+            postHelpMessage(incomingChatMessage.channelId)
+            return
         }
 
         sendMessage(

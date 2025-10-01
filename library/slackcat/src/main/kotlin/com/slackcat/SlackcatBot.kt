@@ -45,8 +45,8 @@ class SlackcatBot(
         }
 
         chatClient = object : ChatClient {
-            override fun sendMessage(message: OutgoingChatMessage) {
-                coroutineScope.launch { chatEngine.sendMessage(message) }
+            override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+                return chatEngine.sendMessage(message)
             }
         }
 

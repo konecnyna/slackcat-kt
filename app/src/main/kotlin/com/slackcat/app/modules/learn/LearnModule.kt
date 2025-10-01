@@ -27,7 +27,10 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         println(incomingChatMessage.userText)
 
         val learnRequest = learnFactory.makeLearnRequest(incomingChatMessage)
-            ?: return postHelpMessage(incomingChatMessage.channelId)
+        if (learnRequest == null) {
+            postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
 
         val message = when (learnDAO.insertLearn(learnRequest)) {
             true -> "I've learned ${learnRequest.learnKey} successfully. To recall use `?${learnRequest.learnKey}`"
@@ -43,7 +46,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     }
 
 
-    override fun onUnhandledCommand(message: IncomingChatMessage): Boolean {
+    override suspend fun onUnhandledCommand(message: IncomingChatMessage): Boolean {
         val index = try {
             message.userText.toInt() - 1
         } catch (exception: NumberFormatException) {
@@ -58,7 +61,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         })
     }
 
-    private fun sendLearnMessage(
+    private suspend fun sendLearnMessage(
         channelId: String,
         learnItem: LearnDAO.LearnRow
     ) {

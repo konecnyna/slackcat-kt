@@ -52,24 +52,34 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
-    override suspend fun sendMessage(message: OutgoingChatMessage) {
-        val messageBlocks = if (message.message.text.isNotEmpty()) {
-            val jsonObjectConverter = JsonToBlockConverter()
-            jsonObjectConverter.jsonObjectToBlocks(message.message.text)
-        } else {
-            null
-        }
+    override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+        return try {
+            val messageBlocks = if (message.message.text.isNotEmpty()) {
+                val jsonObjectConverter = JsonToBlockConverter()
+                jsonObjectConverter.jsonObjectToBlocks(message.message.text)
+            } else {
+                null
+            }
 
-        client.chatPostMessage { req ->
-            req.apply {
-                channel(message.channelId)
-                blocks(messageBlocks)
-                username(message.botName)
-                when (val icon = message.botIcon) {
-                    is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
-                    is BotIcon.BotImageIcon -> iconUrl(icon.url)
+            val response = client.chatPostMessage { req ->
+                req.apply {
+                    channel(message.channelId)
+                    blocks(messageBlocks)
+                    username(message.botName)
+                    when (val icon = message.botIcon) {
+                        is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
+                        is BotIcon.BotImageIcon -> iconUrl(icon.url)
+                    }
                 }
             }
+
+            if (response.isOk) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

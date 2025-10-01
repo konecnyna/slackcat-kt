@@ -22,7 +22,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         text("Send a kewl message when slackcat starts")
     }
 
-    override fun onEvent(event: SlackcatEvent) {
+    override suspend fun onEvent(event: SlackcatEvent) {
         if (ENV != Environment.Production) {
             return
         }

@@ -1,5 +1,5 @@
 package com.slackcat.chat.models
 
 interface ChatClient {
-    fun sendMessage(message: OutgoingChatMessage)
+    suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit>
 }

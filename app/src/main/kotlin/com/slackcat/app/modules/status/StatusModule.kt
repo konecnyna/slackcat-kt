@@ -11,7 +11,10 @@ class StatusModule : SlackcatModule() {
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val statusService = getStatusSource(incomingChatMessage.arguments)
-            ?: return postHelpMessage(incomingChatMessage.channelId)
+        if (statusService == null) {
+            postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
 
         val response = statusClient.fetch(statusService)
 

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 interface ChatEngine {
     fun connect(ready: () -> Unit)
 
-    suspend fun sendMessage(message: OutgoingChatMessage)
+    suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit>
 
     suspend fun eventFlow(): SharedFlow<IncomingChatMessage>
 

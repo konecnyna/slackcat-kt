@@ -79,8 +79,8 @@ class Router(
 
         if (feature == null) {
             var handled = false
-            unhandledCommandModuleModules.forEach {
-                if (it.onUnhandledCommand(incomingMessage)) {
+            for (module in unhandledCommandModuleModules) {
+                if (module.onUnhandledCommand(incomingMessage)) {
                     handled = true
                 }
             }
@@ -90,12 +90,7 @@ class Router(
         return try {
             when {
                 incomingMessage.arguments.contains("--help") -> {
-                    val helpMessage =
-                        OutgoingChatMessage(
-                            channelId = incomingMessage.channelId,
-                            message = text(feature.help()),
-                        )
-                    feature.sendMessage(helpMessage)
+                    feature.postHelpMessage(incomingMessage.channelId)
                 }
 
                 else -> withContext(Dispatchers.IO) {
@@ -109,7 +104,7 @@ class Router(
         }
     }
 
-    private fun handleError(
+    private suspend fun handleError(
         feature: SlackcatModule,
         incomingMessage: IncomingChatMessage,
         exception: Exception,
@@ -129,7 +124,9 @@ class Router(
 
     private fun subscribeToEvents() = coroutineScope.launch {
         eventsFlow.collect { event ->
-            eventModules.forEach { module -> module.onEvent(event) }
+            eventModules.forEach { module ->
+                launch { module.onEvent(event) }
+            }
         }
     }
 }

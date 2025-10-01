@@ -11,7 +11,10 @@ class EmojiModule : SlackcatModule() {
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val emoji = emojiClient.fetchEmoji(incomingChatMessage.userText)
-            ?: return postHelpMessage(incomingChatMessage.channelId)
+        if (emoji == null) {
+            postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
 
         sendMessage(
             OutgoingChatMessage(
