@@ -17,7 +17,7 @@ class KudosModule : SlackcatModule(), StorageModule {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message = text("Bob now has $updatedKudos"),
+                    message = text("<@${updatedKudos.userId}> now has ${updatedKudos.count} kudos"),
                 ),
             )
         }
