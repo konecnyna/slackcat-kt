@@ -7,7 +7,7 @@ import com.slackcat.models.StorageModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
-class KudosModule : SlackcatModule(), StorageModule {
+open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -17,7 +17,7 @@ class KudosModule : SlackcatModule(), StorageModule {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message = text("<@${updatedKudos.userId}> now has ${updatedKudos.count} kudos"),
+                    message = text(getKudosMessage(updatedKudos)),
                 ),
             )
         }
@@ -35,5 +35,17 @@ class KudosModule : SlackcatModule(), StorageModule {
     private fun extractUserIds(userText: String): List<String> {
         val pattern = """<@(\w+)>""".toRegex()
         return pattern.findAll(userText).map { it.groupValues[1] }.toList()
+    }
+
+    protected open fun getKudosMessage(kudos: KudosDAO.Kudos): String {
+        return when (kudos.count) {
+            1 -> "<@${kudos.userId}> now has ${kudos.count} plus"
+            10 -> "<@${kudos.userId}> now has ${kudos.count} pluses! Double digits!"
+            69 -> "Nice <@${kudos.userId}>"
+            else -> {
+                val plusText = if (kudos.count == 1) "plus" else "pluses"
+                "<@${kudos.userId}> now has ${kudos.count} $plusText"
+            }
+        }
     }
 }
