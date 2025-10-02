@@ -5,7 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.presentation.text
 
 class AliasHandler(private val learnDAO: LearnDAO) {
-    fun handleAliases(
+    suspend fun handleAliases(
         incomingChatMessage: IncomingChatMessage
     ): OutgoingChatMessage? {
         val alias = LearnAliases.fromAlias(incomingChatMessage.command)
@@ -22,7 +22,7 @@ class AliasHandler(private val learnDAO: LearnDAO) {
         )
     }
 
-    private fun handleUnlearn(message: IncomingChatMessage): String {
+    private suspend fun handleUnlearn(message: IncomingChatMessage): String {
         val learnKey = message.userText.substringBefore(" --index").trim()
         val index = extractIndexFromText(message.userText)
 
@@ -39,7 +39,7 @@ class AliasHandler(private val learnDAO: LearnDAO) {
     }
 
 
-    private fun handleList(learnKey: String): String {
+    private suspend fun handleList(learnKey: String): String {
         val entries = learnDAO.getEntriesByLearnKey(learnKey)
         return if (entries.isEmpty()) {
             "I couldn't find any entries for that $learnKey"

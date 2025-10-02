@@ -11,6 +11,9 @@ class DatabaseClient {
         Database.connect(databaseConfig)
         transaction {
             storageClients.forEach { SchemaUtils.create(it) }
+            // SchemaUtils.create() doesn't add missing indexes to existing tables
+            // So we need to use createMissingTablesAndColumns to update schema
+            SchemaUtils.createMissingTablesAndColumns(*storageClients.toTypedArray())
         }
     }
 }

@@ -1,15 +1,13 @@
 package com.slackcat.app.modules.jeopardy
 
 import com.slackcat.app.SlackcatAppGraph.slackcatNetworkClient
-import com.slackcat.app.modules.kudos.dbQuery
-import com.slackcat.client.SlackcatNetworkClient
-import kotlinx.coroutines.Dispatchers
+import com.slackcat.database.dbQuery
+import com.slackcat.database.dbUpsert
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import kotlin.random.Random
 
 class JeopardyDAO {
@@ -46,7 +44,7 @@ class JeopardyDAO {
 
     object JeopardyScoreTable : Table() {
         val id = integer("id").autoIncrement()
-        val userId = text("user_id")
+        val userId = text("user_id").uniqueIndex()
         val points = integer("points")
         val right = integer("right")
         val wrong = integer("wrong")
@@ -59,17 +57,15 @@ class JeopardyDAO {
         }
     }
 
-    suspend fun getJeopardyScore(userId: String): JeopardyScoreRow {
-        return dbQuery {
-            val user = JeopardyScoreTable.select { JeopardyScoreTable.userId eq userId }.single()
-            return@dbQuery JeopardyScoreRow(
-                    id = user[JeopardyScoreTable.id],
-                    userId = user[JeopardyScoreTable.userId],
-                    points = user[JeopardyScoreTable.points],
-                    right = user[JeopardyScoreTable.right],
-                    wrong = user[JeopardyScoreTable.wrong]
-                )
-        }
+    suspend fun getJeopardyScore(userId: String): JeopardyScoreRow = dbQuery {
+        val user = JeopardyScoreTable.select { JeopardyScoreTable.userId eq userId }.single()
+        JeopardyScoreRow(
+            id = user[JeopardyScoreTable.id],
+            userId = user[JeopardyScoreTable.userId],
+            points = user[JeopardyScoreTable.points],
+            right = user[JeopardyScoreTable.right],
+            wrong = user[JeopardyScoreTable.wrong]
+        )
     }
 
     fun getJeopardyQuestion(value: String): JeopardyQuestionRow {
@@ -136,37 +132,30 @@ class JeopardyDAO {
     }
 
     suspend fun updateUserScore(userId: String, points: Int, right: Boolean): JeopardyScoreRow {
-        return jeopardyDbQuery {
-            val existingUser = JeopardyScoreTable.select { JeopardyScoreTable.userId eq userId }.singleOrNull()
-            if (existingUser == null) {
-                // User does not exist, insert new user
-                JeopardyScoreTable.insert {
-                    it[JeopardyScoreTable.userId] = userId
-                    it[JeopardyScoreTable.points] = points
-                    it[JeopardyScoreTable.right] = if (right) 1 else 0
-                    it[JeopardyScoreTable.wrong] = if (right) 0 else 1
-                }
-            } else {
-                // User exists, increment points and right, wrong numbers
-                JeopardyScoreTable.update({ JeopardyScoreTable.userId eq userId }) {
-                    with(SqlExpressionBuilder) {
-                        it.update(JeopardyScoreTable.points, JeopardyScoreTable.points + if (right) points else (0-points))
-                        it.update(JeopardyScoreTable.right, JeopardyScoreTable.right + if (right) 1 else 0)
-                        it.update(JeopardyScoreTable.wrong, JeopardyScoreTable.wrong + if (right) 0 else 1)
-                    }
-                }
+        return dbUpsert(
+            table = JeopardyScoreTable,
+            keys = arrayOf(JeopardyScoreTable.userId),
+            onUpdate = listOf(
+                JeopardyScoreTable.points to (JeopardyScoreTable.points + if (right) points else -points),
+                JeopardyScoreTable.right to (JeopardyScoreTable.right + if (right) 1 else 0),
+                JeopardyScoreTable.wrong to (JeopardyScoreTable.wrong + if (right) 0 else 1)
+            ),
+            insertBody = {
+                it[JeopardyScoreTable.userId] = userId
+                it[JeopardyScoreTable.points] = if (right) points else -points
+                it[JeopardyScoreTable.right] = if (right) 1 else 0
+                it[JeopardyScoreTable.wrong] = if (right) 0 else 1
+            },
+            selectWhere = { JeopardyScoreTable.userId eq userId },
+            mapper = { resultRow ->
+                JeopardyScoreRow(
+                    id = resultRow[JeopardyScoreTable.id],
+                    userId = resultRow[JeopardyScoreTable.userId],
+                    points = resultRow[JeopardyScoreTable.points],
+                    right = resultRow[JeopardyScoreTable.right],
+                    wrong = resultRow[JeopardyScoreTable.wrong]
+                )
             }
-
-            val resultRow = JeopardyScoreTable.select { JeopardyScoreTable.userId eq userId }.single()
-            return@jeopardyDbQuery JeopardyScoreRow(
-                id = resultRow[JeopardyScoreTable.id],
-                userId = resultRow[JeopardyScoreTable.userId],
-                points = resultRow[JeopardyScoreTable.points],
-                right = resultRow[JeopardyScoreTable.right],
-                wrong = resultRow[JeopardyScoreTable.wrong]
-            )
-        }
+        )
     }
 }
-
-suspend fun <T> jeopardyDbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }

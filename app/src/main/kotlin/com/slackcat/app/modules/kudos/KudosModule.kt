@@ -1,29 +1,25 @@
 package com.slackcat.app.modules.kudos
 
-import com.slackcat.app.SlackcatAppGraph.globalScope
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
-import kotlinx.coroutines.launch
 
 class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        globalScope.launch {
-            val ids = extractUserIds(incomingChatMessage.userText)
-            ids.forEach {
-                val updatedKudos = kudosDAO.upsertKudos(it)
-                sendMessage(
-                    OutgoingChatMessage(
-                        channelId = incomingChatMessage.channelId,
-                        message = text("Bob now has $updatedKudos"),
-                    ),
-                )
-            }
+        val ids = extractUserIds(incomingChatMessage.userText)
+        ids.forEach {
+            val updatedKudos = kudosDAO.upsertKudos(it)
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    message = text("Bob now has $updatedKudos"),
+                ),
+            )
         }
     }
 
