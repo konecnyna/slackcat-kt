@@ -37,7 +37,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
         return pattern.findAll(userText).map { it.groupValues[1] }.toList()
     }
 
-    protected open fun getKudosMessage(kudos: KudosDAO.Kudos): String {
+    protected open fun getKudosMessage(kudos: KudosDAO.KudosRow): String {
         return when (kudos.count) {
             1 -> "<@${kudos.userId}> now has ${kudos.count} plus"
             10 -> "<@${kudos.userId}> now has ${kudos.count} pluses! Double digits!"
