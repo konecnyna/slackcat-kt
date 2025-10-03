@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.library.core.server)
-    implementation(projects.library.core.common)
+    implementation(projects.library.slackcat.core.server)
+    implementation(projects.library.slackcat.core.common)
 
     implementation(libs.bundles.slack)
     implementation(libs.bundles.testing)

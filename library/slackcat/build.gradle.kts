@@ -30,10 +30,10 @@ repositories {
 }
 
 dependencies {
-    api(projects.library.data.chat)
-    api(projects.library.core.database)
-    api(projects.library.core.common)
-    api(projects.library.core.network)
+    api(projects.library.slackcat.data.chat)
+    api(projects.library.slackcat.core.database)
+    api(projects.library.slackcat.core.common)
+    api(projects.library.slackcat.core.network)
 
 }
 
