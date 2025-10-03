@@ -1,6 +1,18 @@
 package com.slackcat.modules
 
 import com.slackcat.models.SlackcatModule
+import com.slackcat.modules.simple.*
+import com.slackcat.modules.storage.kudos.KudosModule
+import com.slackcat.modules.storage.learn.LearnModule
+import com.slackcat.modules.storage.jeopardy.JeopardyModule
+import com.slackcat.modules.network.weather.WeatherModule
+import com.slackcat.modules.network.translate.TranslateModule
+import com.slackcat.modules.network.crypto.CryptoPriceModule
+import com.slackcat.modules.network.emoji.EmojiModule
+import com.slackcat.modules.network.status.StatusModule
+import com.slackcat.modules.network.summon.SummonModule
+import com.slackcat.modules.network.pokecat.PokeCatModule
+import com.slackcat.modules.network.radar.RadarModule
 import kotlin.reflect.KClass
 
 /**
