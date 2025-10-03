@@ -25,4 +25,7 @@ repositories {
     mavenCentral()
 }
 
-dependencies {}
+dependencies {
+    // Expose Exposed API so consumers can use it
+    api(libs.exposed.core)
+}

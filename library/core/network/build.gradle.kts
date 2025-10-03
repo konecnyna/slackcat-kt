@@ -25,4 +25,8 @@ repositories {
     mavenCentral()
 }
 
-dependencies {}
+dependencies {
+    // Expose serialization and ktor client API so consumers can use them
+    api(libs.serialization.json)
+    api(libs.ktor.client.core)
+}
