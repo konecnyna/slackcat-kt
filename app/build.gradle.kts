@@ -22,6 +22,7 @@ slackcat {
         coroutines()
         reflection()
         exposed()
+        koin()
     }
 }
 

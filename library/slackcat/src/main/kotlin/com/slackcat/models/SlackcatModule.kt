@@ -13,8 +13,7 @@ abstract class SlackcatModule {
 
     abstract fun help(): String
 
-    // Fix this.
-    internal lateinit var chatClient: ChatClient
+    lateinit var chatClient: ChatClient
 
     lateinit var coroutineScope: CoroutineScope
 

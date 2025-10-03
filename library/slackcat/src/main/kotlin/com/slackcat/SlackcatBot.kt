@@ -22,7 +22,7 @@ import kotlin.reflect.full.createInstance
 
 class SlackcatBot(
     val modulesClasses: Array<KClass<out SlackcatModule>>,
-    val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    val coroutineScope: CoroutineScope,
     val databaseConfig: DataSource,
     val networkClient: NetworkClient? = null
 ) {

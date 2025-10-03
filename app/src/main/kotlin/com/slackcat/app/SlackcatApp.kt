@@ -2,23 +2,17 @@ package com.slackcat.app
 
 import io.github.cdimascio.dotenv.dotenv
 import com.slackcat.SlackcatBot
-import com.slackcat.app.modules.bighips.BigHipsModule
-import com.slackcat.app.modules.deploybot.DeployBotModule
-import com.slackcat.app.modules.emojitext.EmojiTextModule
+import com.slackcat.app.di.appModule
+import com.slackcat.di.coreModule
 import com.slackcat.models.SlackcatModule
-import com.slackcat.modules.SlackcatModules
+import com.slackcat.network.NetworkClient
+import kotlinx.coroutines.CoroutineScope
+import org.koin.core.context.startKoin
+import org.koin.core.context.GlobalContext
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 class SlackcatApp {
-    val dataSourceFactory = DatasourceFactory()
-
-    // Mix official modules from SlackcatModules with app-specific custom modules
-    val modules: List<KClass<out SlackcatModule>> = SlackcatModules.all + listOf(
-        BigHipsModule::class,
-        DeployBotModule::class,
-        EmojiTextModule::class
-    )
-
     fun onCreate(args: String?) {
         // Load environment variables from .env file
         dotenv {
@@ -27,11 +21,24 @@ class SlackcatApp {
             ignoreIfMissing = true
         }
 
+        // Initialize Koin
+        startKoin {
+            modules(coreModule, appModule)
+        }
+
+        // Get dependencies from Koin
+        val koin = GlobalContext.get()
+        val coroutineScope = koin.get<CoroutineScope>()
+        val dataSource = koin.get<DataSource>()
+        val networkClient = koin.get<NetworkClient>()
+        val moduleClasses = koin.get<List<KClass<out SlackcatModule>>>()
+
+        // Create SlackcatBot with Koin dependencies
         val slackcatBot = SlackcatBot(
-            modulesClasses = modules.toTypedArray(),
-            coroutineScope = SlackcatAppGraph.globalScope,
-            databaseConfig = dataSourceFactory.makeDatabaseSource(SlackcatAppGraph.ENV),
-            networkClient = SlackcatAppGraph.networkClient
+            modulesClasses = moduleClasses.toTypedArray(),
+            coroutineScope = coroutineScope,
+            databaseConfig = dataSource,
+            networkClient = networkClient
         )
         slackcatBot.start(args)
     }

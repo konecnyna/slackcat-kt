@@ -22,6 +22,7 @@ abstract class FeaturesHandler
         private val ktorServer: Property<Boolean> = objects.property<Boolean>().convention(false)
         private val reflection: Property<Boolean> = objects.property<Boolean>().convention(false)
         private val testing: Property<Boolean> = objects.property<Boolean>().convention(false)
+        private val koin: Property<Boolean> = objects.property<Boolean>().convention(false)
 
         fun coroutines() = coroutines.setDisallowChanges(true)
 
@@ -34,6 +35,8 @@ abstract class FeaturesHandler
         fun reflection() = reflection.setDisallowChanges(true)
 
         fun enableJunitTesting() = testing.setDisallowChanges(true)
+
+        fun koin() = koin.setDisallowChanges(true)
 
         internal fun applyTo(project: Project) =
             with(project) {
@@ -81,6 +84,10 @@ abstract class FeaturesHandler
                     tasks.withType<Test>().configureEach {
                         useJUnitPlatform()
                     }
+                }
+
+                if (koin.get()) {
+                    dependencies.add("implementation", "io.insert-koin:koin-core:3.5.6")
                 }
             }
     }
