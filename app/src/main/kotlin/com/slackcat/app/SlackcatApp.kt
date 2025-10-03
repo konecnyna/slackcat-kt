@@ -28,7 +28,7 @@ class SlackcatApp {
         }
 
         val slackcatBot = SlackcatBot(
-            modulesClasses = modules,
+            modulesClasses = modules.toTypedArray(),
             coroutineScope = SlackcatAppGraph.globalScope,
             databaseConfig = dataSourceFactory.makeDatabaseSource(SlackcatAppGraph.ENV),
             networkClient = SlackcatAppGraph.networkClient
