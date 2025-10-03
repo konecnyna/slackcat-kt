@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.serialization") version "2.0.21"
     id("com.github.johnrengelman.shadow") version "7.1.2" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2" apply false
 }
 
 allprojects {
@@ -19,4 +20,8 @@ allprojects {
     kotlin {
         jvmToolchain(21)
     }
+}
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
