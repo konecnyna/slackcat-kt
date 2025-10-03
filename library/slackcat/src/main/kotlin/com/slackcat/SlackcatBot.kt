@@ -8,8 +8,10 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.database.DatabaseGraph
 import com.slackcat.internal.Router
+import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
+import com.slackcat.network.NetworkClient
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,7 +23,8 @@ import kotlin.reflect.full.createInstance
 class SlackcatBot(
     val modulesClasses: Array<KClass<out SlackcatModule>>,
     val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    val databaseConfig: DataSource
+    val databaseConfig: DataSource,
+    val networkClient: NetworkClient? = null
 ) {
     lateinit var chatEngine: ChatEngine
     lateinit var chatClient: ChatClient
@@ -51,7 +54,13 @@ class SlackcatBot(
         }
 
         val slackcatModules: List<SlackcatModule> = modulesClasses.map {
-            it.createInstance().also { module -> module.chatClient = chatClient }
+            it.createInstance().also { module ->
+                module.chatClient = chatClient
+                module.coroutineScope = coroutineScope
+                if (module is NetworkModule && networkClient != null) {
+                    module.networkClient = networkClient
+                }
+            }
         }
 
         router = Router(

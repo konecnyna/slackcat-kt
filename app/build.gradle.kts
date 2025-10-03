@@ -33,6 +33,7 @@ repositories {
 
 dependencies {
     implementation(projects.library.slackcat)
+    implementation(projects.library.slackcatModules)
 
     implementation(libs.serialization.json)
     implementation("org.apache.commons:commons-dbcp2:2.13.0")

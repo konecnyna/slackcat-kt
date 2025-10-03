@@ -4,6 +4,7 @@ includeBuild("slackcat-gradle-plugin")
 include(
     ":app",
     ":library:slackcat",
+    ":library:slackcat-modules",
     ":library:data:chat",
     ":library:core:common",
     ":library:core:database",
