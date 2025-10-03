@@ -7,7 +7,8 @@ on:
       - develop
 
 jobs:
-  test:
+  test-modules:
+    name: Test Slackcat Modules
     runs-on: ubuntu-latest
 
     steps:
@@ -24,20 +25,58 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Run tests
-        run: ./gradlew test --no-daemon
+      - name: Run module tests
+        run: ./gradlew :library:slackcat-modules:test --no-daemon
 
-      - name: Publish test results
+      - name: Publish module test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
+          check_name: Module Test Results
           files: |
-            **/build/test-results/**/*.xml
+            library/slackcat-modules/build/test-results/**/*.xml
 
-      - name: Upload test reports
+      - name: Upload module test reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-reports
+          name: module-test-reports
           path: |
-            **/build/reports/tests/
+            library/slackcat-modules/build/reports/tests/
+
+  test-slackcat-lib:
+    name: Test Slackcat Library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run slackcat library tests
+        run: ./gradlew :library:slackcat:test :library:slackcat:core:common:test :library:slackcat:core:database:test :library:slackcat:core:network:test :library:slackcat:core:server:test :library:slackcat:data:chat:test --no-daemon
+
+      - name: Publish library test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          check_name: Library Test Results
+          files: |
+            library/slackcat/**/build/test-results/**/*.xml
+
+      - name: Upload library test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: library-test-reports
+          path: |
+            library/slackcat/**/build/reports/tests/

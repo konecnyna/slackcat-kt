@@ -4,7 +4,6 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.simple.*
 import com.slackcat.modules.storage.kudos.KudosModule
 import com.slackcat.modules.storage.learn.LearnModule
-import com.slackcat.modules.storage.jeopardy.JeopardyModule
 import com.slackcat.modules.network.weather.WeatherModule
 import com.slackcat.modules.network.translate.TranslateModule
 import com.slackcat.modules.network.crypto.CryptoPriceModule
@@ -34,7 +33,6 @@ object SlackcatModules {
         // Storage modules
         KudosModule::class,
         LearnModule::class,
-        JeopardyModule::class,
 
         // Network modules
         WeatherModule::class,
@@ -88,7 +86,6 @@ object SlackcatModules {
      */
     val gamification: List<KClass<out SlackcatModule>> = listOf(
         KudosModule::class,
-        JeopardyModule::class,
         LearnModule::class
     )
 

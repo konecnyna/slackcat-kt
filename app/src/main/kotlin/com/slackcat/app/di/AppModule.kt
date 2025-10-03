@@ -5,6 +5,7 @@ import com.slackcat.app.Environment
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.emojitext.EmojiTextModule
+import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.SlackcatModules
 import com.slackcat.network.NetworkClient
@@ -38,7 +39,8 @@ val appModule = module {
         SlackcatModules.all + listOf(
             BigHipsModule::class,
             DeployBotModule::class,
-            EmojiTextModule::class
+            EmojiTextModule::class,
+            JeopardyModule::class
         )
     }
 }

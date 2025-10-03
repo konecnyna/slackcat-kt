@@ -1,4 +1,4 @@
-package com.slackcat.modules.storage.jeopardy
+package com.slackcat.app.modules.jeopardy
 
 import com.slackcat.database.dbQuery
 import com.slackcat.database.dbUpsert

@@ -1,4 +1,4 @@
-package com.slackcat.modules.storage.jeopardy
+package com.slackcat.app.modules.jeopardy
 
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
