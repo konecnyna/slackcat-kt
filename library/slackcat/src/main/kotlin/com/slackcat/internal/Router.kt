@@ -131,4 +131,9 @@ class Router(
                 }
             }
         }
+
+    /**
+     * Returns the list of all active modules in the bot
+     */
+    fun getAllModules(): List<SlackcatModule> = modules
 }

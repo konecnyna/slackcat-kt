@@ -2,6 +2,7 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildRichMessage
 import com.slackcat.presentation.text
@@ -10,12 +11,11 @@ import com.slackcat.presentation.text
  * Module that lists all active modules in the bot.
  * Responds with a thread showing all commands and their aliases.
  *
- * This module needs to be initialized with the list of active modules
- * after all modules are instantiated.
+ * Queries the Router at runtime to get the current list of active modules.
  */
-class ModulesModule : SlackcatModule() {
-    var activeModules: List<SlackcatModule> = emptyList()
-
+class ModulesModule(
+    private val router: Router,
+) : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val modulesList = buildModulesList()
 
@@ -28,6 +28,10 @@ class ModulesModule : SlackcatModule() {
     }
 
     private fun buildModulesList(): String {
+        val activeModules =
+            router.getAllModules()
+                .filter { it !is ModulesModule } // Exclude self from list
+
         val grouped = activeModules.groupBy { getModuleCategory(it) }
 
         return buildRichMessage {

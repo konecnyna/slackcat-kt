@@ -9,12 +9,19 @@ import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
+import org.jetbrains.exposed.sql.Table
 
 class JeopardyModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule(), StorageModule {
     private val jeopardyDAO by lazy { JeopardyDAO(networkClient) }
     private val aliasHandler by lazy { JeopardyAliasHandler(jeopardyDAO) }
+
+    override fun tables(): List<Table> =
+        listOf(
+            JeopardyDAO.JeopardyQuestionsTable,
+            JeopardyDAO.JeopardyScoreTable,
+        )
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         if (jeopardyDAO.getJeopardyTableLength() == 0L) {
@@ -66,8 +73,6 @@ class JeopardyModule(
                     "Check your current points with ?jeopardy-points",
             )
         }
-
-    override fun provideTables() = listOf(JeopardyDAO.JeopardyQuestionsTable, JeopardyDAO.JeopardyScoreTable)
 
     override fun aliases(): List<String> = JeopardyAliases.entries.map { it.alias }
 }

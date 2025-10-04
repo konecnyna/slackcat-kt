@@ -6,9 +6,12 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
+import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
+
+    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val ids = extractUserIds(incomingChatMessage.userText)
@@ -30,8 +33,6 @@ open class KudosModule : SlackcatModule(), StorageModule {
             title("KudosModule Help")
             text("Give kudos to your friends by using ?++ @username . See who can get the most!")
         }
-
-    override fun provideTables() = listOf(KudosDAO.KudosTable)
 
     private fun extractUserIds(userText: String): List<String> {
         val pattern = """<@(\w+)>""".toRegex()

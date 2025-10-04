@@ -55,17 +55,40 @@ class SlackcatBot(
                 }
             }
 
+        // Temporary empty list for Router construction
+        router =
+            Router(
+                modules = emptyList(),
+                coroutineScope = coroutineScope,
+                eventsFlow = eventsFlow,
+            )
+
         val slackcatModules: List<SlackcatModule> =
             modulesClasses.map { moduleClass ->
                 val module =
                     try {
-                        // Try to create instance with NetworkClient constructor parameter
-                        if (networkClient != null) {
-                            moduleClass.constructors
-                                .firstOrNull { it.parameters.size == 1 }
-                                ?.call(networkClient)
-                        } else {
-                            null
+                        // Try different constructor patterns
+                        when {
+                            // Try Router constructor (for ModulesModule)
+                            moduleClass.constructors.any {
+                                it.parameters.size == 1 &&
+                                    it.parameters[0].type.classifier == Router::class
+                            } -> {
+                                moduleClass.constructors
+                                    .firstOrNull {
+                                        it.parameters.size == 1 &&
+                                            it.parameters[0].type.classifier == Router::class
+                                    }
+                                    ?.call(router)
+                            }
+                            // Try NetworkClient constructor
+                            networkClient != null && moduleClass.constructors.any { it.parameters.size == 1 } -> {
+                                moduleClass.constructors
+                                    .firstOrNull { it.parameters.size == 1 }
+                                    ?.call(networkClient)
+                            }
+                            // Fallback to no-arg constructor
+                            else -> null
                         }
                     } catch (e: Exception) {
                         null
@@ -77,19 +100,7 @@ class SlackcatBot(
                 }
             }
 
-        // Inject the modules list into any ModulesModule instance
-        slackcatModules.forEach { module ->
-            if (module::class.simpleName == "ModulesModule") {
-                try {
-                    val activeModulesProperty = module::class.java.getDeclaredField("activeModules")
-                    activeModulesProperty.isAccessible = true
-                    activeModulesProperty.set(module, slackcatModules)
-                } catch (e: Exception) {
-                    // Ignore if field doesn't exist or can't be set
-                }
-            }
-        }
-
+        // Update router with actual modules list
         router =
             Router(
                 modules = slackcatModules,
@@ -109,7 +120,7 @@ class SlackcatBot(
             modules
                 .filter { it is StorageModule }
                 .map { it as StorageModule }
-        val exposedTables = databaseFeatures.map { it.provideTables() }.flatMap { it }
+        val exposedTables = databaseFeatures.map { it.tables() }.flatMap { it }
         println(exposedTables)
         DatabaseGraph.connectDatabase(exposedTables, databaseConfig)
     }

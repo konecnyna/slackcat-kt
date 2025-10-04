@@ -4,13 +4,16 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.internal.Router
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,13 +22,15 @@ class ModulesModuleTest {
     private lateinit var modulesModule: ModulesModule
     private lateinit var mockChatClient: ChatClient
     private lateinit var mockCoroutineScope: CoroutineScope
+    private lateinit var mockRouter: Router
 
     @BeforeEach
     fun setup() {
-        modulesModule = ModulesModule()
+        mockRouter = mockk(relaxed = true)
         mockChatClient = mockk(relaxed = true)
         mockCoroutineScope = mockk(relaxed = true)
 
+        modulesModule = ModulesModule(mockRouter)
         modulesModule.chatClient = mockChatClient
         modulesModule.coroutineScope = mockCoroutineScope
 
@@ -74,7 +79,7 @@ class ModulesModuleTest {
             // Setup some test modules
             val pingModule = PingModule()
             val dateModule = DateModule()
-            modulesModule.activeModules = listOf(pingModule, dateModule, modulesModule)
+            every { mockRouter.getAllModules() } returns listOf(pingModule, dateModule, modulesModule)
 
             val incomingMessage =
                 createTestMessage(
@@ -95,7 +100,8 @@ class ModulesModuleTest {
             assertTrue(messageText.contains("Active Slackcat Modules"))
             assertTrue(messageText.contains("ping"))
             assertTrue(messageText.contains("date"))
-            assertTrue(messageText.contains("modules"))
+            // ModulesModule should be filtered out
+            assertFalse(messageText.contains("?modules"))
         }
 
     @Test
@@ -103,7 +109,7 @@ class ModulesModuleTest {
         runTest {
             val pingModule = PingModule()
             val dateModule = DateModule()
-            modulesModule.activeModules = listOf(pingModule, dateModule)
+            every { mockRouter.getAllModules() } returns listOf(pingModule, dateModule)
 
             val incomingMessage = createTestMessage("modules")
             modulesModule.onInvoke(incomingMessage)
@@ -121,7 +127,7 @@ class ModulesModuleTest {
             val pingModule = PingModule()
             val dateModule = DateModule()
             val flipModule = FlipModule()
-            modulesModule.activeModules = listOf(pingModule, dateModule, flipModule)
+            every { mockRouter.getAllModules() } returns listOf(pingModule, dateModule, flipModule)
 
             val incomingMessage = createTestMessage("modules")
             modulesModule.onInvoke(incomingMessage)
@@ -136,7 +142,7 @@ class ModulesModuleTest {
     @Test
     fun `buildModulesList shows help usage hint`() =
         runTest {
-            modulesModule.activeModules = listOf(PingModule())
+            every { mockRouter.getAllModules() } returns listOf(PingModule())
 
             val incomingMessage = createTestMessage("modules")
             modulesModule.onInvoke(incomingMessage)
