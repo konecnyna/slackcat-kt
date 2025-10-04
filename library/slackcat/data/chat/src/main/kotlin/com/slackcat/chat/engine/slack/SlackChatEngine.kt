@@ -54,7 +54,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     override suspend fun sendMessage(
         message: OutgoingChatMessage,
         botName: String,
-        botIcon: BotIcon
+        botIcon: BotIcon,
     ): Result<Unit> {
         return try {
             val messageBlocks =

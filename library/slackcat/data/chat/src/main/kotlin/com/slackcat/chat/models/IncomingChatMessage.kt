@@ -1,8 +1,6 @@
 package com.slackcat.chat.models
 
 import com.slackcat.common.RichTextMessage
-import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON
-import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_NAME
 
 data class IncomingChatMessage(
     val arguments: List<String>,

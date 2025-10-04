@@ -1,6 +1,5 @@
 package com.slackcat.app.modules.jeopardy
 
-import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.RichTextMessage

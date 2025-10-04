@@ -5,7 +5,10 @@ import org.apache.commons.dbcp2.BasicDataSource
 import javax.sql.DataSource
 
 class DefaultDatasourceFactory {
-    fun makeDatabaseSource(engine: Engine, databaseConfig: DatabaseConfig?): DataSource {
+    fun makeDatabaseSource(
+        engine: Engine,
+        databaseConfig: DatabaseConfig?,
+    ): DataSource {
         return when (engine) {
             Engine.Slack -> {
                 requireNotNull(databaseConfig) { "DatabaseConfig is required for Slack engine" }

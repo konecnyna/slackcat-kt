@@ -45,5 +45,4 @@ abstract class SlackcatModule : KoinComponent {
     }
 
     open fun aliases(): List<String> = emptyList()
-
 }

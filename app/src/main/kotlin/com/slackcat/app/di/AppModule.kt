@@ -3,21 +3,22 @@ package com.slackcat.app.di
 import com.slackcat.DefaultDatasourceFactory
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
+import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.common.DatabaseConfig
 import com.slackcat.common.SlackcatAppDefaults
 import com.slackcat.common.SlackcatConfig
-import com.slackcat.modules.simple.emojitext.EmojiTextModule
-import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.SlackcatModules
+import com.slackcat.modules.simple.emojitext.EmojiTextModule
 import org.koin.dsl.module
 import java.time.LocalDate
 import java.time.Month
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
-val appModule = module {
+val appModule =
+    module {
         // DataSource factory
         single { DefaultDatasourceFactory() }
 
@@ -56,12 +57,13 @@ val appModule = module {
                         else -> BotIcon.BotImageIcon(SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON)
                     }
                 },
-                databaseConfig = DatabaseConfig(
-                    url = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432",
-                    name = System.getenv("DATABASE_NAME") ?: "slackcat",
-                    username = System.getenv("DATABASE_USER") ?: "",
-                    password = System.getenv("DATABASE_PASSWORD") ?: ""
-                )
+                databaseConfig =
+                    DatabaseConfig(
+                        url = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432",
+                        name = System.getenv("DATABASE_NAME") ?: "slackcat",
+                        username = System.getenv("DATABASE_USER") ?: "",
+                        password = System.getenv("DATABASE_PASSWORD") ?: "",
+                    ),
             )
         }
     }

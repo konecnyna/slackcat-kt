@@ -4,6 +4,6 @@ interface ChatClient {
     suspend fun sendMessage(
         message: OutgoingChatMessage,
         botName: String,
-        botIcon: BotIcon
+        botIcon: BotIcon,
     ): Result<Unit>
 }
