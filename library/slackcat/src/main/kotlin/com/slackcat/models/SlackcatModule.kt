@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.presentation.text
+import kotlinx.coroutines.CoroutineScope
 
 abstract class SlackcatModule {
     abstract suspend fun onInvoke(incomingChatMessage: IncomingChatMessage)
@@ -12,18 +13,19 @@ abstract class SlackcatModule {
 
     abstract fun help(): String
 
-    // Fix this.
-    internal lateinit var chatClient: ChatClient
+    lateinit var chatClient: ChatClient
 
-    fun sendMessage(message: OutgoingChatMessage) {
-        chatClient.sendMessage(message)
+    lateinit var coroutineScope: CoroutineScope
+
+    suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+        return chatClient.sendMessage(message)
     }
 
-    fun postHelpMessage(channelId: String) {
-        sendMessage(
+    suspend fun postHelpMessage(channelId: String): Result<Unit> {
+        return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                message = text(help())
+                message = text(help()),
             ),
         )
     }

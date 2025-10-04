@@ -1,53 +1,18 @@
 package com.slackcat.app
 
-import io.github.cdimascio.dotenv.dotenv
 import com.slackcat.SlackcatBot
-import com.slackcat.app.modules.bighips.BigHipsModule
-import com.slackcat.app.modules.cryptoprice.CryptoPriceModule
-import com.slackcat.app.modules.date.DateModule
-import com.slackcat.app.modules.deploybot.DeployBotModule
-import com.slackcat.app.modules.emoji.EmojiModule
-import com.slackcat.app.modules.jeopardy.JeopardyModule
-import com.slackcat.app.modules.emojisentence.EmojiSentenceModule
-import com.slackcat.app.modules.emojitext.EmojiTextModule
-import com.slackcat.app.modules.flip.FlipModule
-import com.slackcat.app.modules.framer.FrameModule
-import com.slackcat.app.modules.kudos.KudosModule
-import com.slackcat.app.modules.learn.LearnModule
-import com.slackcat.app.modules.ping.PingModule
-import com.slackcat.app.modules.pokecat.PokeCatModule
-import com.slackcat.app.modules.radar.RadarModule
-import com.slackcat.app.modules.status.StatusModule
-import com.slackcat.app.modules.summon.SummonModule
-import com.slackcat.app.modules.translate.TranslateModule
-import com.slackcat.app.modules.weather.WeatherModule
+import com.slackcat.app.di.appModule
+import com.slackcat.di.coreModule
 import com.slackcat.models.SlackcatModule
+import com.slackcat.network.NetworkClient
+import io.github.cdimascio.dotenv.dotenv
+import kotlinx.coroutines.CoroutineScope
+import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 class SlackcatApp {
-    val dataSourceFactory = DatasourceFactory()
-    val modules: Array<KClass<out SlackcatModule>> = arrayOf(
-        DateModule::class,
-        KudosModule::class,
-        PingModule::class,
-        StatusModule::class,
-        BigHipsModule::class,
-        TranslateModule::class,
-        PokeCatModule::class,
-        LearnModule::class,
-        SummonModule::class,
-        DeployBotModule::class,
-        EmojiModule::class,
-        WeatherModule::class,
-        JeopardyModule::class,
-        RadarModule::class,
-        EmojiSentenceModule::class,
-        EmojiTextModule::class,
-        CryptoPriceModule::class,
-        FlipModule::class,
-        FrameModule::class
-    )
-
     fun onCreate(args: String?) {
         // Load environment variables from .env file
         dotenv {
@@ -56,11 +21,26 @@ class SlackcatApp {
             ignoreIfMissing = true
         }
 
-        val slackcatBot = SlackcatBot(
-            modulesClasses = modules,
-            coroutineScope = SlackcatAppGraph.globalScope,
-            databaseConfig = dataSourceFactory.makeDatabaseSource(SlackcatAppGraph.ENV)
-        )
+        // Initialize Koin
+        startKoin {
+            modules(coreModule, appModule)
+        }
+
+        // Get dependencies from Koin
+        val koin = GlobalContext.get()
+        val coroutineScope = koin.get<CoroutineScope>()
+        val dataSource = koin.get<DataSource>()
+        val networkClient = koin.get<NetworkClient>()
+        val moduleClasses = koin.get<List<KClass<out SlackcatModule>>>()
+
+        // Create SlackcatBot with Koin dependencies
+        val slackcatBot =
+            SlackcatBot(
+                modulesClasses = moduleClasses.toTypedArray(),
+                coroutineScope = coroutineScope,
+                databaseConfig = dataSource,
+                networkClient = networkClient,
+            )
         slackcatBot.start(args)
     }
 }

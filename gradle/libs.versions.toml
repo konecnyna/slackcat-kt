@@ -14,6 +14,8 @@ mockito = "5.14.2"
 mockk = "1.13.13"
 mockito-inline = "4.5.1"
 junit = "5.10.0"
+koin = "3.5.6"
+ktlint = "12.1.2"
 
 [libraries]
 slack-api-client = { module = "com.slack.api:slack-api-client", version.ref = "slack" }
@@ -52,6 +54,8 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockk-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito-inline" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 [bundles]
 

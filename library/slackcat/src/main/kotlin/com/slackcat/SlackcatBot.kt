@@ -8,28 +8,32 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.database.DatabaseGraph
 import com.slackcat.internal.Router
+import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import kotlinx.coroutines.*
+import com.slackcat.network.NetworkClient
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import org.jetbrains.exposed.sql.Table
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.supervisorScope
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class SlackcatBot(
     val modulesClasses: Array<KClass<out SlackcatModule>>,
-    val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    val databaseConfig: DataSource
+    val coroutineScope: CoroutineScope,
+    val databaseConfig: DataSource,
+    val networkClient: NetworkClient? = null,
 ) {
     lateinit var chatEngine: ChatEngine
     lateinit var chatClient: ChatClient
     lateinit var router: Router
 
-    private val _events = MutableSharedFlow<SlackcatEvent>()
-    private val eventsFlow = _events.asSharedFlow()
-
+    private val events = MutableSharedFlow<SlackcatEvent>()
+    val eventsFlow = events.asSharedFlow()
 
     fun start(args: String?) {
         val modules = setupChatModule(args)
@@ -38,36 +42,50 @@ class SlackcatBot(
     }
 
     private fun setupChatModule(args: String?): List<SlackcatModule> {
-        chatEngine = if (!args.isNullOrEmpty()) {
-            CliChatEngine(args, coroutineScope)
-        } else {
-            SlackChatEngine(coroutineScope)
-        }
-
-        chatClient = object : ChatClient {
-            override fun sendMessage(message: OutgoingChatMessage) {
-                coroutineScope.launch { chatEngine.sendMessage(message) }
+        chatEngine =
+            if (!args.isNullOrEmpty()) {
+                CliChatEngine(args, coroutineScope)
+            } else {
+                SlackChatEngine(coroutineScope)
             }
-        }
 
-        val slackcatModules: List<SlackcatModule> = modulesClasses.map {
-            it.createInstance().also { module -> module.chatClient = chatClient }
-        }
+        chatClient =
+            object : ChatClient {
+                override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+                    return chatEngine.sendMessage(message)
+                }
+            }
 
-        router = Router(
-            modules = slackcatModules,
-            coroutineScope = coroutineScope,
-            eventsFlow = eventsFlow
-        )
+        val slackcatModules: List<SlackcatModule> =
+            modulesClasses.map {
+                it.createInstance().also { module ->
+                    module.chatClient = chatClient
+                    module.coroutineScope = coroutineScope
+                    if (module is NetworkModule && networkClient != null) {
+                        module.networkClient = networkClient
+                    }
+                }
+            }
 
-        chatEngine.connect { coroutineScope.launch { _events.emit(SlackcatEvent.STARTED) } }
+        router =
+            Router(
+                modules = slackcatModules,
+                coroutineScope = coroutineScope,
+                eventsFlow = eventsFlow,
+            )
+
+        chatEngine.connect { coroutineScope.launch { events.emit(SlackcatEvent.STARTED) } }
         return slackcatModules
     }
 
-    private fun connectDatabase(modules: List<SlackcatModule>, databaseConfig: DataSource) {
-        val databaseFeatures: List<StorageModule> = modules
-            .filter { it is StorageModule }
-            .map { it as StorageModule }
+    private fun connectDatabase(
+        modules: List<SlackcatModule>,
+        databaseConfig: DataSource,
+    ) {
+        val databaseFeatures: List<StorageModule> =
+            modules
+                .filter { it is StorageModule }
+                .map { it as StorageModule }
         val exposedTables = databaseFeatures.map { it.provideTables() }.flatMap { it }
         println(exposedTables)
         DatabaseGraph.connectDatabase(exposedTables, databaseConfig)

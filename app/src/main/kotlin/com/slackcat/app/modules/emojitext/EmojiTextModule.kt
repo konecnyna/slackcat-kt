@@ -1,6 +1,5 @@
 package com.slackcat.app.modules.emojitext
 
-
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.SlackcatModule
@@ -16,7 +15,7 @@ class EmojiTextModule : SlackcatModule() {
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     message = text(help()),
-                )
+                ),
             )
             return
         }
@@ -27,21 +26,27 @@ class EmojiTextModule : SlackcatModule() {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = text(output),
-            )
+            ),
         )
     }
 
-    private fun renderText(letters: List<String>, emojiOne: String, emojiTwo: String): String {
+    private fun renderText(
+        letters: List<String>,
+        emojiOne: String,
+        emojiTwo: String,
+    ): String {
         // Remove leading/trailing whitespace from dictionary patterns to avoid extra spaces
-        val cleanedDictionary = emojiDictionary.mapValues { (_, value) ->
-            value.trim()
-        }
+        val cleanedDictionary =
+            emojiDictionary.mapValues { (_, value) ->
+                value.trim()
+            }
 
         // Convert letters to their emoji representations and merge them
         var result = ""
-        val letterDisplays = letters.map { letter ->
-            getLetter(letter, cleanedDictionary)
-        }
+        val letterDisplays =
+            letters.map { letter ->
+                getLetter(letter, cleanedDictionary)
+            }
 
         // Initialize with first letter
         if (letterDisplays.isNotEmpty()) {
@@ -76,12 +81,18 @@ class EmojiTextModule : SlackcatModule() {
         return EmojiInput(textEmoji, bgEmoji, letterArray)
     }
 
-    private fun getLetter(letter: String, cleanedDictionary: Map<String, String>): String {
+    private fun getLetter(
+        letter: String,
+        cleanedDictionary: Map<String, String>,
+    ): String {
         // Get letter pattern from dictionary or default to space
         return cleanedDictionary[letter] ?: cleanedDictionary["space"] ?: ""
     }
 
-    private fun mergeLines(line: String, letter: String): String {
+    private fun mergeLines(
+        line: String,
+        letter: String,
+    ): String {
         if (line.isEmpty()) return letter
 
         val lineArray = line.split("\n")
@@ -99,19 +110,26 @@ class EmojiTextModule : SlackcatModule() {
     }
 
     // Extension function to pad a list to specified size
-    private fun <T> List<T>.padTo(size: Int, padding: T): List<T> {
-        return if (this.size >= size) this
-        else this + List(size - this.size) { padding }
+    private fun <T> List<T>.padTo(
+        size: Int,
+        padding: T,
+    ): List<T> {
+        return if (this.size >= size) {
+            this
+        } else {
+            this + List(size - this.size) { padding }
+        }
     }
 
-    override fun help(): String = buildMessage {
-        title("EmojiText Help")
-        text("Convert text to emoji patterns")
-        text("Usage: ?emoji-text :emoji_for_letters: [:emoji_for_background:] your text")
-        text("Examples:")
-        text("  ?emoji-text :fire: :black_large_square: Hello")
-        text("  ?emoji-text :heart: Hello World")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("EmojiText Help")
+            text("Convert text to emoji patterns")
+            text("Usage: ?emoji-text :emoji_for_letters: [:emoji_for_background:] your text")
+            text("Examples:")
+            text("  ?emoji-text :fire: :black_large_square: Hello")
+            text("  ?emoji-text :heart: Hello World")
+        }
 
     override fun provideCommand(): String = "emoji-text"
 }
@@ -119,5 +137,5 @@ class EmojiTextModule : SlackcatModule() {
 data class EmojiInput(
     val emojiOne: String,
     val emojiTwo: String,
-    val letterArray: List<String>
+    val letterArray: List<String>,
 )
