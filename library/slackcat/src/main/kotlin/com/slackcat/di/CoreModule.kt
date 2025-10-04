@@ -1,7 +1,10 @@
 package com.slackcat.di
 
+import com.slackcat.Engine
 import com.slackcat.common.SlackcatConfig
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.network.NetworkClient
+import com.slackcat.network.NetworkGraph
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,6 +23,14 @@ val coreModule = module {
         named("eventsFlow"),
     ) { get<MutableSharedFlow<SlackcatEvent>>().asSharedFlow() }
 
-    // Slackcat configuration
-    single<SlackcatConfig> { SlackcatConfig() }
+    // Engine configuration - default from ENV or can be overridden
+    single<Engine> {
+        when (System.getenv("ENGINE")) {
+            "SLACK" -> Engine.Slack
+            else -> Engine.Cli
+        }
+    }
+
+    // NetworkClient - can be overridden
+    single<NetworkClient> { NetworkGraph.networkClient }
 }

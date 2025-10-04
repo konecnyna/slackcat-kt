@@ -29,8 +29,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
             return
         }
 
-        val message =
-            when (event) {
+        val message = when (event) {
                 SlackcatEvent.STARTED -> "I've started! MEOW!"
             }
 

@@ -30,4 +30,6 @@ dependencies {
     api(projects.library.slackcat.core.database)
     api(projects.library.slackcat.core.common)
     api(projects.library.slackcat.core.network)
+
+    implementation("org.apache.commons:commons-dbcp2:2.13.0")
 }

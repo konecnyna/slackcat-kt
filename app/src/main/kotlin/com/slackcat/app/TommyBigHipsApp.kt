@@ -42,23 +42,3 @@ class SlackcatApp {
         slackcatBot.start(args)
     }
 }
-
-
-val tommyBigHipsConfig = SlackcatConfig(
-    botNameProvider = {
-        when (LocalDate.now().month) {
-            Month.DECEMBER -> "Santa Cat 🎅"
-            Month.OCTOBER -> "Spooky Cat 👻"
-            Month.JULY -> "Freedom Cat 🇺🇸"
-            else -> SlackcatAppDefaults.DEFAULT_BOT_NAME
-        }
-    },
-    botIconProvider = {
-        when (LocalDate.now().month) {
-            Month.DECEMBER -> BotIcon.BotEmojiIcon(":santa:")
-            Month.OCTOBER -> BotIcon.BotEmojiIcon(":ghost:")
-            Month.JULY -> BotIcon.BotEmojiIcon(":flag-us:")
-            else -> BotIcon.BotImageIcon(SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON)
-        }
-    }
-)

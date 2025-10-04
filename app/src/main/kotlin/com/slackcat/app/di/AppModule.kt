@@ -1,18 +1,16 @@
 package com.slackcat.app.di
 
-import com.slackcat.app.DatasourceFactory
-import com.slackcat.app.Environment
+import com.slackcat.DefaultDatasourceFactory
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.chat.models.BotIcon
+import com.slackcat.common.DatabaseConfig
 import com.slackcat.common.SlackcatAppDefaults
 import com.slackcat.common.SlackcatConfig
 import com.slackcat.modules.simple.emojitext.EmojiTextModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.SlackcatModules
-import com.slackcat.network.NetworkClient
-import com.slackcat.network.NetworkGraph
 import org.koin.dsl.module
 import java.time.LocalDate
 import java.time.Month
@@ -20,24 +18,13 @@ import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 val appModule = module {
-        // Environment configuration
-        single<Environment> {
-            when (System.getenv("ENV")) {
-                "PRODUCTION" -> Environment.Production
-                else -> Environment.Development
-            }
-        }
-
         // DataSource factory
-        single { DatasourceFactory() }
+        single { DefaultDatasourceFactory() }
 
-        // DataSource - environment-specific
+        // DataSource - engine-specific
         single<DataSource> {
-            get<DatasourceFactory>().makeDatabaseSource(get())
+            get<DefaultDatasourceFactory>().makeDatabaseSource(get(), get<SlackcatConfig>().databaseConfig)
         }
-
-        // NetworkClient
-        single<NetworkClient> { NetworkGraph.networkClient }
 
         // Module classes - combining library modules with app-specific modules
         single<List<KClass<out SlackcatModule>>> {
@@ -50,7 +37,7 @@ val appModule = module {
                 )
         }
 
-        // Override SlackcatConfig with custom date-based bot names/icons
+        // SlackcatConfig with custom date-based bot names/icons and database config
         single<SlackcatConfig> {
             SlackcatConfig(
                 botNameProvider = {
@@ -68,7 +55,13 @@ val appModule = module {
                         Month.JULY -> BotIcon.BotEmojiIcon(":flag-us:")
                         else -> BotIcon.BotImageIcon(SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON)
                     }
-                }
+                },
+                databaseConfig = DatabaseConfig(
+                    url = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432",
+                    name = System.getenv("DATABASE_NAME") ?: "slackcat",
+                    username = System.getenv("DATABASE_USER") ?: "",
+                    password = System.getenv("DATABASE_PASSWORD") ?: ""
+                )
             )
         }
     }
