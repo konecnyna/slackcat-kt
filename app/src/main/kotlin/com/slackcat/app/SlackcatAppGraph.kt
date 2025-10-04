@@ -12,12 +12,11 @@ object SlackcatAppGraph {
 
     val networkClient = NetworkGraph.networkClient
 
-    val ENV = when (System.getenv("ENV")) {
-        "PRODUCTION" ->Environment.Production
-        else -> Environment.Development
-    }
+    val ENV =
+        when (System.getenv("ENV")) {
+            "PRODUCTION" -> Environment.Production
+            else -> Environment.Development
+        }
 }
-
-
 
 enum class Environment { Production, Development }

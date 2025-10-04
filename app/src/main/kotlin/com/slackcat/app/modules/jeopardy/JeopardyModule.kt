@@ -34,7 +34,10 @@ class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
                 channelId = incomingChatMessage.channelId,
                 message = message,
                 botName = "Alex Trebek",
-                botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg"),
+                botIcon =
+                    BotIcon.BotImageIcon(
+                        "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg",
+                    ),
             ),
         )
     }
@@ -43,9 +46,11 @@ class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
         return buildRichMessage {
             divider()
             section(
-                text = "*The category is '${question.category}' for $${question.value}:* \n ${question.question} \n Question ID: ${question.id}",
+                text =
+                    "*The category is '${question.category}' for $${question.value}:* \n " +
+                        "${question.question} \n Question ID: ${question.id}",
                 imageUrl = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
-                altText = "alex quebec"
+                altText = "alex quebec",
             )
             divider()
         }
@@ -53,24 +58,29 @@ class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
 
     override fun provideCommand(): String = "jeopardy"
 
-    override fun help(): String = buildMessage {
-        title("JeopardyModule Help")
-        text("Get a question using ?jeopardy <value> (ex ?jeopardy 300) \n" +
-                "Answer a question using ?jeopardy-answer <questionId> <your answer> \n" +
-                "Check your current points with ?jeopardy-points")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("JeopardyModule Help")
+            text(
+                "Get a question using ?jeopardy <value> (ex ?jeopardy 300) \n" +
+                    "Answer a question using ?jeopardy-answer <questionId> <your answer> \n" +
+                    "Check your current points with ?jeopardy-points",
+            )
+        }
 
     override fun provideTables() = listOf(JeopardyDAO.JeopardyQuestionsTable, JeopardyDAO.JeopardyScoreTable)
+
     override fun aliases(): List<String> = JeopardyAliases.entries.map { it.alias }
 }
 
-
 enum class JeopardyAliases(val alias: String) {
     Answer("jeopardy-answer"),
-    Points("jeopardy-points");
+    Points("jeopardy-points"),
+    ;
 
     companion object {
         private val aliasMap = entries.associateBy { it.alias }
+
         fun fromAlias(alias: String): JeopardyAliases? {
             return aliasMap[alias.lowercase()]
         }

@@ -20,15 +20,16 @@ class DatasourceFactory {
 
     private fun makePostgresSource(): DataSource {
         val databaseUrl = "${System.getenv("DATABASE_URL") ?: "jdbc:sqlite:"}/${System.getenv("DATABASE_NAME")}"
-        val dataSource = BasicDataSource().apply {
-            url = databaseUrl
-            username = System.getenv("DATABASE_USER") ?: ""
-            password = System.getenv("DATABASE_PASSWORD") ?: ""
-            driverClassName = "org.postgresql.Driver"
-            maxTotal = 10
-            maxIdle = 5
-            minIdle = 2
-        }
+        val dataSource =
+            BasicDataSource().apply {
+                url = databaseUrl
+                username = System.getenv("DATABASE_USER") ?: ""
+                password = System.getenv("DATABASE_PASSWORD") ?: ""
+                driverClassName = "org.postgresql.Driver"
+                maxTotal = 10
+                maxIdle = 5
+                minIdle = 2
+            }
         return dataSource
     }
 }

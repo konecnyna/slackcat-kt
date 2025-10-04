@@ -21,29 +21,33 @@ class SummonModule : SlackcatModule(), NetworkModule {
             return
         }
 
-        val images = summonClient.getHtml(
-            incomingChatMessage.userText,
-            incomingChatMessage.command == "gif"
-        ).take(10)
+        val images =
+            summonClient.getHtml(
+                incomingChatMessage.userText,
+                incomingChatMessage.command == "gif",
+            ).take(10)
 
-        val imageUrl = when {
-            images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
-            incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image
-            else -> images[0].image
-        }
+        val imageUrl =
+            when {
+                images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
+                incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image
+                else -> images[0].image
+            }
 
-        val result = sendMessage(
-            OutgoingChatMessage(
-                channelId = incomingChatMessage.channelId,
-                message = buildRichMessage {
-                    image(
-                        imageUrl = imageUrl,
-                        altText = "summon image: ${incomingChatMessage.userText}"
-                    )
-                    context("Source: $imageUrl")
-                }
+        val result =
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    message =
+                        buildRichMessage {
+                            image(
+                                imageUrl = imageUrl,
+                                altText = "summon image: ${incomingChatMessage.userText}",
+                            )
+                            context("Source: $imageUrl")
+                        },
+                ),
             )
-        )
 
         result.fold(
             onSuccess = {
@@ -54,28 +58,29 @@ class SummonModule : SlackcatModule(), NetworkModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        message = buildRichMessage {
-                            text("❌ Failed to send summon message: ${error.message}")
-                            text("Original request: ${incomingChatMessage.userText}")
-                        }
-                    )
+                        message =
+                            buildRichMessage {
+                                text("❌ Failed to send summon message: ${error.message}")
+                                text("Original request: ${incomingChatMessage.userText}")
+                            },
+                    ),
                 )
-            }
+            },
         )
     }
 
     override fun provideCommand(): String = "summon"
+
     override fun aliases(): List<String> = SummonModuleAliases.entries.map { it.alias }
 
-    override fun help(): String = buildMessage {
-        title("Summon Help")
-        text("Summon an image from Google images. Use with caution...")
-        text("Usage: ?summon slackcat")
-    }
-
+    override fun help(): String =
+        buildMessage {
+            title("Summon Help")
+            text("Summon an image from Google images. Use with caution...")
+            text("Usage: ?summon slackcat")
+        }
 }
 
-
 enum class SummonModuleAliases(val alias: String) {
-    Gif("gif")
+    Gif("gif"),
 }

@@ -22,32 +22,34 @@ class StatusModule : SlackcatModule(), NetworkModule {
 
         val response = statusClient.fetch(statusService)
 
-        val message = response?.let {
-            OutgoingChatMessage(
+        val message =
+            response?.let {
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    message = text(response.toMessage()),
+                )
+            } ?: OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(response.toMessage())
+                message = text("Got en error when trying fetch status..."),
             )
-        } ?: OutgoingChatMessage(
-            channelId = incomingChatMessage.channelId,
-            message = text("Got en error when trying fetch status...")
-        )
 
         sendMessage(message)
     }
 
     override fun provideCommand(): String = "status"
 
-    override fun help(): String = buildMessage {
-        title("StatusModule Help")
-        text("Quickly check slacks status page with ?status command.")
-        text("Usage: ?status --github")
+    override fun help(): String =
+        buildMessage {
+            title("StatusModule Help")
+            text("Quickly check slacks status page with ?status command.")
+            text("Usage: ?status --github")
 
-        val entries =
-            StatusClient.Service.entries
-                .map { "${it.label} (${it.arguments.joinToString(", ")})" }
-                .joinToString(", ")
-        text("Availiable services: $entries")
-    }
+            val entries =
+                StatusClient.Service.entries
+                    .map { "${it.label} (${it.arguments.joinToString(", ")})" }
+                    .joinToString(", ")
+            text("Availiable services: $entries")
+        }
 
     private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
         return StatusClient.Service.entries.find { service ->

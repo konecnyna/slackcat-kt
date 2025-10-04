@@ -23,19 +23,20 @@ class CryptoPriceModule() : SlackcatModule(), NetworkModule {
         }
 
         val cryptoPrice = cryptoPriceClient.getPrice(userText)
-        val message = if (cryptoPrice != null) {
-            // Format the price with commas and preserve precision
-            val formattedPrice = formatPrice(cryptoPrice.price)
-            "The current price of ${cryptoPrice.ticker}: $$formattedPrice"
-        } else {
-            "Could not fetch the price for $userText. Please ensure the ticker symbol is correct."
-        }
+        val message =
+            if (cryptoPrice != null) {
+                // Format the price with commas and preserve precision
+                val formattedPrice = formatPrice(cryptoPrice.price)
+                "The current price of ${cryptoPrice.ticker}: $$formattedPrice"
+            } else {
+                "Could not fetch the price for $userText. Please ensure the ticker symbol is correct."
+            }
 
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(message)
-            )
+                message = text(message),
+            ),
         )
     }
 
@@ -49,12 +50,13 @@ class CryptoPriceModule() : SlackcatModule(), NetworkModule {
         }
     }
 
-    override fun help(): String = buildMessage {
-        title("CryptoPriceModule Help")
-        text("Fetch current cryptocurrency prices.")
-        text("*Usage:* ?crypto <ticker>")
-        text("Example: `?crypto btc` to get the price of Bitcoin.")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("CryptoPriceModule Help")
+            text("Fetch current cryptocurrency prices.")
+            text("*Usage:* ?crypto <ticker>")
+            text("Example: `?crypto btc` to get the price of Bitcoin.")
+        }
 
     override fun provideCommand(): String = "crypto"
 }

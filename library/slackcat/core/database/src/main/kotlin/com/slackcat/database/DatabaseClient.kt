@@ -7,7 +7,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import javax.sql.DataSource
 
 class DatabaseClient {
-    fun initialize(storageClients: List<Table>, databaseConfig: DataSource) {
+    fun initialize(
+        storageClients: List<Table>,
+        databaseConfig: DataSource,
+    ) {
         Database.connect(databaseConfig)
         transaction {
             storageClients.forEach { SchemaUtils.create(it) }

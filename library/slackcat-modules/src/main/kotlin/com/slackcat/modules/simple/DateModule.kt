@@ -17,7 +17,7 @@ class DateModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text("Currently, it's $dateString where I am")
+                message = text("Currently, it's $dateString where I am"),
             ),
         )
     }

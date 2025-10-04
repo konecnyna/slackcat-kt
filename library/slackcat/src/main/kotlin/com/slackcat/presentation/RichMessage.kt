@@ -1,8 +1,10 @@
 package com.slackcat.presentation
 
 import com.slackcat.common.RichTextMessage
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class RichTextMessageBuilder {
     private val blocks = mutableListOf<Block>()
@@ -11,29 +13,39 @@ class RichTextMessageBuilder {
         blocks.add(Block.Divider)
     }
 
-    fun section(text: String, imageUrl: String? = null, altText: String? = null) {
-        val section = Block.Section(
-            text = TextObject(text = text, type = "mrkdwn"),
-            accessory = imageUrl?.let { Accessory(type = "image", image_url = it, alt_text = altText ?: "") }
-        )
+    fun section(
+        text: String,
+        imageUrl: String? = null,
+        altText: String? = null,
+    ) {
+        val section =
+            Block.Section(
+                text = TextObject(text = text, type = "mrkdwn"),
+                accessory = imageUrl?.let { Accessory(type = "image", image_url = it, alt_text = altText ?: "") },
+            )
         blocks.add(section)
     }
 
     fun text(text: String) {
-        val section = Block.Section(
-            text = TextObject(text = text, type = "mrkdwn"),
-        )
+        val section =
+            Block.Section(
+                text = TextObject(text = text, type = "mrkdwn"),
+            )
         blocks.add(section)
     }
 
     fun context(text: String) {
-        val section = Block.Context(
-            listOf(TextObject(text = text, type = "mrkdwn")),
-        )
+        val section =
+            Block.Context(
+                listOf(TextObject(text = text, type = "mrkdwn")),
+            )
         blocks.add(section)
     }
 
-    fun image(imageUrl: String, altText: String) {
+    fun image(
+        imageUrl: String,
+        altText: String,
+    ) {
         blocks.add(Block.Image(image_url = imageUrl, alt_text = altText))
     }
 
@@ -50,9 +62,6 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
 
 inline fun text(value: String) = buildRichMessage { section(value) }
 
-
-
-
 // Define a structure to represent blocks
 @Serializable
 data class RichMessage(val blocks: List<Block>)
@@ -67,22 +76,21 @@ sealed class Block {
     @SerialName("section")
     data class Section(
         val text: TextObject,
-        val accessory: Accessory? = null
+        val accessory: Accessory? = null,
     ) : Block()
 
     @Serializable
     @SerialName("image")
     data class Image(
         val image_url: String,
-        val alt_text: String
+        val alt_text: String,
     ) : Block()
-
 
     @Serializable
     @SerialName("caption")
     data class Context(
-        val elements: List<TextObject>
-    ): Block()
+        val elements: List<TextObject>,
+    ) : Block()
 }
 
 @Serializable

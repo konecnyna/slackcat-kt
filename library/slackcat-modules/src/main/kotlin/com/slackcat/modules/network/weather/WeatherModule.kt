@@ -13,22 +13,30 @@ class WeatherModule : SlackcatModule(), NetworkModule {
 
     private val weatherClient by lazy { WeatherClient(networkClient) }
     private val weatherMessageFactory = WeatherMessageFactory()
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         when (val result = weatherClient.getForecast(incomingChatMessage.userText)) {
-            null -> sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    message = text("Could not find location ${incomingChatMessage.userText}.\nVerify it <https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\nYou may need to use a bigger city.")
+            null ->
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = incomingChatMessage.channelId,
+                        message =
+                            text(
+                                "Could not find location ${incomingChatMessage.userText}.\n" +
+                                    "Verify it " +
+                                    "<https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\n" +
+                                    "You may need to use a bigger city.",
+                            ),
+                    ),
                 )
-            )
 
             else -> {
                 val richMessage = weatherMessageFactory.makeMessage(result)
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        message = text(richMessage)
-                    )
+                        message = text(richMessage),
+                    ),
                 )
             }
         }
@@ -36,9 +44,10 @@ class WeatherModule : SlackcatModule(), NetworkModule {
 
     override fun provideCommand(): String = "weather"
 
-    override fun help(): String = buildMessage {
-        title("WeatherModule Help")
-        text("This module is will give you weather data from NWS")
-        text("Usage: ?weather <zipcode>")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("WeatherModule Help")
+            text("This module is will give you weather data from NWS")
+            text("Usage: ?weather <zipcode>")
+        }
 }

@@ -6,16 +6,13 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-
 application {
     mainClass.set("com.slackcat.app.ApplicationKt")
 }
 
-
 repositories {
     mavenCentral()
 }
-
 
 slackcat {
     features {
@@ -41,15 +38,12 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 }
 
-
 tasks.jar {
     manifest {
         attributes["Main-Class"] = application.mainClass
         attributes["Implementation-Version"] = "0.0.1" // Change to project version
     }
 }
-
-
 
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
     archiveBaseName.set("slackcat")
@@ -59,8 +53,6 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     }
 }
 
-
 tasks.test {
     useJUnitPlatform()
 }
-

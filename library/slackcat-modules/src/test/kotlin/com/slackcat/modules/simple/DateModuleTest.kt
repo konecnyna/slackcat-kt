@@ -31,11 +31,12 @@ class DateModuleTest {
 
         coEvery { mockChatClient.sendMessage(any()) } returns Result.success(Unit)
     }
+
     private fun createTestMessage(
         command: String,
         userText: String = "",
         channelId: String = "channel123",
-        arguments: List<String> = emptyList()
+        arguments: List<String> = emptyList(),
     ) = IncomingChatMessage(
         arguments = arguments,
         command = command,
@@ -43,9 +44,8 @@ class DateModuleTest {
         chatUser = ChatUser("user123"),
         messageId = "msg123",
         rawMessage = "?$command $userText",
-        userText = userText
+        userText = userText,
     )
-
 
     @Test
     fun `provideCommand returns date`() {
@@ -66,34 +66,44 @@ class DateModuleTest {
     }
 
     @Test
-    fun `onInvoke sends current date message`() = runTest {
-        val incomingMessage = createTestMessage("date", "", arguments = emptyList()
-        )
+    fun `onInvoke sends current date message`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "date",
+                    "",
+                    arguments = emptyList(),
+                )
 
-        dateModule.onInvoke(incomingMessage)
+            dateModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertEquals("channel123", sentMessage.channelId)
-        assertTrue(sentMessage.message.toString().contains("Currently, it's"))
-    }
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
+            assertTrue(sentMessage.message.toString().contains("Currently, it's"))
+        }
 
     @Test
-    fun `onInvoke message contains date components`() = runTest {
-        val incomingMessage = createTestMessage("date", "", arguments = emptyList()
-        )
+    fun `onInvoke message contains date components`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "date",
+                    "",
+                    arguments = emptyList(),
+                )
 
-        dateModule.onInvoke(incomingMessage)
+            dateModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        val messageText = sentMessage.message.toString()
+            val sentMessage = messageSlot.captured
+            val messageText = sentMessage.message.toString()
 
-        // The message should contain time-related terms
-        assertTrue(messageText.contains("Currently") || messageText.contains("it's"))
-    }
+            // The message should contain time-related terms
+            assertTrue(messageText.contains("Currently") || messageText.contains("it's"))
+        }
 }

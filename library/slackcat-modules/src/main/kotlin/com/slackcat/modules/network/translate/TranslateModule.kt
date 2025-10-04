@@ -4,8 +4,8 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
-import com.slackcat.modules.FunTranslationApiResponse
 import com.slackcat.modules.ErrorResponseFunTranslation
+import com.slackcat.modules.FunTranslationApiResponse
 import com.slackcat.modules.SuccessResponseFunTranslation
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
@@ -40,7 +40,7 @@ class TranslateModule : SlackcatModule(), NetworkModule {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message = text(outgoingText)
+                    message = text(outgoingText),
                 ),
             )
         }
@@ -51,11 +51,12 @@ class TranslateModule : SlackcatModule(), NetworkModule {
         translationType: String,
     ): FunTranslationApiResponse? {
         return runCatching {
-            val response = networkClient.post(
-                "https://api.funtranslations.com/translate/$translationType",
-                """{"text":"$text"}""",
-                emptyMap()
-            )
+            val response =
+                networkClient.post(
+                    "https://api.funtranslations.com/translate/$translationType",
+                    """{"text":"$text"}""",
+                    emptyMap(),
+                )
             deserialize(response)
         }.getOrNull()
     }

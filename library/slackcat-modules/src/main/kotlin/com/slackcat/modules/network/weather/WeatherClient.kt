@@ -1,20 +1,20 @@
 package com.slackcat.modules.network.weather
 
 import com.slackcat.network.NetworkClient
-import kotlinx.serialization.Serializable
 
 class WeatherClient(private val networkClient: NetworkClient) {
     private val zipToLocationDataCache = mutableMapOf<String, LocationData>()
 
     suspend fun getForecast(zipCode: String): CurrentForecast? {
         // Retrieve location data from cache or fetch if not available
-        val locationData = zipToLocationDataCache[zipCode] ?: run {
-            val (locationName, latitude, longitude) = getLatLonFromZip(zipCode) ?: return null
-            val gridPoints = getGridPoints(latitude, longitude) ?: return null
-            LocationData(locationName, latitude, longitude, gridPoints).also {
-                zipToLocationDataCache[zipCode] = it
+        val locationData =
+            zipToLocationDataCache[zipCode] ?: run {
+                val (locationName, latitude, longitude) = getLatLonFromZip(zipCode) ?: return null
+                val gridPoints = getGridPoints(latitude, longitude) ?: return null
+                LocationData(locationName, latitude, longitude, gridPoints).also {
+                    zipToLocationDataCache[zipCode] = it
+                }
             }
-        }
 
         val forecast = fetchForecast(locationData.gridPoints) ?: return null
         val currentPeriod = forecast.properties.periods.firstOrNull() ?: return null
@@ -28,7 +28,7 @@ class WeatherClient(private val networkClient: NetworkClient) {
             windDirection = currentPeriod.windDirection,
             shortForecast = currentPeriod.shortForecast,
             detailedForecast = currentPeriod.detailedForecast,
-            iconUrl = currentPeriod.icon
+            iconUrl = currentPeriod.icon,
         )
     }
 
@@ -42,7 +42,10 @@ class WeatherClient(private val networkClient: NetworkClient) {
         }.getOrNull()
     }
 
-    private suspend fun getGridPoints(latitude: Double, longitude: Double): GridPoints? {
+    private suspend fun getGridPoints(
+        latitude: Double,
+        longitude: Double,
+    ): GridPoints? {
         val url = "https://api.weather.gov/points/$latitude,$longitude"
         return runCatching {
             val pointResponse = networkClient.fetch(url, PointResponse.serializer(), emptyMap())
@@ -55,11 +58,12 @@ class WeatherClient(private val networkClient: NetworkClient) {
     private suspend fun fetchForecast(gridPoints: GridPoints): ForecastResponse? {
         val url = gridPoints.forecast
         return runCatching {
-            val result = networkClient.fetch(
-                url = url,
-                serializer = ForecastResponse.serializer(),
-                headers = mapOf("User-Agent" to "SlackcatApp")
-            )
+            val result =
+                networkClient.fetch(
+                    url = url,
+                    serializer = ForecastResponse.serializer(),
+                    headers = mapOf("User-Agent" to "SlackcatApp"),
+                )
             println(result)
             result
         }.getOrNull()

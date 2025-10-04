@@ -42,7 +42,6 @@ tasks.register("ktlint", JavaExec::class) {
         "--reporter=checkstyle,output=${layout.buildDirectory.asFile.get().absolutePath}/reports/ktlint/ktlint.xml",
         "--color",
         "--editorconfig=${configFile.get().asFile.absolutePath}",
-
     ) + patterns
 }
 

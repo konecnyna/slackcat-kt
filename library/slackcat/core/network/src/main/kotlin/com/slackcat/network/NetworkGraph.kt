@@ -24,7 +24,10 @@ object NetworkGraph {
                     logger =
                         object : Logger {
                             override fun log(message: String) {
-                                println("\n--------NetworkRequest-----------\n$message\n------------EndRequest-----------\n")
+                                val msg =
+                                    "\n--------NetworkRequest-----------\n$message\n" +
+                                        "------------EndRequest-----------\n"
+                                println(msg)
                             }
                         }
                     level = LogLevel.BODY

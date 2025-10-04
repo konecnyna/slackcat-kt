@@ -2,7 +2,6 @@ package com.slackcat.modules.network.weather
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class ForecastResponse(val properties: Properties)
 
@@ -18,7 +17,7 @@ data class Period(
     val shortForecast: String,
     val windSpeed: String,
     val windDirection: String,
-    val detailedForecast: String
+    val detailedForecast: String,
 )
 
 @Serializable
@@ -44,13 +43,12 @@ data class CurrentForecast(
     val windDirection: String,
     val shortForecast: String,
     val detailedForecast: String,
-    val iconUrl: String
+    val iconUrl: String,
 )
-
 
 data class LocationData(
     val locationName: String,
     val latitude: Double,
     val longitude: Double,
-    val gridPoints: GridPoints
+    val gridPoints: GridPoints,
 )

@@ -14,33 +14,35 @@ import org.koin.dsl.module
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
-val appModule = module {
-    // Environment configuration
-    single<Environment> {
-        when (System.getenv("ENV")) {
-            "PRODUCTION" -> Environment.Production
-            else -> Environment.Development
+val appModule =
+    module {
+        // Environment configuration
+        single<Environment> {
+            when (System.getenv("ENV")) {
+                "PRODUCTION" -> Environment.Production
+                else -> Environment.Development
+            }
+        }
+
+        // DataSource factory
+        single { DatasourceFactory() }
+
+        // DataSource - environment-specific
+        single<DataSource> {
+            get<DatasourceFactory>().makeDatabaseSource(get())
+        }
+
+        // NetworkClient
+        single<NetworkClient> { NetworkGraph.networkClient }
+
+        // Module classes - combining library modules with app-specific modules
+        single<List<KClass<out SlackcatModule>>> {
+            SlackcatModules.all +
+                listOf(
+                    BigHipsModule::class,
+                    DeployBotModule::class,
+                    EmojiTextModule::class,
+                    JeopardyModule::class,
+                )
         }
     }
-
-    // DataSource factory
-    single { DatasourceFactory() }
-
-    // DataSource - environment-specific
-    single<DataSource> {
-        get<DatasourceFactory>().makeDatabaseSource(get())
-    }
-
-    // NetworkClient
-    single<NetworkClient> { NetworkGraph.networkClient }
-
-    // Module classes - combining library modules with app-specific modules
-    single<List<KClass<out SlackcatModule>>> {
-        SlackcatModules.all + listOf(
-            BigHipsModule::class,
-            DeployBotModule::class,
-            EmojiTextModule::class,
-            JeopardyModule::class
-        )
-    }
-}

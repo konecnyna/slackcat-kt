@@ -18,9 +18,10 @@ class KudosDAO {
         return dbUpsert(
             table = KudosTable,
             keys = arrayOf(KudosTable.userId),
-            onUpdate = listOf(
-                KudosTable.count to (KudosTable.count + 1)
-            ),
+            onUpdate =
+                listOf(
+                    KudosTable.count to (KudosTable.count + 1),
+                ),
             insertBody = {
                 it[KudosTable.userId] = userId
                 it[KudosTable.count] = 1
@@ -32,7 +33,7 @@ class KudosDAO {
                     userId = resultRow[KudosTable.userId],
                     count = resultRow[KudosTable.count],
                 )
-            }
+            },
         )
     }
 }

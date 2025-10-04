@@ -10,16 +10,17 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
     val alexTrebekish = "https://emoji.slack-edge.com/T07UUET6K51/alex-trebekish/5a325219e8701914.png"
     val alexTrebek = "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg"
     val jeopardy = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg"
-    suspend fun handleAliases(
-        incomingChatMessage: IncomingChatMessage
-    ): OutgoingChatMessage? {
-        val alias = JeopardyAliases.fromAlias(incomingChatMessage.command)
-            ?: return null
 
-        val message = when (alias) {
-            JeopardyAliases.Answer -> handleAnswer(incomingChatMessage)
-            JeopardyAliases.Points -> handlePoints(incomingChatMessage)
-        }
+    suspend fun handleAliases(incomingChatMessage: IncomingChatMessage): OutgoingChatMessage? {
+        val alias =
+            JeopardyAliases.fromAlias(incomingChatMessage.command)
+                ?: return null
+
+        val message =
+            when (alias) {
+                JeopardyAliases.Answer -> handleAnswer(incomingChatMessage)
+                JeopardyAliases.Points -> handlePoints(incomingChatMessage)
+            }
 
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
@@ -42,12 +43,14 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
                 jeopardyDAO.updateUserScore(message.chatUser.toString(), questionPoints, true)
             }
             return jeopardize("CORRECT the answer is ${questionRow?.answer} for ${questionRow?.value}", jeopardy)
-
         } else {
             if (questionPoints != null) {
                 jeopardyDAO.updateUserScore(message.chatUser.toString(), questionPoints, false)
             }
-            return jeopardize("Wrong!!! What an idiot!: the answer is ${questionRow?.answer} for ${questionRow?.value}", alexTrebekish)
+            return jeopardize(
+                "Wrong!!! What an idiot!: the answer is ${questionRow?.answer} for ${questionRow?.value}",
+                alexTrebekish,
+            )
         }
     }
 
@@ -57,21 +60,25 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
             return jeopardize("No score available", alexTrebekish)
         } else {
             return jeopardize(
-                    "*<@${extractUserId(message.chatUser.toString())}> score:* \n " +
+                "*<@${extractUserId(message.chatUser.toString())}> score:* \n " +
                     "*Points:* ${user.points} \n " +
                     "*Correct:* ${user.right} \n " +
-                    "*Wrong:* ${user.wrong}", jeopardy
+                    "*Wrong:* ${user.wrong}",
+                jeopardy,
             )
         }
     }
 
-    private fun jeopardize(message: String, imageUrl: String): RichTextMessage {
+    private fun jeopardize(
+        message: String,
+        imageUrl: String,
+    ): RichTextMessage {
         return buildRichMessage {
             divider()
             section(
                 text = message,
                 imageUrl = imageUrl,
-                altText = "alex quebec"
+                altText = "alex quebec",
             )
             divider()
         }
@@ -82,7 +89,6 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
 
         val matchResult = regex.find(userText)
         return matchResult?.groups?.get(1)?.value
-
     }
 
     private fun extractAnswer(userText: String): String? {

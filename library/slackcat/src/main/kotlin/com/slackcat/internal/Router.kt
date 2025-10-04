@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 class Router(
     private val modules: List<SlackcatModule>,
     private val coroutineScope: CoroutineScope,
-    private val eventsFlow: SharedFlow<SlackcatEvent>
+    private val eventsFlow: SharedFlow<SlackcatEvent>,
 ) {
     private val featureCommandMap: Map<String, SlackcatModule> by lazy {
         buildMap {
@@ -46,7 +46,6 @@ class Router(
         }
     }
 
-
     private val eventModules: List<SlackcatEventsModule> by lazy {
         featureCommandMap
             .toList()
@@ -55,14 +54,13 @@ class Router(
     }
 
     private val unhandledCommandModuleModules: List<UnhandledCommandModule>
-        get() = modules.filter { it is UnhandledCommandModule }
-            .map { it as UnhandledCommandModule }
-
+        get() =
+            modules.filter { it is UnhandledCommandModule }
+                .map { it as UnhandledCommandModule }
 
     init {
         subscribeToEvents()
     }
-
 
     /**
      * true -> message was handled by module
@@ -74,8 +72,9 @@ class Router(
             return false
         }
 
-        val feature = featureCommandMap[command] // Primary commands take precedence
-            ?: aliasCommandMap[command] // Check alias modules next
+        val feature =
+            featureCommandMap[command] // Primary commands take precedence
+                ?: aliasCommandMap[command] // Check alias modules next
 
         if (feature == null) {
             var handled = false
@@ -93,9 +92,10 @@ class Router(
                     feature.postHelpMessage(incomingMessage.channelId)
                 }
 
-                else -> withContext(Dispatchers.IO) {
-                    feature.onInvoke(incomingMessage)
-                }
+                else ->
+                    withContext(Dispatchers.IO) {
+                        feature.onInvoke(incomingMessage)
+                    }
             }
             true
         } catch (exception: Exception) {
@@ -109,11 +109,12 @@ class Router(
         incomingMessage: IncomingChatMessage,
         exception: Exception,
     ) {
-        val errorMessage = buildMessage {
-            title("🚨 Error")
-            text("The ${feature::class.java.canonicalName} module encountered an error!")
-            text("Error: '${exception.message}'")
-        }
+        val errorMessage =
+            buildMessage {
+                title("🚨 Error")
+                text("The ${feature::class.java.canonicalName} module encountered an error!")
+                text("Error: '${exception.message}'")
+            }
         feature.sendMessage(
             OutgoingChatMessage(
                 channelId = incomingMessage.channelId,
@@ -122,11 +123,12 @@ class Router(
         )
     }
 
-    private fun subscribeToEvents() = coroutineScope.launch {
-        eventsFlow.collect { event ->
-            eventModules.forEach { module ->
-                launch { module.onEvent(event) }
+    private fun subscribeToEvents() =
+        coroutineScope.launch {
+            eventsFlow.collect { event ->
+                eventModules.forEach { module ->
+                    launch { module.onEvent(event) }
+                }
             }
         }
-    }
 }

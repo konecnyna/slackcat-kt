@@ -23,8 +23,9 @@ class BigHipsModule : SlackcatModule() {
 
     override fun provideCommand(): String = "big-hips"
 
-    override fun help(): String = buildMessage {
-        title("Big Hips Help")
-        text("This module is for tommy big hips only! If you have regular hips please don't use.")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("Big Hips Help")
+            text("This module is for tommy big hips only! If you have regular hips please don't use.")
+        }
 }

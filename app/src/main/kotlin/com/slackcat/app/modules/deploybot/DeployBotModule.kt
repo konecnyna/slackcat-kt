@@ -17,25 +17,28 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
     }
 
     override fun provideCommand(): String = "deploy-bot"
-    override fun help(): String = buildMessage {
-        title("DeployBoyModule Help")
-        text("Send a kewl message when slackcat starts")
-    }
+
+    override fun help(): String =
+        buildMessage {
+            title("DeployBoyModule Help")
+            text("Send a kewl message when slackcat starts")
+        }
 
     override suspend fun onEvent(event: SlackcatEvent) {
         if (ENV != Environment.Production) {
             return
         }
 
-        val message = when (event) {
-            SlackcatEvent.STARTED -> "I've started! MEOW!"
-        }
+        val message =
+            when (event) {
+                SlackcatEvent.STARTED -> "I've started! MEOW!"
+            }
 
         sendMessage(
             OutgoingChatMessage(
                 channelId = BigHipsChannels.SlackcatTesting.channelId,
-                message = text(message)
-            )
+                message = text(message),
+            ),
         )
     }
 }

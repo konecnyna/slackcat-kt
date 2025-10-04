@@ -19,10 +19,12 @@ class CliChatEngine(
 ) : ChatEngine {
     companion object {
         const val DIVIDER = "-----------------------------"
-        const val ERROR_MESSAGE = "\n${DIVIDER}\n 🚨The incoming message wasn't handled.\n" +
+        const val ERROR_MESSAGE =
+            "\n${DIVIDER}\n 🚨The incoming message wasn't handled.\n" +
                 "* Please check to make sure its in the proper format. E.g. '?ping'\n" +
                 "* Make sure to add your feature to 'FeatureGraph.kt'\n" +
-                "* Make sure you added it to  modules list - val modules: Array<KClass<out SlackcatModule>> = arrayOf(DateModule::class,...)\n" +
+                "* Make sure you added it to  modules list - " +
+                "val modules: Array<KClass<out SlackcatModule>> = arrayOf(DateModule::class,...)\n" +
                 DIVIDER
     }
 

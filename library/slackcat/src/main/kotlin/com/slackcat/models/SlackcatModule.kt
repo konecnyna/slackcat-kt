@@ -25,7 +25,7 @@ abstract class SlackcatModule {
         return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                message = text(help())
+                message = text(help()),
             ),
         )
     }

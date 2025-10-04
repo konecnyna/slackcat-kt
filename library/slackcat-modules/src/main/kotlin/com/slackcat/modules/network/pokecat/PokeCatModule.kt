@@ -21,9 +21,10 @@ class PokeCatModule : SlackcatModule(), NetworkModule {
             return
         }
 
-        val pokemon = runCatching {
-            networkClient.fetch("$baseurl/$pokemonIdentifier", PokemonData.serializer(), emptyMap())
-        }.getOrNull()
+        val pokemon =
+            runCatching {
+                networkClient.fetch("$baseurl/$pokemonIdentifier", PokemonData.serializer(), emptyMap())
+            }.getOrNull()
         if (pokemon == null) {
             postHelpMessage(incomingChatMessage.channelId)
             return
@@ -33,7 +34,10 @@ class PokeCatModule : SlackcatModule(), NetworkModule {
                 channelId = incomingChatMessage.channelId,
                 message = buildPokemonMessage(pokemon),
                 botName = "PokéCat",
-                botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png"),
+                botIcon =
+                    BotIcon.BotImageIcon(
+                        "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png",
+                    ),
             ),
         )
     }
@@ -42,9 +46,11 @@ class PokeCatModule : SlackcatModule(), NetworkModule {
         return buildRichMessage {
             divider()
             section(
-                text = "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n *Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* ",
+                text =
+                    "*${pokemon.name.uppercase()}* \n *HP: ${pokemon.stats[0].base_stat}* \n " +
+                        "*Attack: ${pokemon.stats[1].base_stat}* \n *Defense: ${pokemon.stats[2].base_stat}* ",
                 imageUrl = pokemon.sprites.front_default,
-                altText = pokemon.sprites.front_default
+                altText = pokemon.sprites.front_default,
             )
             divider()
         }
@@ -57,10 +63,11 @@ class PokeCatModule : SlackcatModule(), NetworkModule {
 
     override fun provideCommand(): String = "pokemon"
 
-    override fun help(): String = buildMessage {
-        title("Pokemon Help")
-        text("Get stats on your favorite pokemon")
-        text("- Usage: `?pokemon <number>`")
-        text("- Ex: `?pokemon 69`")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("Pokemon Help")
+            text("Get stats on your favorite pokemon")
+            text("- Usage: `?pokemon <number>`")
+            text("- Ex: `?pokemon 69`")
+        }
 }

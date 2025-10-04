@@ -1,18 +1,23 @@
 package com.slackcat.database
 
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Expression
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.upsert
 
 /**
  * Generic database query wrapper that runs operations in a suspended transaction.
  * Use this for all database operations to ensure proper async handling.
  */
-suspend fun <T> dbQuery(block: suspend () -> T): T =
-    newSuspendedTransaction(Dispatchers.IO) { block() }
+suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
 
 /**
  * Generic upsert operation that abstracts Exposed's upsert functionality.
@@ -32,13 +37,14 @@ suspend fun <T> dbUpsert(
     onUpdate: List<Pair<Column<*>, Expression<*>>>,
     insertBody: Table.(InsertStatement<*>) -> Unit,
     selectWhere: SqlExpressionBuilder.() -> Op<Boolean>,
-    mapper: (ResultRow) -> T
-): T = dbQuery {
-    table.upsert(
-        keys = keys,
-        onUpdate = onUpdate,
-        body = insertBody
-    )
+    mapper: (ResultRow) -> T,
+): T =
+    dbQuery {
+        table.upsert(
+            keys = keys,
+            onUpdate = onUpdate,
+            body = insertBody,
+        )
 
-    table.select(selectWhere).single().let(mapper)
-}
+        table.select(selectWhere).single().let(mapper)
+    }

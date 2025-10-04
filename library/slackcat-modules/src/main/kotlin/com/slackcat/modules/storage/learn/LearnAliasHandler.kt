@@ -5,20 +5,20 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.presentation.text
 
 class LearnAliasHandler(private val learnDAO: LearnDAO) {
-    suspend fun handleAliases(
-        incomingChatMessage: IncomingChatMessage
-    ): OutgoingChatMessage? {
-        val alias = LearnAliases.fromAlias(incomingChatMessage.command)
-            ?: return null
+    suspend fun handleAliases(incomingChatMessage: IncomingChatMessage): OutgoingChatMessage? {
+        val alias =
+            LearnAliases.fromAlias(incomingChatMessage.command)
+                ?: return null
 
-        val message = when (alias) {
-            LearnAliases.Unlearn -> handleUnlearn(incomingChatMessage)
-            LearnAliases.List -> handleList(incomingChatMessage.userText)
-        }
+        val message =
+            when (alias) {
+                LearnAliases.Unlearn -> handleUnlearn(incomingChatMessage)
+                LearnAliases.List -> handleList(incomingChatMessage.userText)
+            }
 
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
-            message = text(message)
+            message = text(message),
         )
     }
 
@@ -26,7 +26,7 @@ class LearnAliasHandler(private val learnDAO: LearnDAO) {
         val learnKey = message.userText.substringBefore(" --index").trim()
         val index = extractIndexFromText(message.userText)
 
-        return  if (index != null && learnDAO.removeEntryByIndex(learnKey, index - 1)) {
+        return if (index != null && learnDAO.removeEntryByIndex(learnKey, index - 1)) {
             "🎉 Poof! Entry #$index for \"$learnKey\" has vanished into the digital ether! 🌌"
         } else {
             "Oops! 😅 Couldn't find entry #$index for \"$learnKey\". Are you sure it exists?"
@@ -37,7 +37,6 @@ class LearnAliasHandler(private val learnDAO: LearnDAO) {
         val regex = Regex("--index\\s+(\\d+)")
         return regex.find(userText)?.groupValues?.get(1)?.toIntOrNull()
     }
-
 
     private suspend fun handleList(learnKey: String): String {
         val entries = learnDAO.getEntriesByLearnKey(learnKey)

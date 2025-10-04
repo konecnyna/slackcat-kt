@@ -23,21 +23,25 @@ class EmojiModule : SlackcatModule(), NetworkModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = buildRichMessage {
-                    image(
-                        imageUrl = emoji,
-                        altText = "summon image"
-                    )
-                }
-            )
+                message =
+                    buildRichMessage {
+                        image(
+                            imageUrl = emoji,
+                            altText = "summon image",
+                        )
+                    },
+            ),
         )
     }
 
     override fun provideCommand(): String = "emoji"
 
-    override fun help(): String = buildMessage {
-        title("EmojiModule Help")
-        text("Grab emoji from this fun <https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3|fun list>")
-    }
-
+    override fun help(): String =
+        buildMessage {
+            title("EmojiModule Help")
+            text(
+                "Grab emoji from this fun " +
+                    "<https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3|fun list>",
+            )
+        }
 }

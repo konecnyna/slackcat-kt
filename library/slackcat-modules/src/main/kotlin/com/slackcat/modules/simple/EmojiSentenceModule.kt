@@ -20,21 +20,23 @@ class EmojiSentenceModule : SlackcatModule() {
     }
 
     private fun convertString(userText: String): String {
-        val converted = userText.lowercase().map { char ->
-            if (char in 'a'..'z') {
-                val color = if (Random.nextBoolean()) "white" else "yellow"
-                ":alphabet-$color-$char:"
-            } else {
-                char.toString()
-            }
-        }.joinToString("")
+        val converted =
+            userText.lowercase().map { char ->
+                if (char in 'a'..'z') {
+                    val color = if (Random.nextBoolean()) "white" else "yellow"
+                    ":alphabet-$color-$char:"
+                } else {
+                    char.toString()
+                }
+            }.joinToString("")
         return converted
     }
 
-    override fun help(): String = buildMessage {
-        title("Emojisentence Help")
-        text("Write some text braaa (Example '?emojisentence what up braaa')")
-    }
+    override fun help(): String =
+        buildMessage {
+            title("Emojisentence Help")
+            text("Write some text braaa (Example '?emojisentence what up braaa')")
+        }
 
     override fun provideCommand(): String = "emojisetence"
 }

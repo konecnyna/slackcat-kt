@@ -31,11 +31,12 @@ class EmojiSentenceModuleTest {
 
         coEvery { mockChatClient.sendMessage(any()) } returns Result.success(Unit)
     }
+
     private fun createTestMessage(
         command: String,
         userText: String = "",
         channelId: String = "channel123",
-        arguments: List<String> = emptyList()
+        arguments: List<String> = emptyList(),
     ) = IncomingChatMessage(
         arguments = arguments,
         command = command,
@@ -43,9 +44,8 @@ class EmojiSentenceModuleTest {
         chatUser = ChatUser("user123"),
         messageId = "msg123",
         rawMessage = "?$command $userText",
-        userText = userText
+        userText = userText,
     )
-
 
     @Test
     fun `provideCommand returns emojisetence`() {
@@ -67,109 +67,139 @@ class EmojiSentenceModuleTest {
     }
 
     @Test
-    fun `onInvoke converts text to emoji format`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "hello", arguments = emptyList()
-        )
+    fun `onInvoke converts text to emoji format`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "hello",
+                    arguments = emptyList(),
+                )
 
-        emojiSentenceModule.onInvoke(incomingMessage)
+            emojiSentenceModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertEquals("channel123", sentMessage.channelId)
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
 
-        val messageText = sentMessage.message.toString()
-        // Should contain emoji alphabet format
-        assertTrue(messageText.contains(":alphabet-"))
-    }
-
-    @Test
-    fun `onInvoke converts lowercase letters to emoji`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "a", arguments = emptyList()
-        )
-
-        emojiSentenceModule.onInvoke(incomingMessage)
-
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
-
-        val sentMessage = messageSlot.captured
-        val messageText = sentMessage.message.toString()
-
-        // Should contain alphabet emoji
-        assertTrue(messageText.contains(":alphabet-"))
-        assertTrue(messageText.contains("-a:"))
-    }
+            val messageText = sentMessage.message.toString()
+            // Should contain emoji alphabet format
+            assertTrue(messageText.contains(":alphabet-"))
+        }
 
     @Test
-    fun `onInvoke converts uppercase to lowercase emoji`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "ABC", arguments = emptyList()
-        )
+    fun `onInvoke converts lowercase letters to emoji`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "a",
+                    arguments = emptyList(),
+                )
 
-        emojiSentenceModule.onInvoke(incomingMessage)
+            emojiSentenceModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        val messageText = sentMessage.message.toString()
+            val sentMessage = messageSlot.captured
+            val messageText = sentMessage.message.toString()
 
-        // Should convert to lowercase and contain emoji format
-        assertTrue(messageText.contains(":alphabet-"))
-        assertTrue(messageText.contains("-a:"))
-        assertTrue(messageText.contains("-b:"))
-        assertTrue(messageText.contains("-c:"))
-    }
-
-    @Test
-    fun `onInvoke preserves non-alphabetic characters`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "a b", arguments = emptyList()
-        )
-
-        emojiSentenceModule.onInvoke(incomingMessage)
-
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
-
-        val sentMessage = messageSlot.captured
-        val messageText = sentMessage.message.toString()
-
-        // Should preserve the space between letters
-        assertTrue(messageText.contains(":alphabet-"))
-        // The space should be preserved
-        assertTrue(messageText.contains(" "))
-    }
+            // Should contain alphabet emoji
+            assertTrue(messageText.contains(":alphabet-"))
+            assertTrue(messageText.contains("-a:"))
+        }
 
     @Test
-    fun `onInvoke handles empty text`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "", arguments = emptyList()
-        )
+    fun `onInvoke converts uppercase to lowercase emoji`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "ABC",
+                    arguments = emptyList(),
+                )
 
-        emojiSentenceModule.onInvoke(incomingMessage)
+            emojiSentenceModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertEquals("channel123", sentMessage.channelId)
-    }
+            val sentMessage = messageSlot.captured
+            val messageText = sentMessage.message.toString()
+
+            // Should convert to lowercase and contain emoji format
+            assertTrue(messageText.contains(":alphabet-"))
+            assertTrue(messageText.contains("-a:"))
+            assertTrue(messageText.contains("-b:"))
+            assertTrue(messageText.contains("-c:"))
+        }
 
     @Test
-    fun `onInvoke handles numbers and special characters`() = runTest {
-        val incomingMessage = createTestMessage("emojisetence", "a1!", arguments = emptyList()
-        )
+    fun `onInvoke preserves non-alphabetic characters`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "a b",
+                    arguments = emptyList(),
+                )
 
-        emojiSentenceModule.onInvoke(incomingMessage)
+            emojiSentenceModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        val messageText = sentMessage.message.toString()
+            val sentMessage = messageSlot.captured
+            val messageText = sentMessage.message.toString()
 
-        // Should convert 'a' to emoji but preserve '1' and '!'
-        assertTrue(messageText.contains(":alphabet-"))
-        assertTrue(messageText.contains("-a:"))
-    }
+            // Should preserve the space between letters
+            assertTrue(messageText.contains(":alphabet-"))
+            // The space should be preserved
+            assertTrue(messageText.contains(" "))
+        }
+
+    @Test
+    fun `onInvoke handles empty text`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "",
+                    arguments = emptyList(),
+                )
+
+            emojiSentenceModule.onInvoke(incomingMessage)
+
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
+        }
+
+    @Test
+    fun `onInvoke handles numbers and special characters`() =
+        runTest {
+            val incomingMessage =
+                createTestMessage(
+                    "emojisetence",
+                    "a1!",
+                    arguments = emptyList(),
+                )
+
+            emojiSentenceModule.onInvoke(incomingMessage)
+
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+
+            val sentMessage = messageSlot.captured
+            val messageText = sentMessage.message.toString()
+
+            // Should convert 'a' to emoji but preserve '1' and '!'
+            assertTrue(messageText.contains(":alphabet-"))
+            assertTrue(messageText.contains("-a:"))
+        }
 }

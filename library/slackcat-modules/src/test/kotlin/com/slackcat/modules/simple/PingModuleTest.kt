@@ -36,7 +36,7 @@ class PingModuleTest {
         command: String,
         userText: String = "",
         channelId: String = "channel123",
-        arguments: List<String> = emptyList()
+        arguments: List<String> = emptyList(),
     ) = IncomingChatMessage(
         arguments = arguments,
         command = command,
@@ -44,7 +44,7 @@ class PingModuleTest {
         chatUser = ChatUser("user123"),
         messageId = "msg123",
         rawMessage = "?$command $userText",
-        userText = userText
+        userText = userText,
     )
 
     @Test
@@ -69,68 +69,73 @@ class PingModuleTest {
     }
 
     @Test
-    fun `onInvoke with ping command sends pong`() = runTest {
-        val incomingMessage = createTestMessage("ping")
+    fun `onInvoke with ping command sends pong`() =
+        runTest {
+            val incomingMessage = createTestMessage("ping")
 
-        pingModule.onInvoke(incomingMessage)
+            pingModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertEquals("channel123", sentMessage.channelId)
-        assertTrue(sentMessage.message.toString().contains("pong"))
-    }
-
-    @Test
-    fun `onInvoke with bing command sends bong`() = runTest {
-        val incomingMessage = createTestMessage("bing")
-
-        pingModule.onInvoke(incomingMessage)
-
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
-
-        val sentMessage = messageSlot.captured
-        assertTrue(sentMessage.message.toString().contains("bong"))
-    }
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
+            assertTrue(sentMessage.message.toString().contains("pong"))
+        }
 
     @Test
-    fun `onInvoke with ding command sends dong`() = runTest {
-        val incomingMessage = createTestMessage("ding")
+    fun `onInvoke with bing command sends bong`() =
+        runTest {
+            val incomingMessage = createTestMessage("bing")
 
-        pingModule.onInvoke(incomingMessage)
+            pingModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertTrue(sentMessage.message.toString().contains("dong"))
-    }
-
-    @Test
-    fun `onInvoke with ring command sends wrong`() = runTest {
-        val incomingMessage = createTestMessage("ring")
-
-        pingModule.onInvoke(incomingMessage)
-
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
-
-        val sentMessage = messageSlot.captured
-        assertTrue(sentMessage.message.toString().contains("wrong"))
-    }
+            val sentMessage = messageSlot.captured
+            assertTrue(sentMessage.message.toString().contains("bong"))
+        }
 
     @Test
-    fun `onInvoke with unknown command defaults to pong`() = runTest {
-        val incomingMessage = createTestMessage("unknown")
+    fun `onInvoke with ding command sends dong`() =
+        runTest {
+            val incomingMessage = createTestMessage("ding")
 
-        pingModule.onInvoke(incomingMessage)
+            pingModule.onInvoke(incomingMessage)
 
-        val messageSlot = slot<OutgoingChatMessage>()
-        coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
 
-        val sentMessage = messageSlot.captured
-        assertTrue(sentMessage.message.toString().contains("pong"))
-    }
+            val sentMessage = messageSlot.captured
+            assertTrue(sentMessage.message.toString().contains("dong"))
+        }
+
+    @Test
+    fun `onInvoke with ring command sends wrong`() =
+        runTest {
+            val incomingMessage = createTestMessage("ring")
+
+            pingModule.onInvoke(incomingMessage)
+
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+
+            val sentMessage = messageSlot.captured
+            assertTrue(sentMessage.message.toString().contains("wrong"))
+        }
+
+    @Test
+    fun `onInvoke with unknown command defaults to pong`() =
+        runTest {
+            val incomingMessage = createTestMessage("unknown")
+
+            pingModule.onInvoke(incomingMessage)
+
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+
+            val sentMessage = messageSlot.captured
+            assertTrue(sentMessage.message.toString().contains("pong"))
+        }
 }

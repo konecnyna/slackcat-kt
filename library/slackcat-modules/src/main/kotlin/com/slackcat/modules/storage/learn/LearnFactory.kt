@@ -13,7 +13,7 @@ class LearnFactory {
     // Parses the quoted format: ?learn "key" "value"
     private fun parseQuotedFormat(
         text: String,
-        incomingChatMessage: IncomingChatMessage
+        incomingChatMessage: IncomingChatMessage,
     ): LearnInsertRow? {
         val regex = """^\?learn\s+"(\w+)"\s+"((?s).+)"$""".toRegex()
         val match = regex.matchEntire(text)
@@ -28,7 +28,7 @@ class LearnFactory {
     // Parses the unquoted format: ?learn key rest of the text
     private fun parseUnquotedFormat(
         text: String,
-        incomingChatMessage: IncomingChatMessage
+        incomingChatMessage: IncomingChatMessage,
     ): LearnInsertRow? {
         // Updated regex to handle newlines and whitespace properly
         val regex = """^(\S+)\s+((?s).+)${'$'}""".toRegex() // Allows matching multi-line text
@@ -45,7 +45,7 @@ class LearnFactory {
     private fun createLearnInsertRow(
         learnKey: String?,
         learnText: String?,
-        incomingChatMessage: IncomingChatMessage
+        incomingChatMessage: IncomingChatMessage,
     ): LearnInsertRow? {
         return if (learnKey != null && learnText != null) {
             LearnInsertRow(
