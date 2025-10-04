@@ -31,6 +31,10 @@ jobs:
   test-modules:
     name: Test Slackcat Modules
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -68,6 +72,10 @@ jobs:
   test-slackcat-lib:
     name: Test Slackcat Library
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
