@@ -20,6 +20,7 @@ data class OutgoingChatMessage(
     val message: RichTextMessage = RichTextMessage(""),
     val botName: String = DEFAULT_BOT_NAME,
     val botIcon: BotIcon = BotIcon.BotImageIcon(DEFAULT_BOT_IMAGE_ICON),
+    val threadId: String? = null,
 )
 
 sealed interface BotIcon {

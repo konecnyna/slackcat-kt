@@ -67,6 +67,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                         channel(message.channelId)
                         blocks(messageBlocks)
                         username(message.botName)
+                        message.threadId?.let { threadTs(it) }
                         when (val icon = message.botIcon) {
                             is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
                             is BotIcon.BotImageIcon -> iconUrl(icon.url)

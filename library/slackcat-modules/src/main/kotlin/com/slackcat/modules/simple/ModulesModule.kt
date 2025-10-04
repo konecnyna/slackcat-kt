@@ -23,6 +23,7 @@ class ModulesModule(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = text(modulesList),
+                threadId = incomingChatMessage.threadId,
             ),
         )
     }
