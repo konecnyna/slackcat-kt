@@ -17,6 +17,11 @@ class JeopardyModule(
     private val jeopardyDAO by lazy { JeopardyDAO(networkClient) }
     private val aliasHandler by lazy { JeopardyAliasHandler(jeopardyDAO) }
 
+    override val botName = "Alex Trebek"
+    override val botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg")
+
+
+
     override fun tables(): List<Table> =
         listOf(
             JeopardyDAO.JeopardyQuestionsTable,
@@ -39,11 +44,6 @@ class JeopardyModule(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = message,
-                botName = "Alex Trebek",
-                botIcon =
-                    BotIcon.BotImageIcon(
-                        "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg",
-                    ),
             ),
         )
     }

@@ -14,6 +14,9 @@ class PokeCatModule(
 ) : SlackcatModule() {
     val baseurl = "https://pokeapi.co/api/v2/pokemon"
 
+    override val botName = "PokéCat"
+    override val botIcon = BotIcon.BotImageIcon("https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png")
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val pokemonIdentifier = incomingChatMessage.userText
         if (pokemonIdentifier.isBlank()) {
@@ -33,11 +36,6 @@ class PokeCatModule(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = buildPokemonMessage(pokemon),
-                botName = "PokéCat",
-                botIcon =
-                    BotIcon.BotImageIcon(
-                        "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png",
-                    ),
             ),
         )
     }

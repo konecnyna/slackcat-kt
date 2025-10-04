@@ -13,6 +13,8 @@ import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -23,13 +25,14 @@ import kotlin.reflect.full.createInstance
 
 class SlackcatBot(
     val modulesClasses: Array<KClass<out SlackcatModule>>,
-    val coroutineScope: CoroutineScope,
     val databaseConfig: DataSource,
     val networkClient: NetworkClient? = null,
-) {
+) : KoinComponent {
     lateinit var chatEngine: ChatEngine
     lateinit var chatClient: ChatClient
     lateinit var router: Router
+
+    private val coroutineScope: CoroutineScope = get()
 
     private val events = MutableSharedFlow<SlackcatEvent>()
     val eventsFlow = events.asSharedFlow()
@@ -41,19 +44,24 @@ class SlackcatBot(
     }
 
     private fun setupChatModule(args: String?): List<SlackcatModule> {
-        chatEngine =
-            if (!args.isNullOrEmpty()) {
-                CliChatEngine(args, coroutineScope)
-            } else {
-                SlackChatEngine(coroutineScope)
-            }
+        chatEngine = if (!args.isNullOrEmpty()) {
+            CliChatEngine(args, coroutineScope)
+        } else {
+            SlackChatEngine(coroutineScope)
+        }
 
-        chatClient =
-            object : ChatClient {
-                override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
-                    return chatEngine.sendMessage(message)
-                }
+        chatClient = object : ChatClient {
+            override suspend fun sendMessage(
+                message: OutgoingChatMessage,
+                botName: String,
+                botIcon: com.slackcat.chat.models.BotIcon
+            ): Result<Unit> {
+                return chatEngine.sendMessage(message, botName, botIcon)
             }
+        }
+
+        // Register ChatClient with Koin
+        getKoin().declare(chatClient)
 
         // First pass: instantiate modules without Router dependency
         val modulesWithoutRouter: List<SlackcatModule> =
@@ -80,56 +88,47 @@ class SlackcatBot(
                             null
                         } ?: moduleClass.createInstance() // Fallback to no-arg constructor
 
-                    module.also {
-                        it.chatClient = chatClient
-                        it.coroutineScope = coroutineScope
-                    }
+                    module
                 }
 
         // Create router with modules (excluding Router-dependent ones)
-        router =
-            Router(
-                modules = modulesWithoutRouter,
-                coroutineScope = coroutineScope,
-                eventsFlow = eventsFlow,
-            )
+        router = Router(
+            modules = modulesWithoutRouter,
+            coroutineScope = coroutineScope,
+            eventsFlow = eventsFlow,
+        )
 
         // Second pass: instantiate modules that require Router
-        val modulesWithRouter: List<SlackcatModule> =
-            modulesClasses
-                .filter { moduleClass ->
-                    // Find modules that require Router
-                    moduleClass.constructors.any {
-                        it.parameters.size == 1 &&
-                            it.parameters[0].type.classifier == Router::class
-                    }
+        val modulesWithRouter: List<SlackcatModule> = modulesClasses
+            .filter { moduleClass ->
+                // Find modules that require Router
+                moduleClass.constructors.any {
+                    it.parameters.size == 1 &&
+                        it.parameters[0].type.classifier == Router::class
                 }
-                .map { moduleClass ->
-                    val module =
-                        moduleClass.constructors
-                            .firstOrNull {
-                                it.parameters.size == 1 &&
-                                    it.parameters[0].type.classifier == Router::class
-                            }
-                            ?.call(router)
-                            ?: moduleClass.createInstance()
+            }
+            .map { moduleClass ->
+                val module =
+                    moduleClass.constructors
+                        .firstOrNull {
+                            it.parameters.size == 1 &&
+                                it.parameters[0].type.classifier == Router::class
+                        }
+                        ?.call(router)
+                        ?: moduleClass.createInstance()
 
-                    module.also {
-                        it.chatClient = chatClient
-                        it.coroutineScope = coroutineScope
-                    }
-                }
+                module
+            }
 
         // Combine all modules
         val slackcatModules = modulesWithoutRouter + modulesWithRouter
 
         // Update router with all modules
-        router =
-            Router(
-                modules = slackcatModules,
-                coroutineScope = coroutineScope,
-                eventsFlow = eventsFlow,
-            )
+        router = Router(
+            modules = slackcatModules,
+            coroutineScope = coroutineScope,
+            eventsFlow = eventsFlow,
+        )
 
         chatEngine.connect { coroutineScope.launch { events.emit(SlackcatEvent.STARTED) } }
         return slackcatModules

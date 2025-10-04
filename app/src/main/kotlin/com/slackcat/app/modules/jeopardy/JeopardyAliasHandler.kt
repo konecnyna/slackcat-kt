@@ -8,7 +8,6 @@ import com.slackcat.presentation.buildRichMessage
 
 class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
     val alexTrebekish = "https://emoji.slack-edge.com/T07UUET6K51/alex-trebekish/5a325219e8701914.png"
-    val alexTrebek = "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg"
     val jeopardy = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg"
 
     suspend fun handleAliases(incomingChatMessage: IncomingChatMessage): OutgoingChatMessage? {
@@ -25,10 +24,7 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
             message = message,
-            botName = "Alex Trebek",
-            botIcon = BotIcon.BotImageIcon(alexTrebek),
         )
-        return null
     }
 
     private suspend fun handleAnswer(message: IncomingChatMessage): RichTextMessage {

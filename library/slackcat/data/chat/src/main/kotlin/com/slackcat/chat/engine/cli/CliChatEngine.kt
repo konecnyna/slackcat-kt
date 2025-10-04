@@ -1,6 +1,7 @@
 package com.slackcat.chat.engine.cli
 
 import com.slackcat.chat.engine.ChatEngine
+import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
@@ -60,10 +61,14 @@ class CliChatEngine(
         ready()
     }
 
-    override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+    override suspend fun sendMessage(
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon
+    ): Result<Unit> {
         return try {
             println("--------------------------------------")
-            println("Outgoing message: $message")
+            println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
             println("User sees rich text:\n${message.message.text}")
             println("--------------------------------------")
             Result.success(Unit)
