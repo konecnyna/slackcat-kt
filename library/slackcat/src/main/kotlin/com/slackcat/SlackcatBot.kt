@@ -8,7 +8,6 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.database.DatabaseGraph
 import com.slackcat.internal.Router
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
@@ -57,13 +56,24 @@ class SlackcatBot(
             }
 
         val slackcatModules: List<SlackcatModule> =
-            modulesClasses.map {
-                it.createInstance().also { module ->
-                    module.chatClient = chatClient
-                    module.coroutineScope = coroutineScope
-                    if (module is NetworkModule && networkClient != null) {
-                        module.networkClient = networkClient
-                    }
+            modulesClasses.map { moduleClass ->
+                val module =
+                    try {
+                        // Try to create instance with NetworkClient constructor parameter
+                        if (networkClient != null) {
+                            moduleClass.constructors
+                                .firstOrNull { it.parameters.size == 1 }
+                                ?.call(networkClient)
+                        } else {
+                            null
+                        }
+                    } catch (e: Exception) {
+                        null
+                    } ?: moduleClass.createInstance() // Fallback to no-arg constructor
+
+                module.also {
+                    it.chatClient = chatClient
+                    it.coroutineScope = coroutineScope
                 }
             }
 

@@ -2,7 +2,6 @@ package com.slackcat.modules.network.summon
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
@@ -10,9 +9,9 @@ import com.slackcat.presentation.buildRichMessage
 import com.slackcat.presentation.text
 import kotlin.random.Random
 
-class SummonModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class SummonModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val summonClient by lazy { SummonClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

@@ -4,16 +4,15 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.RichTextMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
-class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class JeopardyModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule(), StorageModule {
     private val jeopardyDAO by lazy { JeopardyDAO(networkClient) }
     private val aliasHandler by lazy { JeopardyAliasHandler(jeopardyDAO) }
 
