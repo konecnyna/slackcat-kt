@@ -64,7 +64,7 @@ val appModule = module {
                 botIconProvider = {
                     when (LocalDate.now().month) {
                         Month.DECEMBER -> BotIcon.BotEmojiIcon(":santa:")
-                        Month.OCTOBER -> BotIcon.BotImageIcon("https://imgur.com/a/95a6wAf")
+                        Month.OCTOBER -> BotIcon.BotImageIcon("https://i.imgur.com/8cxx5in.png")
                         Month.JULY -> BotIcon.BotEmojiIcon(":flag-us:")
                         else -> BotIcon.BotImageIcon(SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON)
                     }
