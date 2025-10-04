@@ -55,52 +55,75 @@ class SlackcatBot(
                 }
             }
 
-        // Temporary empty list for Router construction
+        // First pass: instantiate modules without Router dependency
+        val modulesWithoutRouter: List<SlackcatModule> =
+            modulesClasses
+                .filter { moduleClass ->
+                    // Filter out modules that require Router
+                    !moduleClass.constructors.any {
+                        it.parameters.size == 1 &&
+                            it.parameters[0].type.classifier == Router::class
+                    }
+                }
+                .map { moduleClass ->
+                    val module =
+                        try {
+                            // Try NetworkClient constructor
+                            if (networkClient != null && moduleClass.constructors.any { it.parameters.size == 1 }) {
+                                moduleClass.constructors
+                                    .firstOrNull { it.parameters.size == 1 }
+                                    ?.call(networkClient)
+                            } else {
+                                null
+                            }
+                        } catch (e: Exception) {
+                            null
+                        } ?: moduleClass.createInstance() // Fallback to no-arg constructor
+
+                    module.also {
+                        it.chatClient = chatClient
+                        it.coroutineScope = coroutineScope
+                    }
+                }
+
+        // Create router with modules (excluding Router-dependent ones)
         router =
             Router(
-                modules = emptyList(),
+                modules = modulesWithoutRouter,
                 coroutineScope = coroutineScope,
                 eventsFlow = eventsFlow,
             )
 
-        val slackcatModules: List<SlackcatModule> =
-            modulesClasses.map { moduleClass ->
-                val module =
-                    try {
-                        // Try different constructor patterns
-                        when {
-                            // Try Router constructor (for ModulesModule)
-                            moduleClass.constructors.any {
+        // Second pass: instantiate modules that require Router
+        val modulesWithRouter: List<SlackcatModule> =
+            modulesClasses
+                .filter { moduleClass ->
+                    // Find modules that require Router
+                    moduleClass.constructors.any {
+                        it.parameters.size == 1 &&
+                            it.parameters[0].type.classifier == Router::class
+                    }
+                }
+                .map { moduleClass ->
+                    val module =
+                        moduleClass.constructors
+                            .firstOrNull {
                                 it.parameters.size == 1 &&
                                     it.parameters[0].type.classifier == Router::class
-                            } -> {
-                                moduleClass.constructors
-                                    .firstOrNull {
-                                        it.parameters.size == 1 &&
-                                            it.parameters[0].type.classifier == Router::class
-                                    }
-                                    ?.call(router)
                             }
-                            // Try NetworkClient constructor
-                            networkClient != null && moduleClass.constructors.any { it.parameters.size == 1 } -> {
-                                moduleClass.constructors
-                                    .firstOrNull { it.parameters.size == 1 }
-                                    ?.call(networkClient)
-                            }
-                            // Fallback to no-arg constructor
-                            else -> null
-                        }
-                    } catch (e: Exception) {
-                        null
-                    } ?: moduleClass.createInstance() // Fallback to no-arg constructor
+                            ?.call(router)
+                            ?: moduleClass.createInstance()
 
-                module.also {
-                    it.chatClient = chatClient
-                    it.coroutineScope = coroutineScope
+                    module.also {
+                        it.chatClient = chatClient
+                        it.coroutineScope = coroutineScope
+                    }
                 }
-            }
 
-        // Update router with actual modules list
+        // Combine all modules
+        val slackcatModules = modulesWithoutRouter + modulesWithRouter
+
+        // Update router with all modules
         router =
             Router(
                 modules = slackcatModules,
