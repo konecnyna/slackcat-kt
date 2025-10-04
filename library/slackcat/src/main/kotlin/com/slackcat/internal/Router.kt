@@ -47,10 +47,8 @@ class Router(
     }
 
     private val eventModules: List<SlackcatEventsModule> by lazy {
-        featureCommandMap
-            .toList()
-            .filter { it.second is SlackcatEventsModule }
-            .map { it.second as SlackcatEventsModule }
+        modules
+            .filterIsInstance<SlackcatEventsModule>()
     }
 
     private val unhandledCommandModuleModules: List<UnhandledCommandModule>
