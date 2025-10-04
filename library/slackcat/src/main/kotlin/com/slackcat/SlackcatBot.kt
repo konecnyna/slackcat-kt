@@ -67,6 +67,19 @@ class SlackcatBot(
                 }
             }
 
+        // Inject the modules list into any ModulesModule instance
+        slackcatModules.forEach { module ->
+            if (module::class.simpleName == "ModulesModule") {
+                try {
+                    val activeModulesProperty = module::class.java.getDeclaredField("activeModules")
+                    activeModulesProperty.isAccessible = true
+                    activeModulesProperty.set(module, slackcatModules)
+                } catch (e: Exception) {
+                    // Ignore if field doesn't exist or can't be set
+                }
+            }
+        }
+
         router =
             Router(
                 modules = slackcatModules,

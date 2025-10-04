@@ -13,6 +13,7 @@ import com.slackcat.modules.simple.DateModule
 import com.slackcat.modules.simple.EmojiSentenceModule
 import com.slackcat.modules.simple.FlipModule
 import com.slackcat.modules.simple.FrameModule
+import com.slackcat.modules.simple.ModulesModule
 import com.slackcat.modules.simple.PingModule
 import com.slackcat.modules.storage.kudos.KudosModule
 import com.slackcat.modules.storage.learn.LearnModule
@@ -34,6 +35,7 @@ object SlackcatModules {
             FlipModule::class,
             FrameModule::class,
             EmojiSentenceModule::class,
+            ModulesModule::class,
             // Storage modules
             KudosModule::class,
             LearnModule::class,
@@ -59,6 +61,7 @@ object SlackcatModules {
             FlipModule::class,
             FrameModule::class,
             EmojiSentenceModule::class,
+            ModulesModule::class,
         )
 
     /**
