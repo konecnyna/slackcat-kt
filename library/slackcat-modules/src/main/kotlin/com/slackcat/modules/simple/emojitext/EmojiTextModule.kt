@@ -1,4 +1,4 @@
-package com.slackcat.app.modules.emojitext
+package com.slackcat.modules.simple.emojitext
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
@@ -103,9 +103,9 @@ class EmojiTextModule : SlackcatModule() {
         val paddedLineArray = lineArray.padTo(maxSize, "")
         val paddedLetterArray = letterArray.padTo(maxSize, "")
 
-        // Merge the lines horizontally without adding extra spaces
+        // Merge the lines horizontally with spacing between letters
         return paddedLineArray.zip(paddedLetterArray) { a, b ->
-            a + (if (a.isNotEmpty() && b.isNotEmpty()) "" else "") + b
+            a + (if (a.isNotEmpty() && b.isNotEmpty()) " " else "") + b
         }.joinToString("\n")
     }
 

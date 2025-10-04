@@ -4,7 +4,7 @@ import com.slackcat.app.DatasourceFactory
 import com.slackcat.app.Environment
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
-import com.slackcat.app.modules.emojitext.EmojiTextModule
+import com.slackcat.modules.simple.emojitext.EmojiTextModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.SlackcatModules
