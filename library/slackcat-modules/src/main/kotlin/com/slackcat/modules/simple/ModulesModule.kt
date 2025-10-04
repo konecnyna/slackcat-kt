@@ -2,10 +2,10 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.RichTextMessage
 import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildRichMessage
-import com.slackcat.presentation.text
 
 /**
  * Module that lists all active modules in the bot.
@@ -22,13 +22,13 @@ class ModulesModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(modulesList),
+                message = modulesList,
                 threadId = incomingChatMessage.threadId,
             ),
         )
     }
 
-    private fun buildModulesList(): String {
+    private fun buildModulesList(): RichTextMessage {
         val activeModules =
             router.getAllModules()
                 .filter { it !is ModulesModule } // Exclude self from list
@@ -60,7 +60,7 @@ class ModulesModule(
 
             section("*Total: ${activeModules.size} modules*")
             section("_Use `?<command> --help` for more info about a specific module_")
-        }.toString()
+        }
     }
 
     private fun getModuleCategory(module: SlackcatModule): String {
