@@ -4,18 +4,30 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.RichTextMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
+import org.jetbrains.exposed.sql.Table
 
-class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class JeopardyModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule(), StorageModule {
     private val jeopardyDAO by lazy { JeopardyDAO(networkClient) }
     private val aliasHandler by lazy { JeopardyAliasHandler(jeopardyDAO) }
+
+    override val botName = "Alex Trebek"
+    override val botIcon =
+        BotIcon.BotImageIcon(
+            "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg",
+        )
+
+    override fun tables(): List<Table> =
+        listOf(
+            JeopardyDAO.JeopardyQuestionsTable,
+            JeopardyDAO.JeopardyScoreTable,
+        )
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         if (jeopardyDAO.getJeopardyTableLength() == 0L) {
@@ -33,11 +45,6 @@ class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = message,
-                botName = "Alex Trebek",
-                botIcon =
-                    BotIcon.BotImageIcon(
-                        "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg",
-                    ),
             ),
         )
     }
@@ -67,8 +74,6 @@ class JeopardyModule : SlackcatModule(), StorageModule, NetworkModule {
                     "Check your current points with ?jeopardy-points",
             )
         }
-
-    override fun provideTables() = listOf(JeopardyDAO.JeopardyQuestionsTable, JeopardyDAO.JeopardyScoreTable)
 
     override fun aliases(): List<String> = JeopardyAliases.entries.map { it.alias }
 }

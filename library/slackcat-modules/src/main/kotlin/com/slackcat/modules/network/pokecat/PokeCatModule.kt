@@ -3,16 +3,22 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.RichTextMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.PokemonData
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
-class PokeCatModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
+class PokeCatModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     val baseurl = "https://pokeapi.co/api/v2/pokemon"
+
+    override val botName = "PokéCat"
+    override val botIcon =
+        BotIcon.BotImageIcon(
+            "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png",
+        )
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val pokemonIdentifier = incomingChatMessage.userText
@@ -33,11 +39,6 @@ class PokeCatModule : SlackcatModule(), NetworkModule {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 message = buildPokemonMessage(pokemon),
-                botName = "PokéCat",
-                botIcon =
-                    BotIcon.BotImageIcon(
-                        "https://emoji.slack-edge.com/T07UUET6K51/pokeball/6812d9253feb15f7.png",
-                    ),
             ),
         )
     }

@@ -3,16 +3,15 @@ package com.slackcat.modules.network.crypto
 import com.slackcat.app.modules.crypto.CryptoPriceClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import java.text.DecimalFormat
 
-class CryptoPriceModule() : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class CryptoPriceModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val cryptoPriceClient by lazy { CryptoPriceClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

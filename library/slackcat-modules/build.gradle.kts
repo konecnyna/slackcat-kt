@@ -12,6 +12,7 @@ repositories {
 slackcat {
     features {
         coroutines()
+        koin()
     }
 }
 

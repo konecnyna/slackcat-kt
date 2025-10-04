@@ -11,6 +11,7 @@ import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,6 +21,7 @@ class Router(
     private val coroutineScope: CoroutineScope,
     private val eventsFlow: SharedFlow<SlackcatEvent>,
 ) {
+    private var eventsSubscription: Job? = null
     private val featureCommandMap: Map<String, SlackcatModule> by lazy {
         buildMap {
             modules.forEach { module ->
@@ -47,10 +49,8 @@ class Router(
     }
 
     private val eventModules: List<SlackcatEventsModule> by lazy {
-        featureCommandMap
-            .toList()
-            .filter { it.second is SlackcatEventsModule }
-            .map { it.second as SlackcatEventsModule }
+        modules
+            .filterIsInstance<SlackcatEventsModule>()
     }
 
     private val unhandledCommandModuleModules: List<UnhandledCommandModule>
@@ -123,12 +123,23 @@ class Router(
         )
     }
 
-    private fun subscribeToEvents() =
-        coroutineScope.launch {
-            eventsFlow.collect { event ->
-                eventModules.forEach { module ->
-                    launch { module.onEvent(event) }
+    private fun subscribeToEvents() {
+        eventsSubscription =
+            coroutineScope.launch {
+                eventsFlow.collect { event ->
+                    eventModules.forEach { module ->
+                        launch { module.onEvent(event) }
+                    }
                 }
             }
-        }
+    }
+
+    fun cancelEventsSubscription() {
+        eventsSubscription?.cancel()
+    }
+
+    /**
+     * Returns the list of all active modules in the bot
+     */
+    fun getAllModules(): List<SlackcatModule> = modules
 }

@@ -51,7 +51,11 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
-    override suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+    override suspend fun sendMessage(
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon,
+    ): Result<Unit> {
         return try {
             val messageBlocks =
                 if (message.message.text.isNotEmpty()) {
@@ -66,10 +70,11 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     req.apply {
                         channel(message.channelId)
                         blocks(messageBlocks)
-                        username(message.botName)
-                        when (val icon = message.botIcon) {
-                            is BotIcon.BotEmojiIcon -> iconEmoji(icon.emoji)
-                            is BotIcon.BotImageIcon -> iconUrl(icon.url)
+                        username(botName)
+                        message.threadId?.let { threadTs(it) }
+                        when (botIcon) {
+                            is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
+                            is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
                         }
                     }
                 }
