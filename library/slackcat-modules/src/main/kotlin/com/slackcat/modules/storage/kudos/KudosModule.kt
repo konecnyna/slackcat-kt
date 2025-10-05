@@ -16,9 +16,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val allIds = extractUserIds(incomingChatMessage.userText)
-        val ids = allIds.filter { it != incomingChatMessage.chatUser.userId }
+        val validIds = filterValidKudosRecipients(allIds, incomingChatMessage.chatUser.userId)
 
-        if (allIds.size == 1 && ids.isEmpty()) {
+        if (allIds.size == 1 && validIds.isEmpty()) {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
@@ -29,14 +29,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
             return
         }
 
-        ids.forEach {
-            val updatedKudos = kudosDAO.upsertKudos(it)
-            sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    threadId = incomingChatMessage.messageId,
-                    message = text(getKudosMessage(updatedKudos)),
-                ),
+        validIds.forEach { recipientId ->
+            giveKudosToUser(
+                recipientId = recipientId,
+                channelId = incomingChatMessage.channelId,
+                threadId = incomingChatMessage.messageId,
             )
         }
     }
@@ -57,15 +54,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
             is SlackcatEvent.ReactionAdded -> {
                 // Give kudos to the user who authored the message
                 event.itemUserId?.let { messageAuthorId ->
-                    // Don't allow self-kudos via reactions
-                    if (messageAuthorId != event.userId) {
-                        val updatedKudos = kudosDAO.upsertKudos(messageAuthorId)
-                        sendMessage(
-                            OutgoingChatMessage(
-                                channelId = event.channelId,
-                                threadId = event.messageTimestamp,
-                                message = text(getKudosMessage(updatedKudos)),
-                            ),
+                    if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
+                        giveKudosToUser(
+                            recipientId = messageAuthorId,
+                            channelId = event.channelId,
+                            threadId = event.messageTimestamp,
                         )
                     }
                 }
@@ -80,6 +73,45 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 // Ignore other events
             }
         }
+    }
+
+    /**
+     * Centralized validation logic for kudos.
+     * Returns true if the kudos is valid (not self-kudos).
+     */
+    private fun isValidKudos(
+        giverId: String,
+        recipientId: String,
+    ): Boolean {
+        return giverId != recipientId
+    }
+
+    /**
+     * Filters a collection of user IDs to remove the giver (no self-kudos).
+     */
+    private fun filterValidKudosRecipients(
+        recipientIds: Collection<String>,
+        giverId: String,
+    ): List<String> {
+        return recipientIds.filter { isValidKudos(giverId, it) }
+    }
+
+    /**
+     * Gives kudos to a user and sends a confirmation message.
+     */
+    private suspend fun giveKudosToUser(
+        recipientId: String,
+        channelId: String,
+        threadId: String,
+    ) {
+        val updatedKudos = kudosDAO.upsertKudos(recipientId)
+        sendMessage(
+            OutgoingChatMessage(
+                channelId = channelId,
+                threadId = threadId,
+                message = text(getKudosMessage(updatedKudos)),
+            ),
+        )
     }
 
     private fun extractUserIds(userText: String): Set<String> {
