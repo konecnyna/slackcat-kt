@@ -41,7 +41,7 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
 2. Navigate to **Features** > **Event Subscriptions**.
 3. Toggle **Enable Events** to **On**.
 
-### Subscribe to Message Events
+### Subscribe to Bot Events
 
 1. In the **Event Subscriptions** page, scroll down to **Subscribe to bot events**.
 2. Click on **Add Bot User Event**.
@@ -50,6 +50,8 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
     - `message.im` (for direct messages)
     - `message.groups` (for private channels)
     - `message.mpim` (for group direct messages)
+    - `reaction_added` (for emoji reactions added to messages)
+    - `reaction_removed` (for emoji reactions removed from messages)
 
 ### Set Up OAuth Scopes
 
@@ -61,6 +63,7 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
     - `mpim:history` (for group direct messages)
     - `channels:join` (if your bot needs to join channels automatically)
     - `chat:write` (to send messages)
+    - `reactions:read` (to receive reaction events like reaction_added and reaction_removed)
 
 ### Reinstall the App
 
