@@ -51,6 +51,9 @@ class SlackcatBot(
                 SlackChatEngine(coroutineScope)
             }
 
+        // Wire the events flow to the chat engine so it can emit reaction events
+        chatEngine.setEventsFlow(events)
+
         chatClient =
             object : ChatClient {
                 override suspend fun sendMessage(

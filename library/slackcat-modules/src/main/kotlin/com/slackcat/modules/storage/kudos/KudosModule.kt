@@ -2,6 +2,7 @@ package com.slackcat.modules.storage.kudos
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.SlackcatEvent
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.presentation.buildMessage
@@ -46,7 +47,40 @@ open class KudosModule : SlackcatModule(), StorageModule {
         buildMessage {
             title("KudosModule Help")
             text("Give kudos to your friends by using ?++ @username . See who can get the most!")
+            text("You can also give kudos by reacting with :heavy_plus_sign: to their messages!")
         }
+
+    override fun reactionsToHandle(): Set<String> = setOf("heavy_plus_sign")
+
+    override suspend fun onReaction(event: SlackcatEvent) {
+        when (event) {
+            is SlackcatEvent.ReactionAdded -> {
+                // Give kudos to the user who authored the message
+                event.itemUserId?.let { messageAuthorId ->
+                    // Don't allow self-kudos via reactions
+                    if (messageAuthorId != event.userId) {
+                        val updatedKudos = kudosDAO.upsertKudos(messageAuthorId)
+                        sendMessage(
+                            OutgoingChatMessage(
+                                channelId = event.channelId,
+                                threadId = event.messageTimestamp,
+                                message = text(getKudosMessage(updatedKudos)),
+                            ),
+                        )
+                    }
+                }
+            }
+
+            is SlackcatEvent.ReactionRemoved -> {
+                // Optionally handle kudos removal
+                // For now, we'll keep kudos even if reactions are removed
+            }
+
+            else -> {
+                // Ignore other events
+            }
+        }
+    }
 
     private fun extractUserIds(userText: String): Set<String> {
         val pattern = """<@(\w+)>""".toRegex()

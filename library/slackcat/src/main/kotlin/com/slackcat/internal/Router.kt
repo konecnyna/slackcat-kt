@@ -127,8 +127,36 @@ class Router(
         eventsSubscription =
             coroutineScope.launch {
                 eventsFlow.collect { event ->
+                    // First, notify all SlackcatEventsModule implementations
                     eventModules.forEach { module ->
                         launch { module.onEvent(event) }
+                    }
+
+                    // Then, handle reaction events with filtering for SlackcatModule implementations
+                    when (event) {
+                        is SlackcatEvent.ReactionAdded, is SlackcatEvent.ReactionRemoved -> {
+                            val reaction =
+                                when (event) {
+                                    is SlackcatEvent.ReactionAdded -> event.reaction
+                                    is SlackcatEvent.ReactionRemoved -> event.reaction
+                                    else -> null
+                                }
+
+                            reaction?.let { emoji ->
+                                modules
+                                    .filter { module ->
+                                        val handledReactions = module.reactionsToHandle()
+                                        handledReactions.isNotEmpty() && emoji in handledReactions
+                                    }
+                                    .forEach { module ->
+                                        launch { module.onReaction(event) }
+                                    }
+                            }
+                        }
+
+                        else -> {
+                            // Other events are already handled above
+                        }
                     }
                 }
             }

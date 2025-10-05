@@ -4,12 +4,15 @@ import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageEvent
+import com.slack.api.model.event.ReactionAddedEvent
+import com.slack.api.model.event.ReactionRemovedEvent
 import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
+import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,6 +22,8 @@ import kotlinx.coroutines.launch
 class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEngine {
     private val _messagesFlow = MutableSharedFlow<IncomingChatMessage>()
     private val messagesFlow = _messagesFlow.asSharedFlow()
+
+    private var eventsFlow: MutableSharedFlow<SlackcatEvent>? = null
 
     private val app = App()
     private val client = app.client
@@ -39,6 +44,40 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 CommandParser.extractCommand(message.text)?.let {
                     _messagesFlow.emit(message.toDomain(it))
                 }
+            }
+            ctx.ack()
+        }
+
+        app.event(ReactionAddedEvent::class.java) { payload, ctx ->
+            val event = payload.event
+            globalCoroutineScope.launch {
+                eventsFlow?.emit(
+                    SlackcatEvent.ReactionAdded(
+                        userId = event.user,
+                        reaction = event.reaction,
+                        channelId = event.item.channel,
+                        messageTimestamp = event.item.ts,
+                        itemUserId = event.itemUser,
+                        eventTimestamp = event.eventTs,
+                    ),
+                )
+            }
+            ctx.ack()
+        }
+
+        app.event(ReactionRemovedEvent::class.java) { payload, ctx ->
+            val event = payload.event
+            globalCoroutineScope.launch {
+                eventsFlow?.emit(
+                    SlackcatEvent.ReactionRemoved(
+                        userId = event.user,
+                        reaction = event.reaction,
+                        channelId = event.item.channel,
+                        messageTimestamp = event.item.ts,
+                        itemUserId = event.itemUser,
+                        eventTimestamp = event.eventTs,
+                    ),
+                )
             }
             ctx.ack()
         }
@@ -92,6 +131,10 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     override suspend fun eventFlow() = messagesFlow
 
     override fun provideEngineName(): String = "SlackRTM"
+
+    override fun setEventsFlow(eventsFlow: MutableSharedFlow<SlackcatEvent>) {
+        this.eventsFlow = eventsFlow
+    }
 
     fun MessageEvent.toDomain(command: String) =
         IncomingChatMessage(

@@ -45,4 +45,24 @@ abstract class SlackcatModule : KoinComponent {
     }
 
     open fun aliases(): List<String> = emptyList()
+
+    /**
+     * Override this method to specify which reaction emojis this module should handle.
+     * Return a set of emoji names (without colons) that this module is interested in.
+     * Return an empty set (default) to not handle any reactions.
+     *
+     * Example: setOf("thumbsup", "heart", "fire", "+1")
+     */
+    open fun reactionsToHandle(): Set<String> = emptySet()
+
+    /**
+     * Override this method to handle reaction events.
+     * This will only be called if reactionsToHandle() returns a non-empty set
+     * and the reaction matches one of the emojis in that set.
+     *
+     * @param event The reaction event (either ReactionAdded or ReactionRemoved)
+     */
+    open suspend fun onReaction(event: com.slackcat.common.SlackcatEvent) {
+        // Default implementation does nothing
+    }
 }
