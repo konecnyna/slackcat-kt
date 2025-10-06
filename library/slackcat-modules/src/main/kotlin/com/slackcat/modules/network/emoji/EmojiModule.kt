@@ -2,15 +2,14 @@ package com.slackcat.modules.network.emoji
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
-class EmojiModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class EmojiModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val emojiClient by lazy { EmojiClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

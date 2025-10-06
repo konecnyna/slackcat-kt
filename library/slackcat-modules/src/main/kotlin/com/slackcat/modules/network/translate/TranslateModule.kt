@@ -2,7 +2,6 @@ package com.slackcat.modules.network.translate
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.ErrorResponseFunTranslation
 import com.slackcat.modules.FunTranslationApiResponse
@@ -14,9 +13,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
-class TranslateModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class TranslateModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

@@ -2,15 +2,14 @@ package com.slackcat.modules.network.weather
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
-class WeatherModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class WeatherModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val weatherClient by lazy { WeatherClient(networkClient) }
     private val weatherMessageFactory = WeatherMessageFactory()
 

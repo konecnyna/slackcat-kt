@@ -8,11 +8,14 @@ import com.slackcat.models.UnhandledCommandModule
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 import com.slackcat.presentation.text
+import org.jetbrains.exposed.sql.Table
 
 class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
     private val learnFactory = LearnFactory()
     private val learnDAO = LearnDAO()
     private val aliasHandler = LearnAliasHandler(learnDAO)
+
+    override fun tables(): List<Table> = listOf(LearnDAO.LearnTable)
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val aliasMessage = aliasHandler.handleAliases(incomingChatMessage)
@@ -108,8 +111,6 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         }
 
     override fun provideCommand(): String = "learn"
-
-    override fun provideTables() = listOf(LearnDAO.LearnTable)
 
     override fun aliases(): List<String> = LearnAliases.entries.map { it.alias }
 }

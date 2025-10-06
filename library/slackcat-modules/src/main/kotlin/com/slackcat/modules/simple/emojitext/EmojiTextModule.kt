@@ -1,4 +1,4 @@
-package com.slackcat.app.modules.emojitext
+package com.slackcat.modules.simple.emojitext
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
@@ -35,17 +35,11 @@ class EmojiTextModule : SlackcatModule() {
         emojiOne: String,
         emojiTwo: String,
     ): String {
-        // Remove leading/trailing whitespace from dictionary patterns to avoid extra spaces
-        val cleanedDictionary =
-            emojiDictionary.mapValues { (_, value) ->
-                value.trim()
-            }
-
         // Convert letters to their emoji representations and merge them
         var result = ""
         val letterDisplays =
             letters.map { letter ->
-                getLetter(letter, cleanedDictionary)
+                getLetter(letter, emojiDictionary)
             }
 
         // Initialize with first letter
@@ -55,10 +49,10 @@ class EmojiTextModule : SlackcatModule() {
 
         // Merge remaining letters
         for (i in 1 until letterDisplays.size) {
-            result = mergeLines(result, letterDisplays[i])
+            result = mergeLines(result, letterDisplays[i], emojiTwo)
         }
 
-        // Replace placeholders with actual emojis - avoid issues with whitespace
+        // Replace placeholders with actual emojis
         return result.replace("#", emojiOne).replace(".", emojiTwo)
     }
 
@@ -83,15 +77,16 @@ class EmojiTextModule : SlackcatModule() {
 
     private fun getLetter(
         letter: String,
-        cleanedDictionary: Map<String, String>,
+        dictionary: Map<String, String>,
     ): String {
         // Get letter pattern from dictionary or default to space
-        return cleanedDictionary[letter] ?: cleanedDictionary["space"] ?: ""
+        return dictionary[letter] ?: dictionary["space"] ?: ""
     }
 
     private fun mergeLines(
         line: String,
         letter: String,
+        spacer: String,
     ): String {
         if (line.isEmpty()) return letter
 
@@ -103,9 +98,9 @@ class EmojiTextModule : SlackcatModule() {
         val paddedLineArray = lineArray.padTo(maxSize, "")
         val paddedLetterArray = letterArray.padTo(maxSize, "")
 
-        // Merge the lines horizontally without adding extra spaces
+        // Merge the lines horizontally with spacing between letters using emojiTwo
         return paddedLineArray.zip(paddedLetterArray) { a, b ->
-            a + (if (a.isNotEmpty() && b.isNotEmpty()) "" else "") + b
+            a + (if (a.isNotEmpty() && b.isNotEmpty()) spacer else "") + b
         }.joinToString("\n")
     }
 

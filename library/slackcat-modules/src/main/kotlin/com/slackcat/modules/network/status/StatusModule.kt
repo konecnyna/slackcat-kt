@@ -2,15 +2,14 @@ package com.slackcat.modules.network.status
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.models.NetworkModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
-class StatusModule : SlackcatModule(), NetworkModule {
-    override lateinit var networkClient: NetworkClient
-
+class StatusModule(
+    private val networkClient: NetworkClient,
+) : SlackcatModule() {
     private val statusClient by lazy { StatusClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

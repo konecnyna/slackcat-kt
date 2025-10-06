@@ -4,32 +4,55 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 
 class DateModuleTest {
     private lateinit var dateModule: DateModule
     private lateinit var mockChatClient: ChatClient
     private lateinit var mockCoroutineScope: CoroutineScope
+    private lateinit var mockConfig: SlackcatConfig
 
     @BeforeEach
     fun setup() {
-        dateModule = DateModule()
         mockChatClient = mockk(relaxed = true)
         mockCoroutineScope = mockk(relaxed = true)
+        mockConfig = mockk(relaxed = true)
 
-        dateModule.chatClient = mockChatClient
-        dateModule.coroutineScope = mockCoroutineScope
+        every { mockConfig.botNameProvider() } returns "TestBot"
+        every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
 
-        coEvery { mockChatClient.sendMessage(any()) } returns Result.success(Unit)
+        startKoin {
+            modules(
+                module {
+                    single<ChatClient> { mockChatClient }
+                    single<CoroutineScope> { mockCoroutineScope }
+                    single<SlackcatConfig> { mockConfig }
+                },
+            )
+        }
+
+        dateModule = DateModule()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        stopKoin()
     }
 
     private fun createTestMessage(
@@ -78,7 +101,7 @@ class DateModuleTest {
             dateModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
-            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
@@ -98,7 +121,7 @@ class DateModuleTest {
             dateModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
-            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
             val messageText = sentMessage.message.toString()

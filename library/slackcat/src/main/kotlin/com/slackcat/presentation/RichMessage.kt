@@ -62,6 +62,29 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
 
 inline fun text(value: String) = buildRichMessage { section(value) }
 
+inline fun buildAttachment(
+    color: String,
+    builderAction: RichTextMessageBuilder.() -> Unit,
+): com.slackcat.common.MessageAttachment {
+    val builder = RichTextMessageBuilder()
+    builder.builderAction()
+    return com.slackcat.common.MessageAttachment(
+        color = color,
+        blocks = builder.build(),
+    )
+}
+
+fun messageWithAttachment(
+    color: String,
+    builderAction: RichTextMessageBuilder.() -> Unit,
+): com.slackcat.common.RichTextMessage {
+    val attachment = buildAttachment(color, builderAction)
+    return com.slackcat.common.RichTextMessage(
+        text = "",
+        attachments = listOf(attachment),
+    )
+}
+
 // Define a structure to represent blocks
 @Serializable
 data class RichMessage(val blocks: List<Block>)

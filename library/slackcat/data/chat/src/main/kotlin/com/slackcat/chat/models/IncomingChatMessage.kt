@@ -1,8 +1,6 @@
 package com.slackcat.chat.models
 
 import com.slackcat.common.RichTextMessage
-import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_IMAGE_ICON
-import com.slackcat.common.SlackcatAppDefaults.DEFAULT_BOT_NAME
 
 data class IncomingChatMessage(
     val arguments: List<String>,
@@ -18,8 +16,7 @@ data class IncomingChatMessage(
 data class OutgoingChatMessage(
     val channelId: String,
     val message: RichTextMessage = RichTextMessage(""),
-    val botName: String = DEFAULT_BOT_NAME,
-    val botIcon: BotIcon = BotIcon.BotImageIcon(DEFAULT_BOT_IMAGE_ICON),
+    val threadId: String? = null,
 )
 
 sealed interface BotIcon {
