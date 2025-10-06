@@ -12,6 +12,8 @@ class EmojiModule(
 ) : SlackcatModule() {
     private val emojiClient by lazy { EmojiClient(networkClient) }
 
+    override fun aliases(): List<String> = listOf("et")
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val emoji = emojiClient.fetchEmoji(incomingChatMessage.userText)
         if (emoji == null) {
