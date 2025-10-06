@@ -27,7 +27,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         }
 
     override suspend fun onEvent(event: SlackcatEvent) {
-        if (engine != Engine.Slack) {
+        if (engine != Engine.ChatClient.Slack) {
             return
         }
 

@@ -11,10 +11,21 @@ import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
+    private val leaderboard = KudosLeaderboard(kudosDAO)
 
     override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        // Check if this is a leaderboard command
+        if (incomingChatMessage.command == "leaderboard" ||
+            incomingChatMessage.command == "kudosleaderboard" ||
+            incomingChatMessage.command == "pluses"
+        ) {
+            handleLeaderboard(incomingChatMessage)
+            return
+        }
+
+        // Handle kudos giving
         val allIds = extractUserIds(incomingChatMessage.userText)
         val validIds = filterValidKudosRecipients(allIds, incomingChatMessage.chatUser.userId)
 
@@ -40,12 +51,28 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
     override fun provideCommand(): String = "++"
 
+    override fun aliases(): List<String> = listOf("leaderboard", "kudosleaderboard", "pluses")
+
     override fun help(): String =
         buildMessage {
             title("KudosModule Help")
             text("Give kudos to your friends by using ?++ @username . See who can get the most!")
             text("You can also give kudos by reacting with :heavy_plus_sign: to their messages!")
+            text("Use ?leaderboard to see the top 10 users with the most kudos!")
         }
+
+    private suspend fun handleLeaderboard(incomingChatMessage: IncomingChatMessage) {
+        val leaderboardText = leaderboard.getLeaderboardMessage()
+        sendMessage(
+            OutgoingChatMessage(
+                channelId = incomingChatMessage.channelId,
+                message =
+                    com.slackcat.presentation.messageWithAttachment("#2eb886") {
+                        section(leaderboardText)
+                    },
+            ),
+        )
+    }
 
     override fun reactionsToHandle(): Set<String> = setOf("heavy_plus_sign")
 

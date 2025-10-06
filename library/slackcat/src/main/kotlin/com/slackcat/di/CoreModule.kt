@@ -29,8 +29,8 @@ val coreModule =
         // Engine configuration - default from ENV or can be overridden
         single<Engine> {
             when (System.getenv("ENV")) {
-                "PRODUCTION" -> Engine.Slack
-                else -> Engine.Cli
+                "PRODUCTION" -> Engine.ChatClient.Slack
+                else -> Engine.CLI
             }
         }
 

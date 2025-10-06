@@ -1,8 +1,10 @@
 package com.slackcat.modules.storage.kudos
 
 import com.slackcat.database.dbUpsert
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.selectAll
 
 class KudosDAO {
     data class KudosRow(val id: Int, val userId: String, val count: Int)
@@ -35,5 +37,20 @@ class KudosDAO {
                 )
             },
         )
+    }
+
+    suspend fun getTopKudos(limit: Int = 10): List<KudosRow> {
+        return com.slackcat.database.dbQuery {
+            KudosTable.selectAll()
+                .orderBy(KudosTable.count, SortOrder.DESC)
+                .limit(limit)
+                .map { resultRow ->
+                    KudosRow(
+                        id = resultRow[KudosTable.id],
+                        userId = resultRow[KudosTable.userId],
+                        count = resultRow[KudosTable.count],
+                    )
+                }
+        }
     }
 }

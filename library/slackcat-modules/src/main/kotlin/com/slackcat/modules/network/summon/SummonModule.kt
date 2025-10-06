@@ -61,6 +61,7 @@ class SummonModule(
                             buildRichMessage {
                                 text("❌ Failed to send summon message: ${error.message}")
                                 text("Original request: ${incomingChatMessage.userText}")
+                                text("URL that broke blocks: $imageUrl")
                             },
                     ),
                 )

@@ -10,11 +10,11 @@ class DefaultDatasourceFactory {
         databaseConfig: DatabaseConfig?,
     ): DataSource {
         return when (engine) {
-            Engine.Slack -> {
+            Engine.ChatClient.Slack -> {
                 requireNotNull(databaseConfig) { "DatabaseConfig is required for Slack engine" }
                 makePostgresSource(databaseConfig)
             }
-            Engine.Cli -> makeSqliteSource()
+            Engine.CLI -> makeSqliteSource()
         }
     }
 

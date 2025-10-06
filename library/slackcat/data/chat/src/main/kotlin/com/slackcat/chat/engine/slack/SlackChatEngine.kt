@@ -104,11 +104,25 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     null
                 }
 
+            val attachments =
+                if (message.message.attachments.isNotEmpty()) {
+                    val jsonObjectConverter = JsonToBlockConverter()
+                    message.message.attachments.map { attachment ->
+                        com.slack.api.model.Attachment.builder()
+                            .color(attachment.color)
+                            .blocks(jsonObjectConverter.jsonObjectToBlocks(attachment.blocks))
+                            .build()
+                    }
+                } else {
+                    null
+                }
+
             val response =
                 client.chatPostMessage { req ->
                     req.apply {
                         channel(message.channelId)
                         blocks(messageBlocks)
+                        attachments(attachments)
                         username(botName)
                         message.threadId?.let { threadTs(it) }
                         when (botIcon) {
