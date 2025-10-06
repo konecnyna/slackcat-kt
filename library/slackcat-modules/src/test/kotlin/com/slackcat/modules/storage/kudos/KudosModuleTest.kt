@@ -4,9 +4,10 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.database.DatabaseDriver
+import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.CoroutineScope
@@ -19,30 +20,52 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import java.nio.file.Path
 
 class KudosModuleTest {
     private lateinit var kudosModule: KudosModule
     private lateinit var mockChatClient: ChatClient
     private lateinit var mockCoroutineScope: CoroutineScope
+    private lateinit var mockConfig: SlackcatConfig
     private lateinit var database: Database
+
+    @TempDir
+    lateinit var tempDir: Path
 
     @BeforeEach
     fun setup() {
-        kudosModule = KudosModule()
         mockChatClient = mockk(relaxed = true)
         mockCoroutineScope = mockk(relaxed = true)
+        mockConfig = mockk(relaxed = true)
 
-        DatabaseDriver.connect(inMemory = true)
-        database = DatabaseDriver.getDatabase()
+        every { mockConfig.botNameProvider() } returns "TestBot"
+        every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
 
+        // Create a temporary SQLite database file for testing
+        val dbFile = tempDir.resolve("test.db").toString()
+        database = Database.connect("jdbc:sqlite:$dbFile", driver = "org.sqlite.JDBC")
+
+        // Create the table schema synchronously
         transaction(database) {
             SchemaUtils.create(KudosDAO.KudosTable)
         }
 
-        kudosModule.chatClient = mockChatClient
-        kudosModule.coroutineScope = mockCoroutineScope
+        startKoin {
+            modules(
+                module {
+                    single<ChatClient> { mockChatClient }
+                    single<CoroutineScope> { mockCoroutineScope }
+                    single<SlackcatConfig> { mockConfig }
+                },
+            )
+        }
 
-        coEvery { mockChatClient.sendMessage(any()) } returns Result.success(Unit)
+        kudosModule = KudosModule()
     }
 
     @AfterEach
@@ -50,6 +73,7 @@ class KudosModuleTest {
         transaction(database) {
             SchemaUtils.drop(KudosDAO.KudosTable)
         }
+        stopKoin()
     }
 
     private fun createTestMessage(
@@ -93,7 +117,7 @@ class KudosModuleTest {
             kudosModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
-            coVerify { mockChatClient.sendMessage(capture(messageSlot)) }
+            coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
@@ -114,7 +138,7 @@ class KudosModuleTest {
             kudosModule.onInvoke(incomingMessage)
 
             val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots)) }
+            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
 
             messageSlots.forEach { sentMessage ->
                 assertEquals("channel123", sentMessage.channelId)
@@ -134,7 +158,7 @@ class KudosModuleTest {
             kudosModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
-            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot)) }
+            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
             assertTrue(sentMessage.message.toString().contains("<@user456>"))
@@ -154,7 +178,7 @@ class KudosModuleTest {
             kudosModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
-            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot)) }
+            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
@@ -175,7 +199,7 @@ class KudosModuleTest {
             kudosModule.onInvoke(incomingMessage)
 
             val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots)) }
+            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
 
             messageSlots.forEach { sentMessage ->
                 assertEquals("channel123", sentMessage.channelId)
@@ -185,31 +209,40 @@ class KudosModuleTest {
             }
         }
 
+    // Create a test subclass to access protected method
+    private class TestKudosModule : KudosModule() {
+        fun testGetKudosMessage(kudos: KudosDAO.KudosRow): String = getKudosMessage(kudos)
+    }
+
     @Test
     fun `getKudosMessage returns correct message for 1 plus`() {
+        val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 1)
-        val message = kudosModule.getKudosMessage(kudosRow)
+        val message = testModule.testGetKudosMessage(kudosRow)
         assertEquals("<@user123> now has 1 plus", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for 10 pluses`() {
+        val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 10)
-        val message = kudosModule.getKudosMessage(kudosRow)
+        val message = testModule.testGetKudosMessage(kudosRow)
         assertEquals("<@user123> now has 10 pluses! Double digits!", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for 69 pluses`() {
+        val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 69)
-        val message = kudosModule.getKudosMessage(kudosRow)
+        val message = testModule.testGetKudosMessage(kudosRow)
         assertEquals("Nice <@user123>", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for multiple pluses`() {
+        val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 5)
-        val message = kudosModule.getKudosMessage(kudosRow)
+        val message = testModule.testGetKudosMessage(kudosRow)
         assertEquals("<@user123> now has 5 pluses", message)
     }
 }

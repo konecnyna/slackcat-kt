@@ -26,6 +26,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockk.mockk)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.sqlite.jdbc)
 }
 
 tasks.test {
