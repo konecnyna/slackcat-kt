@@ -108,11 +108,12 @@ class KudosModuleTest {
     @Test
     fun `onInvoke with single user mention gives kudos and responds in thread`() =
         runTest {
-            val incomingMessage = createTestMessage(
-                command = "++",
-                userText = "<@user456>",
-                messageId = "msg123",
-            )
+            val incomingMessage =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "msg123",
+                )
 
             kudosModule.onInvoke(incomingMessage)
 
@@ -129,11 +130,12 @@ class KudosModuleTest {
     @Test
     fun `onInvoke with multiple user mentions gives kudos to each user`() =
         runTest {
-            val incomingMessage = createTestMessage(
-                command = "++",
-                userText = "<@user456> <@user789>",
-                messageId = "msg123",
-            )
+            val incomingMessage =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456> <@user789>",
+                    messageId = "msg123",
+                )
 
             kudosModule.onInvoke(incomingMessage)
 
@@ -149,11 +151,12 @@ class KudosModuleTest {
     @Test
     fun `onInvoke with duplicate user mentions only gives kudos once`() =
         runTest {
-            val incomingMessage = createTestMessage(
-                command = "++",
-                userText = "<@user456> <@user456> <@user456>",
-                messageId = "msg123",
-            )
+            val incomingMessage =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456> <@user456> <@user456>",
+                    messageId = "msg123",
+                )
 
             kudosModule.onInvoke(incomingMessage)
 
@@ -168,12 +171,13 @@ class KudosModuleTest {
     @Test
     fun `onInvoke prevents users from plusing themselves and sends warning message`() =
         runTest {
-            val incomingMessage = createTestMessage(
-                command = "++",
-                userText = "<@user123>",
-                userId = "user123",
-                messageId = "msg123",
-            )
+            val incomingMessage =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user123>",
+                    userId = "user123",
+                    messageId = "msg123",
+                )
 
             kudosModule.onInvoke(incomingMessage)
 
@@ -189,12 +193,13 @@ class KudosModuleTest {
     @Test
     fun `onInvoke prevents users from plusing themselves in mixed message`() =
         runTest {
-            val incomingMessage = createTestMessage(
-                command = "++",
-                userText = "<@user123> <@user456> <@user789>",
-                userId = "user123",
-                messageId = "msg123",
-            )
+            val incomingMessage =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user123> <@user456> <@user789>",
+                    userId = "user123",
+                    messageId = "msg123",
+                )
 
             kudosModule.onInvoke(incomingMessage)
 

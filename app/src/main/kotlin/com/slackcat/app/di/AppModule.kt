@@ -1,6 +1,5 @@
 package com.slackcat.app.di
 
-import com.slackcat.DefaultDatasourceFactory
 import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
@@ -14,19 +13,10 @@ import com.slackcat.modules.simple.emojitext.EmojiTextModule
 import org.koin.dsl.module
 import java.time.LocalDate
 import java.time.Month
-import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 val appModule =
     module {
-        // DataSource factory
-        single { DefaultDatasourceFactory() }
-
-        // DataSource - engine-specific
-        single<DataSource> {
-            get<DefaultDatasourceFactory>().makeDatabaseSource(get(), get<SlackcatConfig>().databaseConfig)
-        }
-
         // Module classes - combining library modules with app-specific modules
         single<List<KClass<out SlackcatModule>>> {
             SlackcatModules.all +
