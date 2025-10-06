@@ -1,3 +1,2 @@
 [*.kt]
 max_line_length = 200
-ktlint_standard_wrapping = disabled

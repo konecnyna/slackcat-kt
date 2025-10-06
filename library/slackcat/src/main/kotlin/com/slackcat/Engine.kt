@@ -1,7 +1,9 @@
 package com.slackcat
 
 sealed interface Engine {
-    data object Slack : Engine
+    data object CLI : Engine
 
-    data object Cli : Engine
+    sealed interface ChatClient : Engine {
+        data object Slack : ChatClient
+    }
 }
