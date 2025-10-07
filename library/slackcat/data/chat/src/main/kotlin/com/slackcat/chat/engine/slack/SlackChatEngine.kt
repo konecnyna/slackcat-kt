@@ -11,6 +11,7 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.ChatCapability
 import com.slackcat.common.CommandParser
 import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.CoroutineScope
@@ -145,6 +146,22 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     override suspend fun eventFlow() = messagesFlow
 
     override fun provideEngineName(): String = "SlackRTM"
+
+    override fun capabilities(): Set<ChatCapability> {
+        // Slack supports almost all capabilities
+        return setOf(
+            ChatCapability.RICH_FORMATTING,
+            ChatCapability.IMAGES,
+            ChatCapability.THUMBNAILS,
+            ChatCapability.DIVIDERS,
+            ChatCapability.STRUCTURED_FIELDS,
+            ChatCapability.THREADS,
+            ChatCapability.REACTIONS,
+            ChatCapability.CUSTOM_BOT_ICON,
+            ChatCapability.CUSTOM_BOT_NAME,
+            ChatCapability.MESSAGE_COLORS,
+        )
+    }
 
     override fun setEventsFlow(eventsFlow: MutableSharedFlow<SlackcatEvent>) {
         this.eventsFlow = eventsFlow

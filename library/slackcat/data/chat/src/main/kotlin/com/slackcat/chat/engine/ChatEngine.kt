@@ -3,6 +3,7 @@ package com.slackcat.chat.engine
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.ChatCapability
 import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -18,6 +19,12 @@ interface ChatEngine {
     suspend fun eventFlow(): SharedFlow<IncomingChatMessage>
 
     fun provideEngineName(): String
+
+    /**
+     * Returns the set of capabilities this chat engine supports.
+     * Modules can use this to adapt their behavior to different platforms.
+     */
+    fun capabilities(): Set<ChatCapability>
 
     /**
      * Set the events flow for emitting SlackcatEvents (like reactions).

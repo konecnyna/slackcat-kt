@@ -4,6 +4,7 @@ import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.ChatCapability
 import com.slackcat.common.CommandParser
 import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.CoroutineScope
@@ -127,6 +128,13 @@ class CliChatEngine(
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
 
     override fun provideEngineName(): String = "Cli"
+
+    override fun capabilities(): Set<ChatCapability> {
+        // CLI supports basic text output only
+        return setOf(
+            ChatCapability.THREADS,
+        )
+    }
 
     override fun setEventsFlow(eventsFlow: MutableSharedFlow<SlackcatEvent>) {
         this.eventsFlow = eventsFlow

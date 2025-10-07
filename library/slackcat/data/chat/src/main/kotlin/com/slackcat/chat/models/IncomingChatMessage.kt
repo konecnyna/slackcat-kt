@@ -26,3 +26,7 @@ sealed interface BotIcon {
 }
 
 data class ChatUser(val userId: String)
+
+// Type aliases for better naming (will eventually replace the original names)
+typealias UserMessage = IncomingChatMessage
+typealias BotResponse = OutgoingChatMessage
