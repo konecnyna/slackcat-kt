@@ -2,11 +2,12 @@ package com.slackcat.modules.network.pokecat
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.RichTextMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.PokemonData
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
 class PokeCatModule(
@@ -64,9 +65,9 @@ class PokeCatModule(
 
     override fun provideCommand(): String = "pokemon"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Pokemon Help")
+            heading("Pokemon Help")
             text("Get stats on your favorite pokemon")
             text("- Usage: `?pokemon <number>`")
             text("- Ex: `?pokemon 69`")

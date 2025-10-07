@@ -2,9 +2,10 @@ package com.slackcat.modules.network.weather
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
 class WeatherModule(
@@ -43,9 +44,9 @@ class WeatherModule(
 
     override fun provideCommand(): String = "weather"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("WeatherModule Help")
+            heading("WeatherModule Help")
             text("This module is will give you weather data from NWS")
             text("Usage: ?weather <zipcode>")
         }

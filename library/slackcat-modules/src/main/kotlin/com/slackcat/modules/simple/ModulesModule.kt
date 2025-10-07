@@ -2,7 +2,9 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.RichTextMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
 import com.slackcat.presentation.buildRichMessage
@@ -87,15 +89,15 @@ class ModulesModule(
 
     override fun aliases(): List<String> = listOf("commands", "list")
 
-    override fun help(): String =
-        """
-        *ModulesModule Help*
-        Lists all active modules in the bot.
-
-        Usage: `?modules`
-        Aliases: `?commands`, `?list`
-
-        This will display all available commands grouped by category,
-        along with any aliases they might have.
-        """.trimIndent()
+    override fun help(): BotMessage =
+        buildMessage {
+            heading("ModulesModule Help")
+            text("Lists all active modules in the bot.")
+            text("")
+            text("Usage: `?modules`")
+            text("Aliases: `?commands`, `?list`")
+            text("")
+            text("This will display all available commands grouped by category,")
+            text("along with any aliases they might have.")
+        }
 }

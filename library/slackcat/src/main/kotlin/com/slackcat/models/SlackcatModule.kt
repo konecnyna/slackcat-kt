@@ -4,8 +4,8 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatConfig
-import com.slackcat.presentation.text
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -15,7 +15,7 @@ abstract class SlackcatModule : KoinComponent {
 
     abstract fun provideCommand(): String
 
-    abstract fun help(): String
+    abstract fun help(): BotMessage
 
     val chatClient: ChatClient by inject()
 
@@ -39,7 +39,7 @@ abstract class SlackcatModule : KoinComponent {
         return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                message = text(help()),
+                newMessage = help(),
             ),
         )
     }

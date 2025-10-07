@@ -2,12 +2,13 @@ package com.slackcat.modules.network.translate
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.ErrorResponseFunTranslation
 import com.slackcat.modules.FunTranslationApiResponse
 import com.slackcat.modules.SuccessResponseFunTranslation
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -95,9 +96,9 @@ class TranslateModule(
 
     override fun provideCommand(): String = "translate"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("TranslateModule Help")
+            heading("TranslateModule Help")
             text("Wanna talk like a pirate? Try using:\n?translate pirate how is your day going?")
             text("Wanna talk like a yoda? Try using:\n?translate yoda how is your day going?")
         }

@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -84,9 +85,18 @@ class FrameModuleTest {
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = frameModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("Frame Help"))
+        val helpMessage = frameModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("Frame Help")
+                    is MessageElement.Text -> element.content.contains("Frame Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test

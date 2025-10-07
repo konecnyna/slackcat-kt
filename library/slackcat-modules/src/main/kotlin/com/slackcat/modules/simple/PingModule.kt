@@ -2,8 +2,9 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
 class PingModule : SlackcatModule() {
@@ -33,9 +34,9 @@ class PingModule : SlackcatModule() {
             "ring",
         )
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Ping Help")
+            heading("Ping Help")
             text("This module is for debugging. If slackcat is running ?ping will return ?pong")
         }
 }

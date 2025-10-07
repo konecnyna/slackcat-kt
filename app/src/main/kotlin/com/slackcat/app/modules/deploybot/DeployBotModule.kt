@@ -4,10 +4,11 @@ import com.slackcat.Engine
 import com.slackcat.app.BigHipsChannels
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import org.koin.core.component.inject
 
@@ -20,9 +21,9 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
 
     override fun provideCommand(): String = "deploy-bot"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("DeployBoyModule Help")
+            heading("DeployBoyModule Help")
             text("Send a kewl message when slackcat starts")
         }
 

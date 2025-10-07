@@ -2,10 +2,11 @@ package com.slackcat.modules.storage.kudos
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import org.jetbrains.exposed.sql.Table
 
@@ -53,9 +54,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
     override fun aliases(): List<String> = listOf("leaderboard", "kudosleaderboard", "pluses")
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("KudosModule Help")
+            heading("KudosModule Help")
             text("Give kudos to your friends by using ?++ @username . See who can get the most!")
             text("You can also give kudos by reacting with :heavy_plus_sign: to their messages!")
             text("Use ?leaderboard to see the top 10 users with the most kudos!")

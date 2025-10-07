@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -100,9 +101,18 @@ class KudosModuleTest {
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = kudosModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("KudosModule Help"))
+        val helpMessage = kudosModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("KudosModule Help")
+                    is MessageElement.Text -> element.content.contains("KudosModule Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test

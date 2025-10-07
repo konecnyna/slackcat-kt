@@ -2,9 +2,10 @@ package com.slackcat.modules.network.emoji
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
 class EmojiModule(
@@ -37,9 +38,9 @@ class EmojiModule(
 
     override fun provideCommand(): String = "emoji"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("EmojiModule Help")
+            heading("EmojiModule Help")
             text(
                 "Grab emoji from this fun " +
                     "<https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3|fun list>",

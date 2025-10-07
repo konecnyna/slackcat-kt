@@ -2,9 +2,10 @@ package com.slackcat.modules.network.summon
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 import com.slackcat.presentation.text
 import kotlin.random.Random
@@ -69,9 +70,9 @@ class SummonModule(
 
     override fun aliases(): List<String> = SummonModuleAliases.entries.map { it.alias }
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Summon Help")
+            heading("Summon Help")
             text("Summon an image from Google images. Use with caution...")
             text("Usage: ?summon slackcat")
         }

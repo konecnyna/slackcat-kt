@@ -3,11 +3,12 @@ package com.slackcat.app.modules.jeopardy
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.RichTextMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 import org.jetbrains.exposed.sql.Table
 
@@ -65,9 +66,9 @@ class JeopardyModule(
 
     override fun provideCommand(): String = "jeopardy"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("JeopardyModule Help")
+            heading("JeopardyModule Help")
             text(
                 "Get a question using ?jeopardy <value> (ex ?jeopardy 300) \n" +
                     "Answer a question using ?jeopardy-answer <questionId> <your answer> \n" +

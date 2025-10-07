@@ -3,9 +3,10 @@ package com.slackcat.modules.network.crypto
 import com.slackcat.app.modules.crypto.CryptoPriceClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import java.text.DecimalFormat
 
@@ -49,9 +50,9 @@ class CryptoPriceModule(
         }
     }
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("CryptoPriceModule Help")
+            heading("CryptoPriceModule Help")
             text("Fetch current cryptocurrency prices.")
             text("*Usage:* ?crypto <ticker>")
             text("Example: `?crypto btc` to get the price of Bitcoin.")

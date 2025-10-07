@@ -2,8 +2,9 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 import kotlin.random.Random
 
@@ -32,9 +33,9 @@ class EmojiSentenceModule : SlackcatModule() {
         return converted
     }
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Emojisentence Help")
+            heading("Emojisentence Help")
             text("Write some text braaa (Example '?emojisentence what up braaa')")
         }
 

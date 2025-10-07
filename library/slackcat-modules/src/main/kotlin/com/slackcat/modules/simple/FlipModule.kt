@@ -2,8 +2,9 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.text
 
 class FlipModule : SlackcatModule() {
@@ -58,9 +59,9 @@ class FlipModule : SlackcatModule() {
 
     override fun provideCommand(): String = "flip"
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Flip Help")
+            heading("Flip Help")
             text("This module flips text upside down using Unicode characters.")
             text("Usage: ?flip [text]")
             text("Example: ?flip hello world → plɹoʍ ollǝɥ")

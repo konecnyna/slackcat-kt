@@ -2,10 +2,11 @@ package com.slackcat.modules.storage.learn
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 import com.slackcat.presentation.text
 import org.jetbrains.exposed.sql.Table
@@ -102,9 +103,9 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         }
     }
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("LearnModule Help")
+            heading("LearnModule Help")
             text("Create a custom command to recall text.")
             text("*Usage:* ?learn \"<key>\" \"<text>'\"")
             text("You can then recall the text ?<key>")

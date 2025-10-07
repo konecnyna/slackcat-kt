@@ -2,8 +2,9 @@ package com.slackcat.modules.network.radar
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
 import com.slackcat.presentation.buildRichMessage
 
 class RadarModule : SlackcatModule() {
@@ -95,9 +96,9 @@ class RadarModule : SlackcatModule() {
 
     override fun aliases(): List<String> = listOf("weather", "map", "forecast")
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Radar Help")
+            heading("Radar Help")
             text(
                 """
                 Usage: `?radar [location]` - Returns the radar map for the specified location.
