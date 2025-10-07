@@ -1,6 +1,5 @@
 package com.slackcat.app.di
 
-import com.slackcat.app.modules.bighips.BigHipsModule
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.chat.models.BotIcon
@@ -21,7 +20,6 @@ val appModule =
         single<List<KClass<out SlackcatModule>>> {
             SlackcatModules.all +
                 listOf(
-                    BigHipsModule::class,
                     DeployBotModule::class,
                     EmojiTextModule::class,
                     JeopardyModule::class,

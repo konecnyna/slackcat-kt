@@ -53,16 +53,12 @@ class SummonModule(
                 // Message sent successfully, nothing to do
             },
             onFailure = { error ->
-                // Send fallback message on failure
+                // Send fallback message as plain text in a thread
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        message =
-                            buildRichMessage {
-                                text("❌ Failed to send summon message: ${error.message}")
-                                text("Original request: ${incomingChatMessage.userText}")
-                                text("URL that broke blocks: $imageUrl")
-                            },
+                        threadId = incomingChatMessage.messageId,
+                        message = text("<$imageUrl>"),
                     ),
                 )
             },
