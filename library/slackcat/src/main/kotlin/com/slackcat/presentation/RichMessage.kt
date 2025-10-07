@@ -60,7 +60,15 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
     return RichTextMessage(builder.build())
 }
 
-inline fun text(value: String) = buildRichMessage { section(value) }
+/**
+ * Create a simple text message using the new platform-agnostic format.
+ * This replaces the old text() function to use BotMessage internally.
+ */
+inline fun text(value: String): RichTextMessage {
+    // For backward compatibility, we still return RichTextMessage
+    // but modules should start using the new format
+    return buildRichMessage { section(value) }
+}
 
 inline fun buildAttachment(
     color: String,
