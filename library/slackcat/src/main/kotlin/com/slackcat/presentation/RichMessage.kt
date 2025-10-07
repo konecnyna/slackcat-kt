@@ -10,7 +10,7 @@ class RichTextMessageBuilder {
     private val blocks = mutableListOf<Block>()
 
     fun divider() {
-        blocks.add(Block.Divider)
+        blocks.add(Block.Divider())
     }
 
     fun section(
@@ -46,7 +46,9 @@ class RichTextMessageBuilder {
         imageUrl: String,
         altText: String,
     ) {
-        blocks.add(Block.Image(image_url = imageUrl, alt_text = altText))
+        // Slack requires properly formatted URLs - ensure URL is valid
+        val sanitizedUrl = imageUrl.trim()
+        blocks.add(Block.Image(image_url = sanitizedUrl, alt_text = altText))
     }
 
     fun build(): String {
@@ -93,11 +95,12 @@ data class RichMessage(val blocks: List<Block>)
 sealed class Block {
     @Serializable
     @SerialName("divider")
-    data object Divider : Block()
+    data class Divider(val type: String = "divider") : Block()
 
     @Serializable
     @SerialName("section")
     data class Section(
+        val type: String = "section",
         val text: TextObject,
         val accessory: Accessory? = null,
     ) : Block()
@@ -105,13 +108,15 @@ sealed class Block {
     @Serializable
     @SerialName("image")
     data class Image(
+        val type: String = "image",
         val image_url: String,
         val alt_text: String,
     ) : Block()
 
     @Serializable
-    @SerialName("caption")
+    @SerialName("context")
     data class Context(
+        val type: String = "context",
         val elements: List<TextObject>,
     ) : Block()
 }

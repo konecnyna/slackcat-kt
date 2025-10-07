@@ -28,7 +28,7 @@ class EmojiModule(
                     buildRichMessage {
                         image(
                             imageUrl = emoji,
-                            altText = "summon image",
+                            altText = "emojite",
                         )
                     },
             ),
