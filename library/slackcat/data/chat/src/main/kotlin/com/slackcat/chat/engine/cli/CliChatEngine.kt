@@ -35,6 +35,7 @@ class CliChatEngine(
     private val messagesFlow = _messagesFlow.asSharedFlow()
 
     private var eventsFlow: MutableSharedFlow<SlackcatEvent>? = null
+    private val messageConverter = CliMessageConverter()
 
     init {
         scope.launch {
@@ -117,7 +118,16 @@ class CliChatEngine(
         return try {
             println("--------------------------------------")
             println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
-            println("User sees rich text:\n${message.message.text}")
+
+            // Use new message format if available, otherwise fall back to old format
+            val displayText =
+                if (message.isNewFormat() && message.newMessage != null) {
+                    messageConverter.toPlainText(message.newMessage)
+                } else {
+                    message.message.text
+                }
+
+            println("User sees rich text:\n$displayText")
             println("--------------------------------------")
             Result.success(Unit)
         } catch (e: Exception) {

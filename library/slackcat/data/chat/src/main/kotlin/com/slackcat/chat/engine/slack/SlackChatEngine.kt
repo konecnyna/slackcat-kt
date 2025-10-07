@@ -28,6 +28,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     private val app = App()
     private val client = app.client
+    private val messageConverter = SlackMessageConverter()
 
     override fun connect(ready: () -> Unit) {
         app.event(MessageBotEvent::class.java) { _, ctx ->
@@ -97,8 +98,13 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         botIcon: BotIcon,
     ): Result<Unit> {
         return try {
+            // Check if using new message format
             val messageBlocks =
-                if (message.message.text.isNotEmpty()) {
+                if (message.isNewFormat() && message.newMessage != null) {
+                    // Use new converter for BotMessage
+                    messageConverter.toSlackBlocks(message.newMessage)
+                } else if (message.message.text.isNotEmpty()) {
+                    // Fall back to old JSON converter for backward compatibility
                     val jsonObjectConverter = JsonToBlockConverter()
                     jsonObjectConverter.jsonObjectToBlocks(message.message.text)
                 } else {
@@ -106,7 +112,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 }
 
             val attachments =
-                if (message.message.attachments.isNotEmpty()) {
+                if (!message.isNewFormat() && message.message.attachments.isNotEmpty()) {
                     val jsonObjectConverter = JsonToBlockConverter()
                     message.message.attachments.map { attachment ->
                         com.slack.api.model.Attachment.builder()
