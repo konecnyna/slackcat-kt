@@ -4,8 +4,8 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.text
 import emojiDictionary
 
 class EmojiTextModule : SlackcatModule() {
@@ -15,7 +15,7 @@ class EmojiTextModule : SlackcatModule() {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    newMessage = help(),
+                    content = help(),
                 ),
             )
             return
@@ -26,7 +26,7 @@ class EmojiTextModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(output),
+                content = textMessage(output),
             ),
         )
     }

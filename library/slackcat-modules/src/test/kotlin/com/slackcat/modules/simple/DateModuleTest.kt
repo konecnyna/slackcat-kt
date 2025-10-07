@@ -115,7 +115,14 @@ class DateModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
-            assertTrue(sentMessage.message.toString().contains("Currently, it's"))
+            val hasExpectedText =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Currently, it's")
+                        else -> false
+                    }
+                }
+            assertTrue(hasExpectedText)
         }
 
     @Test
@@ -134,9 +141,15 @@ class DateModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
-
-            // The message should contain time-related terms
-            assertTrue(messageText.contains("Currently") || messageText.contains("it's"))
+            val hasExpectedText =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text ->
+                            element.content.contains("Currently") ||
+                                element.content.contains("it's")
+                        else -> false
+                    }
+                }
+            assertTrue(hasExpectedText)
         }
 }

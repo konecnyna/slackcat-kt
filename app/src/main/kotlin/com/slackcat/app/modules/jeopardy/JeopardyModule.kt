@@ -4,12 +4,10 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
-import com.slackcat.common.RichTextMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildRichMessage
 import org.jetbrains.exposed.sql.Table
 
 class JeopardyModule(
@@ -45,19 +43,20 @@ class JeopardyModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = message,
+                content = message,
             ),
         )
     }
 
-    private fun buildJeopardyMessage(question: JeopardyDAO.JeopardyQuestionRow): RichTextMessage {
-        return buildRichMessage {
+    private fun buildJeopardyMessage(question: JeopardyDAO.JeopardyQuestionRow): BotMessage {
+        return buildMessage {
             divider()
-            section(
-                text =
-                    "*The category is '${question.category}' for $${question.value}:* \n " +
-                        "${question.question} \n Question ID: ${question.id}",
-                imageUrl = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
+            text(
+                "*The category is '${question.category}' for $${question.value}:* \n " +
+                    "${question.question} \n Question ID: ${question.id}",
+            )
+            image(
+                url = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
                 altText = "alex quebec",
             )
             divider()

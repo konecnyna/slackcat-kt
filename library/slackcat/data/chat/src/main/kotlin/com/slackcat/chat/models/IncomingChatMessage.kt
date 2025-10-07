@@ -1,7 +1,6 @@
 package com.slackcat.chat.models
 
 import com.slackcat.common.BotMessage
-import com.slackcat.common.RichTextMessage
 
 data class IncomingChatMessage(
     val arguments: List<String>,
@@ -16,15 +15,9 @@ data class IncomingChatMessage(
 
 data class OutgoingChatMessage(
     val channelId: String,
-    val message: RichTextMessage = RichTextMessage(""),
+    val content: BotMessage,
     val threadId: String? = null,
-    val newMessage: BotMessage? = null,
-) {
-    /**
-     * Returns true if this message uses the new BotMessage format.
-     */
-    fun isNewFormat(): Boolean = newMessage != null
-}
+)
 
 sealed interface BotIcon {
     data class BotEmojiIcon(val emoji: String) : BotIcon

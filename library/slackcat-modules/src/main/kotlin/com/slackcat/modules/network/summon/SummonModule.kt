@@ -4,10 +4,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildRichMessage
-import com.slackcat.presentation.text
 import kotlin.random.Random
 
 class SummonModule(
@@ -38,10 +37,10 @@ class SummonModule(
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message =
-                        buildRichMessage {
+                    content =
+                        buildMessage {
                             image(
-                                imageUrl = imageUrl,
+                                url = imageUrl,
                                 altText = "summon image: ${incomingChatMessage.userText}",
                             )
                             context("Source: $imageUrl")
@@ -59,7 +58,7 @@ class SummonModule(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
                         threadId = incomingChatMessage.messageId,
-                        message = text("<$imageUrl>"),
+                        content = textMessage("<$imageUrl>"),
                     ),
                 )
             },

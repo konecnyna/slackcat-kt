@@ -115,7 +115,16 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
-            assertTrue(sentMessage.message.toString().contains("Please provide text to flip"))
+
+            val hasErrorMessage =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Please provide text to flip")
+                        is MessageElement.Heading -> element.content.contains("Please provide text to flip")
+                        else -> false
+                    }
+                }
+            assertTrue(hasErrorMessage)
         }
 
     @Test
@@ -134,12 +143,28 @@ class FlipModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain the table flip emoticon
-            assertTrue(messageText.contains("(╯°□°）╯︵"))
+            val hasTableFlip =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
+                        is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
+                        else -> false
+                    }
+                }
+            assertTrue(hasTableFlip)
+
             // Should contain flipped text (ollǝɥ is hello flipped)
-            assertTrue(messageText.contains("ollǝɥ"))
+            val hasFlippedText =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("ollǝɥ")
+                        is MessageElement.Heading -> element.content.contains("ollǝɥ")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFlippedText)
         }
 
     @Test
@@ -158,10 +183,17 @@ class FlipModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain flipped text
-            assertTrue(messageText.contains("(╯°□°）╯︵"))
+            val hasTableFlip =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
+                        is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
+                        else -> false
+                    }
+                }
+            assertTrue(hasTableFlip)
         }
 
     @Test
@@ -180,12 +212,28 @@ class FlipModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain the table flip emoticon and flipped numbers
-            assertTrue(messageText.contains("(╯°□°）╯︵"))
+            val hasTableFlip =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
+                        is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
+                        else -> false
+                    }
+                }
+            assertTrue(hasTableFlip)
+
             // 123 flipped should be ƐᄅƖ
-            assertTrue(messageText.contains("ƐᄅƖ"))
+            val hasFlippedNumbers =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("ƐᄅƖ")
+                        is MessageElement.Heading -> element.content.contains("ƐᄅƖ")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFlippedNumbers)
         }
 
     @Test
@@ -204,12 +252,28 @@ class FlipModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain flipped text
-            assertTrue(messageText.contains("(╯°□°）╯︵"))
+            val hasTableFlip =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
+                        is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
+                        else -> false
+                    }
+                }
+            assertTrue(hasTableFlip)
+
             // ! flipped is ¡
-            assertTrue(messageText.contains("¡"))
+            val hasFlippedExclamation =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("¡")
+                        is MessageElement.Heading -> element.content.contains("¡")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFlippedExclamation)
         }
 
     @Test
@@ -228,9 +292,16 @@ class FlipModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain the table flip emoticon
-            assertTrue(messageText.contains("(╯°□°）╯︵"))
+            val hasTableFlip =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
+                        is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
+                        else -> false
+                    }
+                }
+            assertTrue(hasTableFlip)
         }
 }

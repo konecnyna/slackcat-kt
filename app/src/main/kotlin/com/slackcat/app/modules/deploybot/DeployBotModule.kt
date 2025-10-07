@@ -7,9 +7,9 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.text
 import org.koin.core.component.inject
 
 class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
@@ -41,7 +41,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = BigHipsChannels.SlackcatTesting.channelId,
-                message = text(message),
+                content = textMessage(message),
             ),
         )
     }

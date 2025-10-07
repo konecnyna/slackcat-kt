@@ -5,7 +5,6 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildRichMessage
 
 class RadarModule : SlackcatModule() {
     private val radars =
@@ -58,24 +57,24 @@ class RadarModule : SlackcatModule() {
         val message =
             when {
                 inputText.isEmpty() ->
-                    buildRichMessage {
+                    buildMessage {
                         image(
-                            imageUrl = "https://s.w-x.co/staticmaps/wu/wxtype/none/usa/animate.png",
+                            url = "https://s.w-x.co/staticmaps/wu/wxtype/none/usa/animate.png",
                             altText = "Radar image for United States",
                         )
                     }
                 radarMatch != null -> {
-                    buildRichMessage {
+                    buildMessage {
                         image(
-                            imageUrl = formatUrl(radarMatch.value),
+                            url = formatUrl(radarMatch.value),
                             altText = "Radar image for ${radarMatch.state}",
                         )
                     }
                 }
                 else -> {
-                    buildRichMessage {
-                        section("Radar Not Found")
-                        section(
+                    buildMessage {
+                        text("Radar Not Found")
+                        text(
                             """Couldn't find radar for "$inputText". Available radars:\n${radars.sortedBy { it.state }.joinToString(
                                 "\n",
                             ) { "- ${it.state}" }}""".trimIndent(),
@@ -87,7 +86,7 @@ class RadarModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = message,
+                content = message,
             ),
         )
     }

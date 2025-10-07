@@ -112,9 +112,16 @@ class FrameModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
+
             // The message should contain the framed image URL
-            val messageText = sentMessage.message.toString()
-            assertTrue(messageText.contains("home-remote-api.herokuapp.com/nickelback"))
+            val hasFramedImageUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/nickelback")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFramedImageUrl)
         }
 
     @Test
@@ -130,9 +137,16 @@ class FrameModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
+
             // The message should contain the framed image URL
-            val messageText = sentMessage.message.toString()
-            assertTrue(messageText.contains("home-remote-api.herokuapp.com/krang"))
+            val hasFramedImageUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/krang")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFramedImageUrl)
         }
 
     @Test
@@ -147,9 +161,16 @@ class FrameModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
+
             // Should contain the URL without angle brackets
-            assertTrue(messageText.contains("https://example.com/image.jpg"))
+            val hasCleanUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("https://example.com/image.jpg")
+                        else -> false
+                    }
+                }
+            assertTrue(hasCleanUrl)
         }
 
     @Test

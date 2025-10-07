@@ -5,8 +5,8 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.text
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -34,7 +34,7 @@ class ReactionCounterModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(message),
+                content = textMessage(message),
             ),
         )
     }

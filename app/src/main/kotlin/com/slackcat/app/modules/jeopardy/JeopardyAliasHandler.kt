@@ -2,8 +2,8 @@ package com.slackcat.app.modules.jeopardy
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.common.RichTextMessage
-import com.slackcat.presentation.buildRichMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 
 class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
     val alexTrebekish = "https://emoji.slack-edge.com/T07UUET6K51/alex-trebekish/5a325219e8701914.png"
@@ -22,11 +22,11 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
 
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
-            message = message,
+            content = message,
         )
     }
 
-    private suspend fun handleAnswer(message: IncomingChatMessage): RichTextMessage {
+    private suspend fun handleAnswer(message: IncomingChatMessage): BotMessage {
         println("handling answer")
         val id = extractQuestionId(message.userText)?.toInt()
         val questionRow = id?.let { jeopardyDAO.getJeopardyQuestionById(it) }
@@ -49,7 +49,7 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
         }
     }
 
-    private suspend fun handlePoints(message: IncomingChatMessage): RichTextMessage {
+    private suspend fun handlePoints(message: IncomingChatMessage): BotMessage {
         val user = jeopardyDAO.getJeopardyScore(message.chatUser.toString())
         if (user == null) {
             return jeopardize("No score available", alexTrebekish)
@@ -67,12 +67,12 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
     private fun jeopardize(
         message: String,
         imageUrl: String,
-    ): RichTextMessage {
-        return buildRichMessage {
+    ): BotMessage {
+        return buildMessage {
             divider()
-            section(
-                text = message,
-                imageUrl = imageUrl,
+            text(message)
+            image(
+                url = imageUrl,
                 altText = "alex quebec",
             )
             divider()

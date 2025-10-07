@@ -39,7 +39,7 @@ abstract class SlackcatModule : KoinComponent {
         return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                newMessage = help(),
+                content = help(),
             ),
         )
     }

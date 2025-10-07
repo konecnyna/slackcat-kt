@@ -98,38 +98,13 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         botIcon: BotIcon,
     ): Result<Unit> {
         return try {
-            // Check if using new message format
-            val messageBlocks =
-                if (message.isNewFormat() && message.newMessage != null) {
-                    // Use new converter for BotMessage
-                    messageConverter.toSlackBlocks(message.newMessage)
-                } else if (message.message.text.isNotEmpty()) {
-                    // Fall back to old JSON converter for backward compatibility
-                    val jsonObjectConverter = JsonToBlockConverter()
-                    jsonObjectConverter.jsonObjectToBlocks(message.message.text)
-                } else {
-                    null
-                }
-
-            val attachments =
-                if (!message.isNewFormat() && message.message.attachments.isNotEmpty()) {
-                    val jsonObjectConverter = JsonToBlockConverter()
-                    message.message.attachments.map { attachment ->
-                        com.slack.api.model.Attachment.builder()
-                            .color(attachment.color)
-                            .blocks(jsonObjectConverter.jsonObjectToBlocks(attachment.blocks))
-                            .build()
-                    }
-                } else {
-                    null
-                }
+            val messageBlocks = messageConverter.toSlackBlocks(message.content)
 
             val response =
                 client.chatPostMessage { req ->
                     req.apply {
                         channel(message.channelId)
                         blocks(messageBlocks)
-                        attachments(attachments)
                         username(botName)
                         message.threadId?.let { threadTs(it) }
                         when (botIcon) {

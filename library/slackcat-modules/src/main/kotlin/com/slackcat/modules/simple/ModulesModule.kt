@@ -3,11 +3,9 @@ package com.slackcat.modules.simple
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
-import com.slackcat.common.RichTextMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.internal.Router
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildRichMessage
 
 /**
  * Module that lists all active modules in the bot.
@@ -24,26 +22,26 @@ class ModulesModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = modulesList,
+                content = modulesList,
                 threadId = incomingChatMessage.threadId,
             ),
         )
     }
 
-    private fun buildModulesList(): RichTextMessage {
+    private fun buildModulesList(): BotMessage {
         val activeModules =
             router.getAllModules()
                 .filter { it !is ModulesModule } // Exclude self from list
 
         val grouped = activeModules.groupBy { getModuleCategory(it) }
 
-        return buildRichMessage {
-            section("*📦 Active Slackcat Modules*")
+        return buildMessage {
+            text("*📦 Active Slackcat Modules*")
             divider()
 
             grouped.forEach { (category, modules) ->
                 val emoji = getCategoryEmoji(category)
-                section("*$emoji $category*")
+                text("*$emoji $category*")
 
                 modules.sortedBy { it.provideCommand() }.forEach { module ->
                     val command = module.provideCommand()
@@ -54,14 +52,14 @@ class ModulesModule(
                         } else {
                             ""
                         }
-                    section("  • `?$command`$aliasText")
+                    text("  • `?$command`$aliasText")
                 }
 
                 divider()
             }
 
-            section("*Total: ${activeModules.size} modules*")
-            section("_Use `?<command> --help` for more info about a specific module_")
+            text("*Total: ${activeModules.size} modules*")
+            text("_Use `?<command> --help` for more info about a specific module_")
         }
     }
 

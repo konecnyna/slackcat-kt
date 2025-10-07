@@ -131,12 +131,46 @@ class ModulesModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            val messageText = sentMessage.message.toString()
-            assertTrue(messageText.contains("Active Slackcat Modules"))
-            assertTrue(messageText.contains("ping"))
-            assertTrue(messageText.contains("date"))
+            val hasActiveModules =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Active Slackcat Modules")
+                        is MessageElement.Heading -> element.content.contains("Active Slackcat Modules")
+                        else -> false
+                    }
+                }
+            assertTrue(hasActiveModules)
+
+            val hasPing =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("ping")
+                        is MessageElement.Heading -> element.content.contains("ping")
+                        else -> false
+                    }
+                }
+            assertTrue(hasPing)
+
+            val hasDate =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("date")
+                        is MessageElement.Heading -> element.content.contains("date")
+                        else -> false
+                    }
+                }
+            assertTrue(hasDate)
+
             // ModulesModule should be filtered out
-            assertFalse(messageText.contains("?modules"))
+            val hasModulesCommand =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("?modules")
+                        is MessageElement.Heading -> element.content.contains("?modules")
+                        else -> false
+                    }
+                }
+            assertFalse(hasModulesCommand)
         }
 
     @Test
@@ -152,8 +186,16 @@ class ModulesModuleTest {
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
-            val messageText = messageSlot.captured.message.toString()
-            assertTrue(messageText.contains("Simple"))
+            val sentMessage = messageSlot.captured
+            val hasSimple =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Simple")
+                        is MessageElement.Heading -> element.content.contains("Simple")
+                        else -> false
+                    }
+                }
+            assertTrue(hasSimple)
         }
 
     @Test
@@ -170,8 +212,16 @@ class ModulesModuleTest {
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
-            val messageText = messageSlot.captured.message.toString()
-            assertTrue(messageText.contains("Total: 3 modules"))
+            val sentMessage = messageSlot.captured
+            val hasModuleCount =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Total: 3 modules")
+                        is MessageElement.Heading -> element.content.contains("Total: 3 modules")
+                        else -> false
+                    }
+                }
+            assertTrue(hasModuleCount)
         }
 
     @Test
@@ -185,7 +235,15 @@ class ModulesModuleTest {
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
-            val messageText = messageSlot.captured.message.toString()
-            assertTrue(messageText.contains("--help"))
+            val sentMessage = messageSlot.captured
+            val hasHelpHint =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("--help")
+                        is MessageElement.Heading -> element.content.contains("--help")
+                        else -> false
+                    }
+                }
+            assertTrue(hasHelpHint)
         }
 }

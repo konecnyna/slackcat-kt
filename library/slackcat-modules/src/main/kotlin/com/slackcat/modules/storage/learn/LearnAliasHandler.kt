@@ -2,7 +2,7 @@ package com.slackcat.modules.storage.learn
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.presentation.text
+import com.slackcat.common.textMessage
 
 class LearnAliasHandler(private val learnDAO: LearnDAO) {
     suspend fun handleAliases(incomingChatMessage: IncomingChatMessage): OutgoingChatMessage? {
@@ -18,7 +18,7 @@ class LearnAliasHandler(private val learnDAO: LearnDAO) {
 
         return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
-            message = text(message),
+            content = textMessage(message),
         )
     }
 

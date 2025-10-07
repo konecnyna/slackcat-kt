@@ -5,9 +5,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.text
 import java.text.DecimalFormat
 
 class CryptoPriceModule(
@@ -35,7 +35,7 @@ class CryptoPriceModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(message),
+                content = textMessage(message),
             ),
         )
     }

@@ -8,24 +8,24 @@ import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
 
 /**
- * Create an outgoing message with the new platform-agnostic format.
+ * Create an outgoing message with platform-agnostic format.
  */
-fun newMessage(
+fun message(
     channelId: String,
-    message: BotMessage,
+    content: BotMessage,
     threadId: String? = null,
 ): OutgoingChatMessage {
     return OutgoingChatMessage(
         channelId = channelId,
-        newMessage = message,
+        content = content,
         threadId = threadId,
     )
 }
 
 /**
- * Create an outgoing message using the new builder DSL.
+ * Create an outgoing message using the builder DSL.
  */
-fun newMessage(
+fun message(
     channelId: String,
     style: MessageStyle? = null,
     threadId: String? = null,
@@ -33,22 +33,22 @@ fun newMessage(
 ): OutgoingChatMessage {
     return OutgoingChatMessage(
         channelId = channelId,
-        newMessage = buildMessage(style, block),
+        content = buildMessage(style, block),
         threadId = threadId,
     )
 }
 
 /**
- * Create a simple text message using the new format.
+ * Create a simple text message.
  */
-fun newTextMessage(
+fun textMessage(
     channelId: String,
     text: String,
     threadId: String? = null,
 ): OutgoingChatMessage {
     return OutgoingChatMessage(
         channelId = channelId,
-        newMessage = textMessage(text),
+        content = textMessage(text),
         threadId = threadId,
     )
 }

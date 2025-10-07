@@ -5,7 +5,6 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildRichMessage
 
 class FrameModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -25,10 +24,10 @@ class FrameModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message =
-                    buildRichMessage {
+                content =
+                    buildMessage {
                         image(
-                            imageUrl = imageUrl,
+                            url = imageUrl,
                             altText = "frame image",
                         )
                     },

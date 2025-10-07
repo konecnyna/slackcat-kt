@@ -4,9 +4,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.text
 
 class WeatherModule(
     private val networkClient: NetworkClient,
@@ -20,8 +20,8 @@ class WeatherModule(
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        message =
-                            text(
+                        content =
+                            textMessage(
                                 "Could not find location ${incomingChatMessage.userText}.\n" +
                                     "Verify it " +
                                     "<https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\n" +
@@ -35,7 +35,7 @@ class WeatherModule(
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        message = text(richMessage),
+                        content = textMessage(richMessage),
                     ),
                 )
             }

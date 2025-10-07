@@ -117,9 +117,16 @@ class EmojiSentenceModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            val messageText = sentMessage.message.toString()
             // Should contain emoji alphabet format
-            assertTrue(messageText.contains(":alphabet-"))
+            val hasEmojiAlphabet =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(":alphabet-")
+                        is MessageElement.Heading -> element.content.contains(":alphabet-")
+                        else -> false
+                    }
+                }
+            assertTrue(hasEmojiAlphabet)
         }
 
     @Test
@@ -138,11 +145,27 @@ class EmojiSentenceModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should contain alphabet emoji
-            assertTrue(messageText.contains(":alphabet-"))
-            assertTrue(messageText.contains("-a:"))
+            val hasAlphabet =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(":alphabet-")
+                        is MessageElement.Heading -> element.content.contains(":alphabet-")
+                        else -> false
+                    }
+                }
+            assertTrue(hasAlphabet)
+
+            val hasLetterA =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("-a:")
+                        is MessageElement.Heading -> element.content.contains("-a:")
+                        else -> false
+                    }
+                }
+            assertTrue(hasLetterA)
         }
 
     @Test
@@ -161,13 +184,47 @@ class EmojiSentenceModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should convert to lowercase and contain emoji format
-            assertTrue(messageText.contains(":alphabet-"))
-            assertTrue(messageText.contains("-a:"))
-            assertTrue(messageText.contains("-b:"))
-            assertTrue(messageText.contains("-c:"))
+            val hasAlphabet =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(":alphabet-")
+                        is MessageElement.Heading -> element.content.contains(":alphabet-")
+                        else -> false
+                    }
+                }
+            assertTrue(hasAlphabet)
+
+            val hasLetterA =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("-a:")
+                        is MessageElement.Heading -> element.content.contains("-a:")
+                        else -> false
+                    }
+                }
+            assertTrue(hasLetterA)
+
+            val hasLetterB =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("-b:")
+                        is MessageElement.Heading -> element.content.contains("-b:")
+                        else -> false
+                    }
+                }
+            assertTrue(hasLetterB)
+
+            val hasLetterC =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("-c:")
+                        is MessageElement.Heading -> element.content.contains("-c:")
+                        else -> false
+                    }
+                }
+            assertTrue(hasLetterC)
         }
 
     @Test
@@ -186,12 +243,28 @@ class EmojiSentenceModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should preserve the space between letters
-            assertTrue(messageText.contains(":alphabet-"))
+            val hasAlphabet =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(":alphabet-")
+                        is MessageElement.Heading -> element.content.contains(":alphabet-")
+                        else -> false
+                    }
+                }
+            assertTrue(hasAlphabet)
+
             // The space should be preserved
-            assertTrue(messageText.contains(" "))
+            val hasSpace =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(" ")
+                        is MessageElement.Heading -> element.content.contains(" ")
+                        else -> false
+                    }
+                }
+            assertTrue(hasSpace)
         }
 
     @Test
@@ -229,10 +302,26 @@ class EmojiSentenceModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
 
             // Should convert 'a' to emoji but preserve '1' and '!'
-            assertTrue(messageText.contains(":alphabet-"))
-            assertTrue(messageText.contains("-a:"))
+            val hasAlphabet =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains(":alphabet-")
+                        is MessageElement.Heading -> element.content.contains(":alphabet-")
+                        else -> false
+                    }
+                }
+            assertTrue(hasAlphabet)
+
+            val hasLetterA =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("-a:")
+                        is MessageElement.Heading -> element.content.contains("-a:")
+                        else -> false
+                    }
+                }
+            assertTrue(hasLetterA)
         }
 }

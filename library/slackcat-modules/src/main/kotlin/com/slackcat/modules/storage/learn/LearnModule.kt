@@ -4,11 +4,10 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
-import com.slackcat.presentation.buildRichMessage
-import com.slackcat.presentation.text
 import org.jetbrains.exposed.sql.Table
 
 class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
@@ -46,7 +45,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(message),
+                content = textMessage(message),
             ),
         )
     }
@@ -81,10 +80,10 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = channelId,
-                        message =
-                            buildRichMessage {
+                        content =
+                            buildMessage {
                                 image(
-                                    imageUrl = text,
+                                    url = text,
                                     altText = "learn image",
                                 )
                             },
@@ -96,7 +95,7 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = channelId,
-                        message = text(learnItem.learnText),
+                        content = textMessage(learnItem.learnText),
                     ),
                 )
             }

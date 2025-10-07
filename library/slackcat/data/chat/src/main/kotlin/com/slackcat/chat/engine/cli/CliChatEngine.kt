@@ -119,13 +119,7 @@ class CliChatEngine(
             println("--------------------------------------")
             println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
 
-            // Use new message format if available, otherwise fall back to old format
-            val displayText =
-                if (message.isNewFormat() && message.newMessage != null) {
-                    messageConverter.toPlainText(message.newMessage)
-                } else {
-                    message.message.text
-                }
+            val displayText = messageConverter.toPlainText(message.content)
 
             println("User sees rich text:\n$displayText")
             println("--------------------------------------")

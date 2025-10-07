@@ -4,11 +4,10 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.UnhandledCommandModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -111,14 +110,14 @@ class Router(
     ) {
         val errorMessage =
             buildMessage {
-                title("🚨 Error")
+                heading("🚨 Error")
                 text("The ${feature::class.java.canonicalName} module encountered an error!")
                 text("Error: '${exception.message}'")
             }
         feature.sendMessage(
             OutgoingChatMessage(
                 channelId = incomingMessage.channelId,
-                message = text(errorMessage),
+                content = errorMessage,
             ),
         )
     }

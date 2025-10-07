@@ -6,7 +6,6 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildRichMessage
 
 class EmojiModule(
     private val networkClient: NetworkClient,
@@ -25,10 +24,10 @@ class EmojiModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message =
-                    buildRichMessage {
+                content =
+                    buildMessage {
                         image(
-                            imageUrl = emoji,
+                            url = emoji,
                             altText = "summon image",
                         )
                     },

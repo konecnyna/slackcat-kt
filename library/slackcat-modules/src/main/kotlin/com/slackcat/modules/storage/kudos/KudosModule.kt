@@ -5,9 +5,9 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import com.slackcat.presentation.text
 import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
@@ -35,7 +35,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     threadId = incomingChatMessage.messageId,
-                    message = text("You'll go blind doing that!"),
+                    content = textMessage("You'll go blind doing that!"),
                 ),
             )
             return
@@ -67,9 +67,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message =
-                    com.slackcat.presentation.messageWithAttachment("#2eb886") {
-                        section(leaderboardText)
+                content =
+                    buildMessage(com.slackcat.common.MessageStyle.SUCCESS) {
+                        text(leaderboardText)
                     },
             ),
         )
@@ -137,7 +137,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                message = text(getKudosMessage(updatedKudos)),
+                content = textMessage(getKudosMessage(updatedKudos)),
             ),
         )
     }
