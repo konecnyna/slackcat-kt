@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -72,12 +73,12 @@ class PingModuleTest {
 
     @Test
     fun `provideCommand returns ping`() {
-        assertEquals("ping", pingModule.provideCommand())
+        assertEquals("ping", pingModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns correct list`() {
-        val aliases = pingModule.aliases()
+        val aliases = pingModule.commandInfo().aliases
         assertEquals(3, aliases.size)
         assertTrue(aliases.contains("bing"))
         assertTrue(aliases.contains("ding"))
@@ -86,9 +87,18 @@ class PingModuleTest {
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = pingModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("Ping Help"))
+        val helpMessage = pingModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("Ping Help")
+                    is MessageElement.Text -> element.content.contains("Ping Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test
@@ -103,7 +113,16 @@ class PingModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
-            assertTrue(sentMessage.message.toString().contains("pong"))
+
+            val hasPong =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("pong")
+                        is MessageElement.Heading -> element.content.contains("pong")
+                        else -> false
+                    }
+                }
+            assertTrue(hasPong)
         }
 
     @Test
@@ -117,7 +136,16 @@ class PingModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage.message.toString().contains("bong"))
+
+            val hasBong =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("bong")
+                        is MessageElement.Heading -> element.content.contains("bong")
+                        else -> false
+                    }
+                }
+            assertTrue(hasBong)
         }
 
     @Test
@@ -131,7 +159,16 @@ class PingModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage.message.toString().contains("dong"))
+
+            val hasDong =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("dong")
+                        is MessageElement.Heading -> element.content.contains("dong")
+                        else -> false
+                    }
+                }
+            assertTrue(hasDong)
         }
 
     @Test
@@ -145,7 +182,16 @@ class PingModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage.message.toString().contains("wrong"))
+
+            val hasWrong =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("wrong")
+                        is MessageElement.Heading -> element.content.contains("wrong")
+                        else -> false
+                    }
+                }
+            assertTrue(hasWrong)
         }
 
     @Test
@@ -159,6 +205,15 @@ class PingModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage.message.toString().contains("pong"))
+
+            val hasPong =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("pong")
+                        is MessageElement.Heading -> element.content.contains("pong")
+                        else -> false
+                    }
+                }
+            assertTrue(hasPong)
         }
 }

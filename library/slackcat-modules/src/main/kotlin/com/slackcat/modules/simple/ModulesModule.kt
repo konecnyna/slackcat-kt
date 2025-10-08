@@ -2,10 +2,11 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.common.RichTextMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
 import com.slackcat.internal.Router
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildRichMessage
 
 /**
  * Module that lists all active modules in the bot.
@@ -22,44 +23,45 @@ class ModulesModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = modulesList,
+                content = modulesList,
                 threadId = incomingChatMessage.threadId,
             ),
         )
     }
 
-    private fun buildModulesList(): RichTextMessage {
+    private fun buildModulesList(): BotMessage {
         val activeModules =
             router.getAllModules()
                 .filter { it !is ModulesModule } // Exclude self from list
 
         val grouped = activeModules.groupBy { getModuleCategory(it) }
 
-        return buildRichMessage {
-            section("*📦 Active Slackcat Modules*")
+        return buildMessage {
+            text("*📦 Active Slackcat Modules*")
             divider()
 
             grouped.forEach { (category, modules) ->
                 val emoji = getCategoryEmoji(category)
-                section("*$emoji $category*")
+                text("*$emoji $category*")
 
-                modules.sortedBy { it.provideCommand() }.forEach { module ->
-                    val command = module.provideCommand()
-                    val aliases = module.aliases()
+                modules.sortedBy { it.commandInfo().command }.forEach { module ->
+                    val commandInfo = module.commandInfo()
+                    val command = commandInfo.command
+                    val aliases = commandInfo.aliases
                     val aliasText =
                         if (aliases.isNotEmpty()) {
                             " (aliases: ${aliases.joinToString(", ")})"
                         } else {
                             ""
                         }
-                    section("  • `?$command`$aliasText")
+                    text("  • `?$command`$aliasText")
                 }
 
                 divider()
             }
 
-            section("*Total: ${activeModules.size} modules*")
-            section("_Use `?<command> --help` for more info about a specific module_")
+            text("*Total: ${activeModules.size} modules*")
+            text("_Use `?<command> --help` for more info about a specific module_")
         }
     }
 
@@ -83,19 +85,21 @@ class ModulesModule(
             else -> "📌"
         }
 
-    override fun provideCommand(): String = "modules"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "modules",
+            aliases = listOf("commands"),
+        )
 
-    override fun aliases(): List<String> = listOf("commands", "list")
-
-    override fun help(): String =
-        """
-        *ModulesModule Help*
-        Lists all active modules in the bot.
-
-        Usage: `?modules`
-        Aliases: `?commands`, `?list`
-
-        This will display all available commands grouped by category,
-        along with any aliases they might have.
-        """.trimIndent()
+    override fun help(): BotMessage =
+        buildMessage {
+            heading("ModulesModule Help")
+            text("Lists all active modules in the bot.")
+            text("")
+            text("Usage: `?modules`")
+            text("Aliases: `?commands`")
+            text("")
+            text("This will display all available commands grouped by category,")
+            text("along with any aliases they might have.")
+        }
 }

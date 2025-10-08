@@ -2,9 +2,10 @@ package com.slackcat.app.modules.framer
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.buildRichMessage
 
 class FrameModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -24,10 +25,10 @@ class FrameModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message =
-                    buildRichMessage {
+                content =
+                    buildMessage {
                         image(
-                            imageUrl = imageUrl,
+                            url = imageUrl,
                             altText = "frame image",
                         )
                     },
@@ -35,13 +36,15 @@ class FrameModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "nickelback"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "nickelback",
+            aliases = FrameModuleAliases.entries.map { it.alias },
+        )
 
-    override fun aliases(): List<String> = FrameModuleAliases.entries.map { it.alias }
-
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Frame Help")
+            heading("Frame Help")
             text("Put an image url into a fun frame [nickelback,krang]")
             text("Usage: ?nickelback https://ca.slack-edge.com/T07UUET6K51-U07UMV791SS-395a3cadb6fd-512")
         }

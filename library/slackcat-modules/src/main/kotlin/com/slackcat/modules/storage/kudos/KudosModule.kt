@@ -2,11 +2,13 @@ package com.slackcat.modules.storage.kudos
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
@@ -34,7 +36,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     threadId = incomingChatMessage.messageId,
-                    message = text("You'll go blind doing that!"),
+                    content = textMessage("You'll go blind doing that!"),
                 ),
             )
             return
@@ -49,27 +51,26 @@ open class KudosModule : SlackcatModule(), StorageModule {
         }
     }
 
-    override fun provideCommand(): String = "++"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "++",
+            aliases = listOf("leaderboard", "kudosleaderboard", "pluses"),
+        )
 
-    override fun aliases(): List<String> = listOf("leaderboard", "kudosleaderboard", "pluses")
-
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("KudosModule Help")
+            heading("KudosModule Help")
             text("Give kudos to your friends by using ?++ @username . See who can get the most!")
             text("You can also give kudos by reacting with :heavy_plus_sign: to their messages!")
             text("Use ?leaderboard to see the top 10 users with the most kudos!")
         }
 
     private suspend fun handleLeaderboard(incomingChatMessage: IncomingChatMessage) {
-        val leaderboardText = leaderboard.getLeaderboardMessage()
+        val leaderboardMessage = leaderboard.getLeaderboardMessage()
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message =
-                    com.slackcat.presentation.messageWithAttachment("#2eb886") {
-                        section(leaderboardText)
-                    },
+                content = leaderboardMessage,
             ),
         )
     }
@@ -136,7 +137,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                message = text(getKudosMessage(updatedKudos)),
+                content = textMessage(getKudosMessage(updatedKudos)),
             ),
         )
     }

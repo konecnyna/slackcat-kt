@@ -3,6 +3,7 @@ package com.slackcat.internal
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
@@ -25,17 +26,20 @@ class RouterTest {
     @BeforeEach
     fun setup() {
         // Create a mock SlackcatModule with a command "testCommand"
-        // Create a mock SlackcatModule with a command "testCommand"
         mockModule =
             mock(SlackcatModule::class.java).apply {
-                `when`(provideCommand()).thenReturn("testCommand")
+                `when`(commandInfo()).thenReturn(CommandInfo("testCommand"))
             }
 
-        // Create a separate mock SlackcatModule for an alias
+        // Create a separate mock SlackcatModule with its own command and alias
         aliasModule =
             mock(SlackcatModule::class.java).apply {
-                `when`(provideCommand()).thenReturn("anotherCommand")
-                `when`(aliases()).thenReturn(listOf("testCommand")) // This module is an alias
+                `when`(commandInfo()).thenReturn(
+                    CommandInfo(
+                        command = "anotherCommand",
+                        aliases = listOf("aliasForAnother"),
+                    ),
+                )
             }
 
         // Pass both modules to the Router
@@ -155,25 +159,25 @@ class RouterTest {
         }
 
     @Test
-    fun `onMessage should prioritize featureCommandMap over aliasCommandMap`() =
+    fun `onMessage should handle aliases correctly`() =
         runTest {
             val chatUser = ChatUser("user123")
             val message =
                 IncomingChatMessage(
                     arguments = emptyList(),
-                    command = "?testCommand",
+                    command = "?aliasForAnother",
                     channelId = "channel1",
                     chatUser = chatUser,
                     messageId = "msg123",
                     userText = "foo bar",
-                    rawMessage = "?testCommand Do something",
+                    rawMessage = "?aliasForAnother Do something",
                 )
 
             val result = router.onMessage(message)
 
             assertTrue(result)
-            verify(mockModule, times(1)).onInvoke(message)
-            verify(aliasModule, never()).onInvoke(message)
+            verify(aliasModule, times(1)).onInvoke(message)
+            verify(mockModule, never()).onInvoke(message)
         }
 
     @Test
@@ -220,4 +224,76 @@ class RouterTest {
             verify(mockModule, never()).onInvoke(message)
             verify(aliasModule, never()).onInvoke(message)
         }
+
+    @Test
+    fun `Router should throw exception when duplicate commands are registered`() {
+        val testScope = TestScope()
+        val eventsFlow = MutableSharedFlow<SlackcatEvent>()
+
+        val module1 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(CommandInfo("duplicate"))
+            }
+        val module2 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(CommandInfo("duplicate"))
+            }
+
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            Router(listOf(module1, module2), testScope, eventsFlow)
+        }
+    }
+
+    @Test
+    fun `Router should throw exception when alias conflicts with command`() {
+        val testScope = TestScope()
+        val eventsFlow = MutableSharedFlow<SlackcatEvent>()
+
+        val module1 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(CommandInfo("mycommand"))
+            }
+        val module2 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(
+                    CommandInfo(
+                        command = "other",
+                        aliases = listOf("mycommand"),
+                    ),
+                )
+            }
+
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            Router(listOf(module1, module2), testScope, eventsFlow)
+        }
+    }
+
+    @Test
+    fun `Router should throw exception when duplicate aliases are registered`() {
+        val testScope = TestScope()
+        val eventsFlow = MutableSharedFlow<SlackcatEvent>()
+
+        val module1 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(
+                    CommandInfo(
+                        command = "command1",
+                        aliases = listOf("shared"),
+                    ),
+                )
+            }
+        val module2 =
+            mock(SlackcatModule::class.java).apply {
+                `when`(commandInfo()).thenReturn(
+                    CommandInfo(
+                        command = "command2",
+                        aliases = listOf("shared"),
+                    ),
+                )
+            }
+
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            Router(listOf(module1, module2), testScope, eventsFlow)
+        }
+    }
 }

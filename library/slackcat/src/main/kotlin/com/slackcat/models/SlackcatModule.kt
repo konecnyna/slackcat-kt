@@ -4,8 +4,8 @@ import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatConfig
-import com.slackcat.presentation.text
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -13,9 +13,11 @@ import org.koin.core.component.inject
 abstract class SlackcatModule : KoinComponent {
     abstract suspend fun onInvoke(incomingChatMessage: IncomingChatMessage)
 
-    abstract fun provideCommand(): String
+    open fun commandInfo(): CommandInfo {
+        throw NotImplementedError("Module must implement commandInfo()")
+    }
 
-    abstract fun help(): String
+    abstract fun help(): BotMessage
 
     val chatClient: ChatClient by inject()
 
@@ -39,12 +41,10 @@ abstract class SlackcatModule : KoinComponent {
         return sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
-                message = text(help()),
+                content = help(),
             ),
         )
     }
-
-    open fun aliases(): List<String> = emptyList()
 
     /**
      * Override this method to specify which reaction emojis this module should handle.

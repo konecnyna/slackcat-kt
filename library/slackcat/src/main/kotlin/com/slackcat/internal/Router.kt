@@ -4,11 +4,10 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.CommandParser
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.UnhandledCommandModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,7 +25,16 @@ class Router(
         buildMap {
             modules.forEach { module ->
                 try {
-                    put(module.provideCommand(), module)
+                    val commandInfo = module.commandInfo()
+                    val existingModule = get(commandInfo.command)
+                    if (existingModule != null) {
+                        throw IllegalStateException(
+                            "Command '${commandInfo.command}' is already registered by " +
+                                "${existingModule::class.java.simpleName}. " +
+                                "Cannot register it again for ${module::class.java.simpleName}.",
+                        )
+                    }
+                    put(commandInfo.command, module)
                 } catch (e: Exception) {
                     throw e
                 }
@@ -38,7 +46,26 @@ class Router(
         buildMap {
             modules.forEach { module ->
                 try {
-                    module.aliases().forEach { alias ->
+                    val commandInfo = module.commandInfo()
+                    commandInfo.aliases.forEach { alias ->
+                        // Check if alias conflicts with a primary command
+                        val existingCommandModule = featureCommandMap[alias]
+                        if (existingCommandModule != null) {
+                            throw IllegalStateException(
+                                "Alias '$alias' for ${module::class.java.simpleName} conflicts with " +
+                                    "primary command in ${existingCommandModule::class.java.simpleName}.",
+                            )
+                        }
+
+                        // Check if alias conflicts with another alias
+                        val existingAliasModule = get(alias)
+                        if (existingAliasModule != null) {
+                            throw IllegalStateException(
+                                "Alias '$alias' for ${module::class.java.simpleName} conflicts with " +
+                                    "alias in ${existingAliasModule::class.java.simpleName}.",
+                            )
+                        }
+
                         put(alias, module)
                     }
                 } catch (e: Exception) {
@@ -59,6 +86,25 @@ class Router(
                 .map { it as UnhandledCommandModule }
 
     init {
+        // Force initialization of command maps to validate for duplicates
+        featureCommandMap
+        aliasCommandMap
+
+        // Set router reference for LearnModule if present
+        modules.filterIsInstance<com.slackcat.models.UnhandledCommandModule>().forEach { module ->
+            if (module::class.java.simpleName == "LearnModule") {
+                try {
+                    val setRouterMethod =
+                        module::class.java.getMethod(
+                            "setRouter",
+                            Router::class.java,
+                        )
+                    setRouterMethod.invoke(module, this)
+                } catch (e: Exception) {
+                    // Method doesn't exist or failed, ignore
+                }
+            }
+        }
         subscribeToEvents()
     }
 
@@ -111,14 +157,14 @@ class Router(
     ) {
         val errorMessage =
             buildMessage {
-                title("🚨 Error")
+                heading("🚨 Error")
                 text("The ${feature::class.java.canonicalName} module encountered an error!")
                 text("Error: '${exception.message}'")
             }
         feature.sendMessage(
             OutgoingChatMessage(
                 channelId = incomingMessage.channelId,
-                message = text(errorMessage),
+                content = errorMessage,
             ),
         )
     }

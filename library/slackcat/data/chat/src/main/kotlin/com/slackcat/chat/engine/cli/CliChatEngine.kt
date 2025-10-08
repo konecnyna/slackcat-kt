@@ -4,6 +4,7 @@ import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.ChatCapability
 import com.slackcat.common.CommandParser
 import com.slackcat.common.SlackcatEvent
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,7 @@ class CliChatEngine(
     private val messagesFlow = _messagesFlow.asSharedFlow()
 
     private var eventsFlow: MutableSharedFlow<SlackcatEvent>? = null
+    private val messageConverter = CliMessageConverter()
 
     init {
         scope.launch {
@@ -116,7 +118,10 @@ class CliChatEngine(
         return try {
             println("--------------------------------------")
             println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
-            println("User sees rich text:\n${message.message.text}")
+
+            val displayText = messageConverter.toPlainText(message.content)
+
+            println("User sees rich text:\n$displayText")
             println("--------------------------------------")
             Result.success(Unit)
         } catch (e: Exception) {
@@ -127,6 +132,13 @@ class CliChatEngine(
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
 
     override fun provideEngineName(): String = "Cli"
+
+    override fun capabilities(): Set<ChatCapability> {
+        // CLI supports basic text output only
+        return setOf(
+            ChatCapability.THREADS,
+        )
+    }
 
     override fun setEventsFlow(eventsFlow: MutableSharedFlow<SlackcatEvent>) {
         this.eventsFlow = eventsFlow

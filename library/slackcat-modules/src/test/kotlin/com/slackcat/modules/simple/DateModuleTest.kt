@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -72,20 +73,29 @@ class DateModuleTest {
 
     @Test
     fun `provideCommand returns date`() {
-        assertEquals("date", dateModule.provideCommand())
+        assertEquals("date", dateModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns empty list`() {
-        val aliases = dateModule.aliases()
+        val aliases = dateModule.commandInfo().aliases
         assertTrue(aliases.isEmpty())
     }
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = dateModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("DateModule Help"))
+        val helpMessage = dateModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("DateModule Help")
+                    is MessageElement.Text -> element.content.contains("DateModule Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test
@@ -105,7 +115,14 @@ class DateModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
-            assertTrue(sentMessage.message.toString().contains("Currently, it's"))
+            val hasExpectedText =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Currently, it's")
+                        else -> false
+                    }
+                }
+            assertTrue(hasExpectedText)
         }
 
     @Test
@@ -124,9 +141,15 @@ class DateModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
-
-            // The message should contain time-related terms
-            assertTrue(messageText.contains("Currently") || messageText.contains("it's"))
+            val hasExpectedText =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text ->
+                            element.content.contains("Currently") ||
+                                element.content.contains("it's")
+                        else -> false
+                    }
+                }
+            assertTrue(hasExpectedText)
         }
 }

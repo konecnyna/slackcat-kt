@@ -2,11 +2,12 @@ package com.slackcat.modules.network.summon
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.buildRichMessage
-import com.slackcat.presentation.text
 import kotlin.random.Random
 
 class SummonModule(
@@ -37,10 +38,10 @@ class SummonModule(
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message =
-                        buildRichMessage {
+                    content =
+                        buildMessage {
                             image(
-                                imageUrl = imageUrl,
+                                url = imageUrl,
                                 altText = "summon image: ${incomingChatMessage.userText}",
                             )
                             context("Source: $imageUrl")
@@ -58,20 +59,22 @@ class SummonModule(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
                         threadId = incomingChatMessage.messageId,
-                        message = text("<$imageUrl>"),
+                        content = textMessage("<$imageUrl>"),
                     ),
                 )
             },
         )
     }
 
-    override fun provideCommand(): String = "summon"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "summon",
+            aliases = SummonModuleAliases.entries.map { it.alias },
+        )
 
-    override fun aliases(): List<String> = SummonModuleAliases.entries.map { it.alias }
-
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Summon Help")
+            heading("Summon Help")
             text("Summon an image from Google images. Use with caution...")
             text("Usage: ?summon slackcat")
         }

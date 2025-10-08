@@ -2,9 +2,11 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import kotlin.random.Random
 
 class EmojiSentenceModule : SlackcatModule() {
@@ -14,7 +16,7 @@ class EmojiSentenceModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(outgoingText),
+                content = textMessage(outgoingText),
             ),
         )
     }
@@ -32,11 +34,11 @@ class EmojiSentenceModule : SlackcatModule() {
         return converted
     }
 
-    override fun help(): String =
+    override fun commandInfo() = CommandInfo(command = "emojisetence")
+
+    override fun help(): BotMessage =
         buildMessage {
-            title("Emojisentence Help")
+            heading("Emojisentence Help")
             text("Write some text braaa (Example '?emojisentence what up braaa')")
         }
-
-    override fun provideCommand(): String = "emojisetence"
 }

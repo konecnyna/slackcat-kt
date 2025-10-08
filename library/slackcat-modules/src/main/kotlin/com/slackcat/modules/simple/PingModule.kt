@@ -2,9 +2,11 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 
 class PingModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
@@ -19,23 +21,20 @@ class PingModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(text),
+                content = textMessage(text),
             ),
         )
     }
 
-    override fun provideCommand(): String = "ping"
-
-    override fun aliases(): List<String> =
-        listOf(
-            "bing",
-            "ding",
-            "ring",
+    override fun commandInfo() =
+        CommandInfo(
+            command = "ping",
+            aliases = listOf("bing", "ding", "ring"),
         )
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Ping Help")
+            heading("Ping Help")
             text("This module is for debugging. If slackcat is running ?ping will return ?pong")
         }
 }

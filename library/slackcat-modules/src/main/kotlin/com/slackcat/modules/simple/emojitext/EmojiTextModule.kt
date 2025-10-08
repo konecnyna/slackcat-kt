@@ -2,9 +2,11 @@ package com.slackcat.modules.simple.emojitext
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import emojiDictionary
 
 class EmojiTextModule : SlackcatModule() {
@@ -14,7 +16,7 @@ class EmojiTextModule : SlackcatModule() {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message = text(help()),
+                    content = help(),
                 ),
             )
             return
@@ -25,7 +27,7 @@ class EmojiTextModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(output),
+                content = textMessage(output),
             ),
         )
     }
@@ -116,17 +118,17 @@ class EmojiTextModule : SlackcatModule() {
         }
     }
 
-    override fun help(): String =
+    override fun commandInfo() = CommandInfo(command = "emoji-text")
+
+    override fun help(): BotMessage =
         buildMessage {
-            title("EmojiText Help")
+            heading("EmojiText Help")
             text("Convert text to emoji patterns")
             text("Usage: ?emoji-text :emoji_for_letters: [:emoji_for_background:] your text")
             text("Examples:")
             text("  ?emoji-text :fire: :black_large_square: Hello")
             text("  ?emoji-text :heart: Hello World")
         }
-
-    override fun provideCommand(): String = "emoji-text"
 }
 
 data class EmojiInput(

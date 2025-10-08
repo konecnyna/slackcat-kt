@@ -3,12 +3,12 @@ package com.slackcat.app.modules.jeopardy
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
-import com.slackcat.common.RichTextMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.buildRichMessage
 import org.jetbrains.exposed.sql.Table
 
 class JeopardyModule(
@@ -44,38 +44,41 @@ class JeopardyModule(
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = message,
+                content = message,
             ),
         )
     }
 
-    private fun buildJeopardyMessage(question: JeopardyDAO.JeopardyQuestionRow): RichTextMessage {
-        return buildRichMessage {
+    private fun buildJeopardyMessage(question: JeopardyDAO.JeopardyQuestionRow): BotMessage {
+        return buildMessage {
             divider()
-            section(
-                text =
-                    "*The category is '${question.category}' for $${question.value}:* \n " +
-                        "${question.question} \n Question ID: ${question.id}",
-                imageUrl = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
+            text(
+                "*The category is '${question.category}' for $${question.value}:* \n " +
+                    "${question.question} \n Question ID: ${question.id}",
+            )
+            image(
+                url = "https://emoji.slack-edge.com/T07UUET6K51/jeopardy/32e52d3ef5c5dc65.jpg",
                 altText = "alex quebec",
             )
             divider()
         }
     }
 
-    override fun provideCommand(): String = "jeopardy"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "jeopardy",
+            aliases = JeopardyAliases.entries.map { it.alias },
+        )
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("JeopardyModule Help")
+            heading("JeopardyModule Help")
             text(
                 "Get a question using ?jeopardy <value> (ex ?jeopardy 300) \n" +
                     "Answer a question using ?jeopardy-answer <questionId> <your answer> \n" +
                     "Check your current points with ?jeopardy-points",
             )
         }
-
-    override fun aliases(): List<String> = JeopardyAliases.entries.map { it.alias }
 }
 
 enum class JeopardyAliases(val alias: String) {

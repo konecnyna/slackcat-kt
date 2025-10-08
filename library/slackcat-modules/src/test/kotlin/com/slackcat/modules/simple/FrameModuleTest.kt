@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -72,21 +73,30 @@ class FrameModuleTest {
 
     @Test
     fun `provideCommand returns nickelback`() {
-        assertEquals("nickelback", frameModule.provideCommand())
+        assertEquals("nickelback", frameModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns correct list`() {
-        val aliases = frameModule.aliases()
+        val aliases = frameModule.commandInfo().aliases
         assertEquals(1, aliases.size)
         assertTrue(aliases.contains("krang"))
     }
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = frameModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("Frame Help"))
+        val helpMessage = frameModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("Frame Help")
+                    is MessageElement.Text -> element.content.contains("Frame Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test
@@ -102,9 +112,16 @@ class FrameModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
+
             // The message should contain the framed image URL
-            val messageText = sentMessage.message.toString()
-            assertTrue(messageText.contains("home-remote-api.herokuapp.com/nickelback"))
+            val hasFramedImageUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/nickelback")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFramedImageUrl)
         }
 
     @Test
@@ -120,9 +137,16 @@ class FrameModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
+
             // The message should contain the framed image URL
-            val messageText = sentMessage.message.toString()
-            assertTrue(messageText.contains("home-remote-api.herokuapp.com/krang"))
+            val hasFramedImageUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/krang")
+                        else -> false
+                    }
+                }
+            assertTrue(hasFramedImageUrl)
         }
 
     @Test
@@ -137,9 +161,16 @@ class FrameModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val messageText = sentMessage.message.toString()
+
             // Should contain the URL without angle brackets
-            assertTrue(messageText.contains("https://example.com/image.jpg"))
+            val hasCleanUrl =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Image -> element.url.contains("https://example.com/image.jpg")
+                        else -> false
+                    }
+                }
+            assertTrue(hasCleanUrl)
         }
 
     @Test

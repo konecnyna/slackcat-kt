@@ -2,9 +2,11 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 
 class FlipModule : SlackcatModule() {
     private val flipMap =
@@ -35,7 +37,7 @@ class FlipModule : SlackcatModule() {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    message = text("Please provide text to flip. Example: ?flip hello world"),
+                    content = textMessage("Please provide text to flip. Example: ?flip hello world"),
                 ),
             )
             return
@@ -45,7 +47,7 @@ class FlipModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text("(╯°□°）╯︵ ┻━ $flippedText ━┻"),
+                content = textMessage("(╯°□°）╯︵ ┻━ $flippedText ━┻"),
             ),
         )
     }
@@ -56,11 +58,11 @@ class FlipModule : SlackcatModule() {
         }.joinToString("")
     }
 
-    override fun provideCommand(): String = "flip"
+    override fun commandInfo() = CommandInfo(command = "flip")
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Flip Help")
+            heading("Flip Help")
             text("This module flips text upside down using Unicode characters.")
             text("Usage: ?flip [text]")
             text("Example: ?flip hello world → plɹoʍ ollǝɥ")

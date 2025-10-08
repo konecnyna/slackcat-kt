@@ -4,6 +4,7 @@ import com.slackcat.chat.models.ChatClient
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -95,14 +96,23 @@ class KudosModuleTest {
 
     @Test
     fun `provideCommand returns ++`() {
-        assertEquals("++", kudosModule.provideCommand())
+        assertEquals("++", kudosModule.commandInfo().command)
     }
 
     @Test
     fun `help returns non-empty string`() {
-        val helpText = kudosModule.help()
-        assertTrue(helpText.isNotEmpty())
-        assertTrue(helpText.contains("KudosModule Help"))
+        val helpMessage = kudosModule.help()
+        assertTrue(helpMessage.elements.isNotEmpty())
+        // Check that help message contains heading or text with the expected content
+        val hasExpectedContent =
+            helpMessage.elements.any { element ->
+                when (element) {
+                    is MessageElement.Heading -> element.content.contains("KudosModule Help")
+                    is MessageElement.Text -> element.content.contains("KudosModule Help")
+                    else -> false
+                }
+            }
+        assertTrue(hasExpectedContent)
     }
 
     @Test
@@ -123,8 +133,26 @@ class KudosModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-            assertTrue(sentMessage.message.toString().contains("<@user456>"))
-            assertTrue(sentMessage.message.toString().contains("1 plus"))
+
+            val hasUser456 =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("<@user456>")
+                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        else -> false
+                    }
+                }
+            assertTrue(hasUser456)
+
+            val hasOnePlus =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("1 plus")
+                        is MessageElement.Heading -> element.content.contains("1 plus")
+                        else -> false
+                    }
+                }
+            assertTrue(hasOnePlus)
         }
 
     @Test
@@ -164,8 +192,26 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage.message.toString().contains("<@user456>"))
-            assertTrue(sentMessage.message.toString().contains("1 plus"))
+
+            val hasUser456 =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("<@user456>")
+                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        else -> false
+                    }
+                }
+            assertTrue(hasUser456)
+
+            val hasOnePlus =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("1 plus")
+                        is MessageElement.Heading -> element.content.contains("1 plus")
+                        else -> false
+                    }
+                }
+            assertTrue(hasOnePlus)
         }
 
     @Test
@@ -187,7 +233,16 @@ class KudosModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-            assertTrue(sentMessage.message.toString().contains("You'll go blind doing that!"))
+
+            val hasWarningMessage =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("You'll go blind doing that!")
+                        is MessageElement.Heading -> element.content.contains("You'll go blind doing that!")
+                        else -> false
+                    }
+                }
+            assertTrue(hasWarningMessage)
         }
 
     @Test
@@ -209,8 +264,20 @@ class KudosModuleTest {
             messageSlots.forEach { sentMessage ->
                 assertEquals("channel123", sentMessage.channelId)
                 assertEquals("msg123", sentMessage.threadId)
-                val messageText = sentMessage.message.toString()
-                assertTrue(messageText.contains("<@user456>") || messageText.contains("<@user789>"))
+
+                val hasExpectedUser =
+                    sentMessage.content.elements.any { element ->
+                        when (element) {
+                            is MessageElement.Text ->
+                                element.content.contains("<@user456>") ||
+                                    element.content.contains("<@user789>")
+                            is MessageElement.Heading ->
+                                element.content.contains("<@user456>") ||
+                                    element.content.contains("<@user789>")
+                            else -> false
+                        }
+                    }
+                assertTrue(hasExpectedUser)
             }
         }
 

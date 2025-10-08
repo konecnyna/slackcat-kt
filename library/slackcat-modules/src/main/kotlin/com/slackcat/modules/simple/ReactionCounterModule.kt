@@ -2,10 +2,12 @@ package com.slackcat.modules.simple
 
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
+import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
+import com.slackcat.common.buildMessage
+import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
-import com.slackcat.presentation.buildMessage
-import com.slackcat.presentation.text
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -33,16 +35,16 @@ class ReactionCounterModule : SlackcatModule() {
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                message = text(message),
+                content = textMessage(message),
             ),
         )
     }
 
-    override fun provideCommand(): String = "reactions"
+    override fun commandInfo() = CommandInfo(command = "reactions")
 
-    override fun help(): String =
+    override fun help(): BotMessage =
         buildMessage {
-            title("Reaction Counter Help")
+            heading("Reaction Counter Help")
             text("This module tracks reactions added to messages.")
             text("Usage: ?reactions - Display current reaction counts")
             text("Tracked reactions: :thumbsup:, :heart:, :fire:, :+1:")
