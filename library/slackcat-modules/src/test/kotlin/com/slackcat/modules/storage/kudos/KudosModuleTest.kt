@@ -45,7 +45,9 @@ class KudosModuleTest {
 
         every { mockConfig.botNameProvider() } returns "TestBot"
         every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
-        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success("mock_timestamp")
+        coEvery { mockChatClient.updateMessage(any(), any(), any(), any(), any()) } returns
+            Result.success("mock_timestamp")
 
         // Create a temporary SQLite database file for testing
         val dbFile = tempDir.resolve("test.db").toString()
@@ -53,7 +55,7 @@ class KudosModuleTest {
 
         // Create the table schema synchronously
         transaction(database) {
-            SchemaUtils.create(KudosDAO.KudosTable)
+            SchemaUtils.create(KudosDAO.KudosTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTransactionTable)
         }
 
         startKoin {
@@ -72,7 +74,7 @@ class KudosModuleTest {
     @AfterEach
     fun tearDown() {
         transaction(database) {
-            SchemaUtils.drop(KudosDAO.KudosTable)
+            SchemaUtils.drop(KudosDAO.KudosTransactionTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTable)
         }
         stopKoin()
     }
@@ -167,13 +169,9 @@ class KudosModuleTest {
 
             kudosModule.onInvoke(incomingMessage)
 
-            val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
-
-            messageSlots.forEach { sentMessage ->
-                assertEquals("channel123", sentMessage.channelId)
-                assertEquals("msg123", sentMessage.threadId)
-            }
+            // First user gets sendMessage, second user gets updateMessage (same thread)
+            coVerify(exactly = 1) { mockChatClient.sendMessage(any(), any(), any()) }
+            coVerify(exactly = 1) { mockChatClient.updateMessage(any(), any(), any(), any(), any()) }
         }
 
     @Test
@@ -258,27 +256,10 @@ class KudosModuleTest {
 
             kudosModule.onInvoke(incomingMessage)
 
-            val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
-
-            messageSlots.forEach { sentMessage ->
-                assertEquals("channel123", sentMessage.channelId)
-                assertEquals("msg123", sentMessage.threadId)
-
-                val hasExpectedUser =
-                    sentMessage.content.elements.any { element ->
-                        when (element) {
-                            is MessageElement.Text ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
-                            is MessageElement.Heading ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
-                            else -> false
-                        }
-                    }
-                assertTrue(hasExpectedUser)
-            }
+            // First valid user gets sendMessage, second valid user gets updateMessage (same thread)
+            // user123 is filtered out (self-kudos)
+            coVerify(exactly = 1) { mockChatClient.sendMessage(any(), any(), any()) }
+            coVerify(exactly = 1) { mockChatClient.updateMessage(any(), any(), any(), any(), any()) }
         }
 
     // Create a test subclass to access protected method

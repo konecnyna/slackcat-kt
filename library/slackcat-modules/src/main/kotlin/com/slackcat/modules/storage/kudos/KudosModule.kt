@@ -15,7 +15,12 @@ open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
     private val leaderboard = KudosLeaderboard(kudosDAO)
 
-    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable, KudosDAO.KudosMessageTable)
+    override fun tables(): List<Table> =
+        listOf(
+            KudosDAO.KudosTable,
+            KudosDAO.KudosMessageTable,
+            KudosDAO.KudosTransactionTable,
+        )
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         // Check if this is a leaderboard command
@@ -44,6 +49,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
         validIds.forEach { recipientId ->
             giveKudosToUser(
+                giverId = incomingChatMessage.chatUser.userId,
                 recipientId = recipientId,
                 channelId = incomingChatMessage.channelId,
                 threadId = incomingChatMessage.messageId,
@@ -84,6 +90,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 event.itemUserId?.let { messageAuthorId ->
                     if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
                         giveKudosToUser(
+                            giverId = event.userId,
                             recipientId = messageAuthorId,
                             channelId = event.channelId,
                             threadId = event.messageTimestamp,
@@ -128,13 +135,45 @@ open class KudosModule : SlackcatModule(), StorageModule {
      * Gives kudos to a user and sends/updates a confirmation message.
      * If a bot message already exists in this thread, it will be updated.
      * Otherwise, a new message will be sent and tracked.
+     *
+     * Includes rate limiting to prevent spam.
      */
     private suspend fun giveKudosToUser(
+        giverId: String,
         recipientId: String,
         channelId: String,
         threadId: String,
     ) {
+        // Check rate limits
+        val rateLimitMessage =
+            kudosDAO.hasRecentKudos(
+                giverId = giverId,
+                recipientId = recipientId,
+                threadTs = threadId,
+            )
+
+        if (rateLimitMessage != null) {
+            // Rate limited - send friendly denial message
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = channelId,
+                    threadId = threadId,
+                    content = textMessage(rateLimitMessage),
+                ),
+            )
+            return
+        }
+
+        // Not rate limited - proceed with giving kudos
         val updatedKudos = kudosDAO.upsertKudos(recipientId)
+
+        // Record this transaction for future rate limit checks
+        kudosDAO.recordTransaction(
+            giverId = giverId,
+            recipientId = recipientId,
+            threadTs = threadId,
+        )
+
         val kudosMessage = getKudosMessage(updatedKudos)
         val messageContent =
             OutgoingChatMessage(
