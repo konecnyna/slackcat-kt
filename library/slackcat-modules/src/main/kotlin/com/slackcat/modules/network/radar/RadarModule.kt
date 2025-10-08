@@ -95,7 +95,7 @@ class RadarModule : SlackcatModule() {
     override fun commandInfo() =
         CommandInfo(
             command = "radar",
-            aliases = listOf("weather", "map", "forecast"),
+            aliases = listOf("map", "forecast"),
         )
 
     override fun help(): BotMessage =

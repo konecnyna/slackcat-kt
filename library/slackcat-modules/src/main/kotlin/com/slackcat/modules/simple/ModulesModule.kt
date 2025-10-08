@@ -88,7 +88,7 @@ class ModulesModule(
     override fun commandInfo() =
         CommandInfo(
             command = "modules",
-            aliases = listOf("commands", "list"),
+            aliases = listOf("commands"),
         )
 
     override fun help(): BotMessage =
@@ -97,7 +97,7 @@ class ModulesModule(
             text("Lists all active modules in the bot.")
             text("")
             text("Usage: `?modules`")
-            text("Aliases: `?commands`, `?list`")
+            text("Aliases: `?commands`")
             text("")
             text("This will display all available commands grouped by category,")
             text("along with any aliases they might have.")
