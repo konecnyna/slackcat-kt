@@ -15,7 +15,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
     private val leaderboard = KudosLeaderboard(kudosDAO)
 
-    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
+    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable, KudosDAO.KudosMessageTable)
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         // Check if this is a leaderboard command
@@ -125,7 +125,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
     }
 
     /**
-     * Gives kudos to a user and sends a confirmation message.
+     * Gives kudos to a user and sends/updates a confirmation message.
+     * If a bot message already exists in this thread, it will be updated.
+     * Otherwise, a new message will be sent and tracked.
      */
     private suspend fun giveKudosToUser(
         recipientId: String,
@@ -133,13 +135,36 @@ open class KudosModule : SlackcatModule(), StorageModule {
         threadId: String,
     ) {
         val updatedKudos = kudosDAO.upsertKudos(recipientId)
-        sendMessage(
+        val kudosMessage = getKudosMessage(updatedKudos)
+        val messageContent =
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                content = textMessage(getKudosMessage(updatedKudos)),
-            ),
-        )
+                content = textMessage(kudosMessage),
+            )
+
+        // Check if we already have a bot message in this thread
+        val existingMessage = kudosDAO.getBotMessageForThread(threadId)
+
+        if (existingMessage != null) {
+            // Update the existing message
+            updateMessage(
+                channelId = existingMessage.channelId,
+                messageTs = existingMessage.botMessageTs,
+                message = messageContent,
+            )
+        } else {
+            // Send a new message and store its timestamp
+            val result = sendMessage(messageContent)
+
+            result.onSuccess { messageTs ->
+                kudosDAO.storeBotMessage(
+                    threadTs = threadId,
+                    botMessageTs = messageTs,
+                    channelId = channelId,
+                )
+            }
+        }
     }
 
     private fun extractUserIds(userText: String): Set<String> {

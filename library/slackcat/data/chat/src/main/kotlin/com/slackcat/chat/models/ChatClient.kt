@@ -5,5 +5,13 @@ interface ChatClient {
         message: OutgoingChatMessage,
         botName: String,
         botIcon: BotIcon,
-    ): Result<Unit>
+    ): Result<String>
+
+    suspend fun updateMessage(
+        channelId: String,
+        messageTs: String,
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon,
+    ): Result<String>
 }

@@ -60,8 +60,18 @@ class SlackcatBot(
                     message: OutgoingChatMessage,
                     botName: String,
                     botIcon: com.slackcat.chat.models.BotIcon,
-                ): Result<Unit> {
+                ): Result<String> {
                     return chatEngine.sendMessage(message, botName, botIcon)
+                }
+
+                override suspend fun updateMessage(
+                    channelId: String,
+                    messageTs: String,
+                    message: OutgoingChatMessage,
+                    botName: String,
+                    botIcon: com.slackcat.chat.models.BotIcon,
+                ): Result<String> {
+                    return chatEngine.updateMessage(channelId, messageTs, message, botName, botIcon)
                 }
             }
 

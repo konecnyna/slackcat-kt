@@ -114,7 +114,7 @@ class CliChatEngine(
         message: OutgoingChatMessage,
         botName: String,
         botIcon: BotIcon,
-    ): Result<Unit> {
+    ): Result<String> {
         return try {
             println("--------------------------------------")
             println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
@@ -123,7 +123,28 @@ class CliChatEngine(
 
             println("User sees rich text:\n$displayText")
             println("--------------------------------------")
-            Result.success(Unit)
+            Result.success("mock_timestamp_${System.currentTimeMillis()}")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateMessage(
+        channelId: String,
+        messageTs: String,
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon,
+    ): Result<String> {
+        return try {
+            println("--------------------------------------")
+            println("Updating message: channelId=$channelId, messageTs=$messageTs, botName=$botName, botIcon=$botIcon")
+
+            val displayText = messageConverter.toPlainText(message.content)
+
+            println("User sees updated rich text:\n$displayText")
+            println("--------------------------------------")
+            Result.success(messageTs)
         } catch (e: Exception) {
             Result.failure(e)
         }
