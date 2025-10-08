@@ -13,7 +13,9 @@ import org.koin.core.component.inject
 abstract class SlackcatModule : KoinComponent {
     abstract suspend fun onInvoke(incomingChatMessage: IncomingChatMessage)
 
-    abstract fun provideCommand(): String
+    open fun commandInfo(): CommandInfo {
+        throw NotImplementedError("Module must implement commandInfo()")
+    }
 
     abstract fun help(): BotMessage
 
@@ -43,8 +45,6 @@ abstract class SlackcatModule : KoinComponent {
             ),
         )
     }
-
-    open fun aliases(): List<String> = emptyList()
 
     /**
      * Override this method to specify which reaction emojis this module should handle.

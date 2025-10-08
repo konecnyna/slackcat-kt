@@ -73,12 +73,12 @@ class PingModuleTest {
 
     @Test
     fun `provideCommand returns ping`() {
-        assertEquals("ping", pingModule.provideCommand())
+        assertEquals("ping", pingModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns correct list`() {
-        val aliases = pingModule.aliases()
+        val aliases = pingModule.commandInfo().aliases
         assertEquals(3, aliases.size)
         assertTrue(aliases.contains("bing"))
         assertTrue(aliases.contains("ding"))

@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 class PingModule : SlackcatModule() {
@@ -25,13 +26,10 @@ class PingModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "ping"
-
-    override fun aliases(): List<String> =
-        listOf(
-            "bing",
-            "ding",
-            "ring",
+    override fun commandInfo() =
+        CommandInfo(
+            command = "ping",
+            aliases = listOf("bing", "ding", "ring"),
         )
 
     override fun help(): BotMessage =

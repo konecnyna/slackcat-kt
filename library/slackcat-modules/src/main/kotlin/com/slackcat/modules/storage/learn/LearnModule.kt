@@ -5,15 +5,27 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
 import org.jetbrains.exposed.sql.Table
 
-class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
+class LearnModule(private var router: com.slackcat.internal.Router? = null) :
+    SlackcatModule(),
+    StorageModule,
+    UnhandledCommandModule {
     private val learnFactory = LearnFactory()
     private val learnDAO = LearnDAO()
     private val aliasHandler = LearnAliasHandler(learnDAO)
+
+    /**
+     * Sets the router reference so the module can check for command conflicts.
+     * This is called by the Router after initialization.
+     */
+    fun setRouter(router: com.slackcat.internal.Router) {
+        this.router = router
+    }
 
     override fun tables(): List<Table> = listOf(LearnDAO.LearnTable)
 
@@ -29,6 +41,29 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
         val learnRequest = learnFactory.makeLearnRequest(incomingChatMessage)
         if (learnRequest == null) {
             postHelpMessage(incomingChatMessage.channelId)
+            return
+        }
+
+        // Validate that the learn key doesn't conflict with existing commands
+        val conflictingModule =
+            router?.let { r ->
+                r.getAllModules().firstOrNull { module ->
+                    val commandInfo = module.commandInfo()
+                    commandInfo.command == learnRequest.learnKey ||
+                        commandInfo.aliases.contains(learnRequest.learnKey)
+                }
+            }
+
+        if (conflictingModule != null) {
+            val message =
+                "Cannot learn '${learnRequest.learnKey}' because it conflicts with an existing command " +
+                    "from ${conflictingModule::class.java.simpleName}."
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    content = textMessage(message),
+                ),
+            )
             return
         }
 
@@ -110,9 +145,11 @@ class LearnModule : SlackcatModule(), StorageModule, UnhandledCommandModule {
             text("You can then recall the text ?<key>")
         }
 
-    override fun provideCommand(): String = "learn"
-
-    override fun aliases(): List<String> = LearnAliases.entries.map { it.alias }
+    override fun commandInfo() =
+        CommandInfo(
+            command = "learn",
+            aliases = LearnAliases.entries.map { it.alias },
+        )
 }
 
 enum class LearnAliases(val alias: String) {

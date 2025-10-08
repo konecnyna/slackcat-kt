@@ -6,6 +6,7 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import java.util.concurrent.ConcurrentHashMap
 
@@ -39,7 +40,7 @@ class ReactionCounterModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "reactions"
+    override fun commandInfo() = CommandInfo(command = "reactions")
 
     override fun help(): BotMessage =
         buildMessage {

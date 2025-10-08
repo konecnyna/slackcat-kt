@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 
@@ -36,7 +37,7 @@ class StatusModule(
         sendMessage(message)
     }
 
-    override fun provideCommand(): String = "status"
+    override fun commandInfo() = CommandInfo(command = "status")
 
     override fun help(): BotMessage =
         buildMessage {

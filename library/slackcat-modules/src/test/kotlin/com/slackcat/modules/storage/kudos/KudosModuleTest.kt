@@ -96,7 +96,7 @@ class KudosModuleTest {
 
     @Test
     fun `provideCommand returns ++`() {
-        assertEquals("++", kudosModule.provideCommand())
+        assertEquals("++", kudosModule.commandInfo().command)
     }
 
     @Test

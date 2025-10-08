@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 class RadarModule : SlackcatModule() {
@@ -91,9 +92,11 @@ class RadarModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "radar"
-
-    override fun aliases(): List<String> = listOf("weather", "map", "forecast")
+    override fun commandInfo() =
+        CommandInfo(
+            command = "radar",
+            aliases = listOf("weather", "map", "forecast"),
+        )
 
     override fun help(): BotMessage =
         buildMessage {

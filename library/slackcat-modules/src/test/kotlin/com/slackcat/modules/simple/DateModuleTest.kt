@@ -73,12 +73,12 @@ class DateModuleTest {
 
     @Test
     fun `provideCommand returns date`() {
-        assertEquals("date", dateModule.provideCommand())
+        assertEquals("date", dateModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns empty list`() {
-        val aliases = dateModule.aliases()
+        val aliases = dateModule.commandInfo().aliases
         assertTrue(aliases.isEmpty())
     }
 

@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.internal.Router
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 /**
@@ -43,9 +44,10 @@ class ModulesModule(
                 val emoji = getCategoryEmoji(category)
                 text("*$emoji $category*")
 
-                modules.sortedBy { it.provideCommand() }.forEach { module ->
-                    val command = module.provideCommand()
-                    val aliases = module.aliases()
+                modules.sortedBy { it.commandInfo().command }.forEach { module ->
+                    val commandInfo = module.commandInfo()
+                    val command = commandInfo.command
+                    val aliases = commandInfo.aliases
                     val aliasText =
                         if (aliases.isNotEmpty()) {
                             " (aliases: ${aliases.joinToString(", ")})"
@@ -83,9 +85,11 @@ class ModulesModule(
             else -> "📌"
         }
 
-    override fun provideCommand(): String = "modules"
-
-    override fun aliases(): List<String> = listOf("commands", "list")
+    override fun commandInfo() =
+        CommandInfo(
+            command = "modules",
+            aliases = listOf("commands", "list"),
+        )
 
     override fun help(): BotMessage =
         buildMessage {

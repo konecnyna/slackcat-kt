@@ -73,12 +73,12 @@ class FlipModuleTest {
 
     @Test
     fun `provideCommand returns flip`() {
-        assertEquals("flip", flipModule.provideCommand())
+        assertEquals("flip", flipModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns empty list`() {
-        val aliases = flipModule.aliases()
+        val aliases = flipModule.commandInfo().aliases
         assertTrue(aliases.isEmpty())
     }
 

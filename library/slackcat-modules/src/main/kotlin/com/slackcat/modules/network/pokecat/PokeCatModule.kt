@@ -5,6 +5,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.PokemonData
 import com.slackcat.network.NetworkClient
@@ -65,7 +66,7 @@ class PokeCatModule(
         return regex.find(userText)?.groupValues?.get(1)
     }
 
-    override fun provideCommand(): String = "pokemon"
+    override fun commandInfo() = CommandInfo(command = "pokemon")
 
     override fun help(): BotMessage =
         buildMessage {

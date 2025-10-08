@@ -6,6 +6,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import java.text.DecimalFormat
@@ -50,6 +51,8 @@ class CryptoPriceModule(
         }
     }
 
+    override fun commandInfo() = CommandInfo(command = "crypto")
+
     override fun help(): BotMessage =
         buildMessage {
             heading("CryptoPriceModule Help")
@@ -57,6 +60,4 @@ class CryptoPriceModule(
             text("*Usage:* ?crypto <ticker>")
             text("Example: `?crypto btc` to get the price of Bitcoin.")
         }
-
-    override fun provideCommand(): String = "crypto"
 }

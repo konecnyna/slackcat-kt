@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,7 +24,7 @@ class DateModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "date"
+    override fun commandInfo() = CommandInfo(command = "date")
 
     override fun help(): BotMessage =
         buildMessage {

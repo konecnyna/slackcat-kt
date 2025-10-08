@@ -5,6 +5,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
@@ -63,7 +64,11 @@ class JeopardyModule(
         }
     }
 
-    override fun provideCommand(): String = "jeopardy"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "jeopardy",
+            aliases = JeopardyAliases.entries.map { it.alias },
+        )
 
     override fun help(): BotMessage =
         buildMessage {
@@ -74,8 +79,6 @@ class JeopardyModule(
                     "Check your current points with ?jeopardy-points",
             )
         }
-
-    override fun aliases(): List<String> = JeopardyAliases.entries.map { it.alias }
 }
 
 enum class JeopardyAliases(val alias: String) {

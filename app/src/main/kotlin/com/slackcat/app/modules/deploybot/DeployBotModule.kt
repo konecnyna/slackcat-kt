@@ -8,6 +8,7 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatEventsModule
 import com.slackcat.models.SlackcatModule
 import org.koin.core.component.inject
@@ -19,7 +20,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         // no - op
     }
 
-    override fun provideCommand(): String = "deploy-bot"
+    override fun commandInfo() = CommandInfo(command = "deploy-bot")
 
     override fun help(): BotMessage =
         buildMessage {

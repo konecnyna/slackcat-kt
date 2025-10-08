@@ -6,6 +6,7 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import org.jetbrains.exposed.sql.Table
@@ -50,9 +51,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
         }
     }
 
-    override fun provideCommand(): String = "++"
-
-    override fun aliases(): List<String> = listOf("leaderboard", "kudosleaderboard", "pluses")
+    override fun commandInfo() =
+        CommandInfo(
+            command = "++",
+            aliases = listOf("leaderboard", "kudosleaderboard", "pluses"),
+        )
 
     override fun help(): BotMessage =
         buildMessage {

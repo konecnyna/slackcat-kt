@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.ErrorResponseFunTranslation
 import com.slackcat.modules.FunTranslationApiResponse
@@ -94,7 +95,7 @@ class TranslateModule(
         }
     }
 
-    override fun provideCommand(): String = "translate"
+    override fun commandInfo() = CommandInfo(command = "translate")
 
     override fun help(): BotMessage =
         buildMessage {

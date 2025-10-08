@@ -77,12 +77,12 @@ class ModulesModuleTest {
 
     @Test
     fun `provideCommand returns modules`() {
-        assertEquals("modules", modulesModule.provideCommand())
+        assertEquals("modules", modulesModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns commands and list`() {
-        val aliases = modulesModule.aliases()
+        val aliases = modulesModule.commandInfo().aliases
         assertEquals(2, aliases.size)
         assertTrue(aliases.contains("commands"))
         assertTrue(aliases.contains("list"))

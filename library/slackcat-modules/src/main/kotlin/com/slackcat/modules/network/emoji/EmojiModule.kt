@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 
@@ -11,8 +12,6 @@ class EmojiModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val emojiClient by lazy { EmojiClient(networkClient) }
-
-    override fun aliases(): List<String> = listOf("et")
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val emoji = emojiClient.fetchEmoji(incomingChatMessage.userText)
@@ -35,7 +34,11 @@ class EmojiModule(
         )
     }
 
-    override fun provideCommand(): String = "emoji"
+    override fun commandInfo() =
+        CommandInfo(
+            command = "emoji",
+            aliases = listOf("et"),
+        )
 
     override fun help(): BotMessage =
         buildMessage {

@@ -74,12 +74,12 @@ class EmojiSentenceModuleTest {
     @Test
     fun `provideCommand returns emojisetence`() {
         // Note: typo in the actual implementation
-        assertEquals("emojisetence", emojiSentenceModule.provideCommand())
+        assertEquals("emojisetence", emojiSentenceModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns empty list`() {
-        val aliases = emojiSentenceModule.aliases()
+        val aliases = emojiSentenceModule.commandInfo().aliases
         assertTrue(aliases.isEmpty())
     }
 

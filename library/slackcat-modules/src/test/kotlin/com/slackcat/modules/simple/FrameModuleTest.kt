@@ -73,12 +73,12 @@ class FrameModuleTest {
 
     @Test
     fun `provideCommand returns nickelback`() {
-        assertEquals("nickelback", frameModule.provideCommand())
+        assertEquals("nickelback", frameModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns correct list`() {
-        val aliases = frameModule.aliases()
+        val aliases = frameModule.commandInfo().aliases
         assertEquals(1, aliases.size)
         assertTrue(aliases.contains("krang"))
     }

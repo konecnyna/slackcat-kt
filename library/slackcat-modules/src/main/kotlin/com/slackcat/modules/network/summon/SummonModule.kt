@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import kotlin.random.Random
@@ -65,9 +66,11 @@ class SummonModule(
         )
     }
 
-    override fun provideCommand(): String = "summon"
-
-    override fun aliases(): List<String> = SummonModuleAliases.entries.map { it.alias }
+    override fun commandInfo() =
+        CommandInfo(
+            command = "summon",
+            aliases = SummonModuleAliases.entries.map { it.alias },
+        )
 
     override fun help(): BotMessage =
         buildMessage {

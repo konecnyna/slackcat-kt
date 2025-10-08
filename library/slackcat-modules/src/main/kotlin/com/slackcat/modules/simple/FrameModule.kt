@@ -4,6 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 class FrameModule : SlackcatModule() {
@@ -35,9 +36,11 @@ class FrameModule : SlackcatModule() {
         )
     }
 
-    override fun provideCommand(): String = "nickelback"
-
-    override fun aliases(): List<String> = FrameModuleAliases.entries.map { it.alias }
+    override fun commandInfo() =
+        CommandInfo(
+            command = "nickelback",
+            aliases = FrameModuleAliases.entries.map { it.alias },
+        )
 
     override fun help(): BotMessage =
         buildMessage {

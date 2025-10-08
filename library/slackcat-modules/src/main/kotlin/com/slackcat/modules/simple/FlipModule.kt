@@ -5,6 +5,7 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 class FlipModule : SlackcatModule() {
@@ -57,7 +58,7 @@ class FlipModule : SlackcatModule() {
         }.joinToString("")
     }
 
-    override fun provideCommand(): String = "flip"
+    override fun commandInfo() = CommandInfo(command = "flip")
 
     override fun help(): BotMessage =
         buildMessage {
