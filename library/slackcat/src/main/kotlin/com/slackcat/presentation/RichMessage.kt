@@ -66,7 +66,7 @@ inline fun buildRichMessage(builderAction: RichTextMessageBuilder.() -> Unit): R
  */
 inline fun text(value: String): RichTextMessage {
     // For backward compatibility, we still return RichTextMessage
-    // but modules should start using the new format
+    // but modules should start using the new bot message format
     return buildRichMessage { section(value) }
 }
 

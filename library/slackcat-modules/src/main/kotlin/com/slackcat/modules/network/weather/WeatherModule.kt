@@ -32,11 +32,11 @@ class WeatherModule(
                 )
 
             else -> {
-                val richMessage = weatherMessageFactory.makeMessage(result)
+                val botMessage = weatherMessageFactory.makeMessage(result)
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        content = textMessage(richMessage),
+                        content = textMessage(botMessage),
                     ),
                 )
             }
