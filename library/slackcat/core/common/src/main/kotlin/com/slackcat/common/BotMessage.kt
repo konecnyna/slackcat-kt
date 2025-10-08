@@ -2,7 +2,7 @@ package com.slackcat.common
 
 /**
  * Platform-agnostic message structure that can be sent by the bot.
- * This replaces the Slack-specific RichTextMessage with a more universal model.
+ * Supports multiple platforms (Slack, CLI, Discord, Teams, etc.) through platform-specific converters.
  */
 data class BotMessage(
     val elements: List<MessageElement>,
