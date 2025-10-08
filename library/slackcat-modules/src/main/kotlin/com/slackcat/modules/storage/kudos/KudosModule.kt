@@ -63,14 +63,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
         }
 
     private suspend fun handleLeaderboard(incomingChatMessage: IncomingChatMessage) {
-        val leaderboardText = leaderboard.getLeaderboardMessage()
+        val leaderboardMessage = leaderboard.getLeaderboardMessage()
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                content =
-                    buildMessage(com.slackcat.common.MessageStyle.SUCCESS) {
-                        text(leaderboardText)
-                    },
+                content = leaderboardMessage,
             ),
         )
     }
