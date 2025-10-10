@@ -1,5 +1,7 @@
 package com.slackcat.modules.storage.kudos
 
+import com.slackcat.database.DatabaseTable
+import com.slackcat.database.asDatabaseTable
 import com.slackcat.database.dbQuery
 import com.slackcat.database.dbUpsert
 import org.jetbrains.exposed.sql.SortOrder
@@ -13,6 +15,20 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 
 class KudosDAO {
+    companion object {
+        /**
+         * Returns the database tables wrapped to hide Exposed implementation.
+         * This is used by KudosModule to register tables with the database layer.
+         */
+        fun getDatabaseTables(): List<DatabaseTable> {
+            return listOf(
+                KudosTable.asDatabaseTable(),
+                KudosMessageTable.asDatabaseTable(),
+                KudosTransactionTable.asDatabaseTable(),
+            )
+        }
+    }
+
     data class KudosRow(val id: Int, val userId: String, val count: Int)
 
     object KudosTable : Table() {

@@ -164,9 +164,9 @@ class SlackcatBot(
             modules
                 .filter { it is StorageModule }
                 .map { it as StorageModule }
-        val exposedTables = databaseFeatures.map { it.tables() }.flatMap { it }
-        println(exposedTables)
-        DatabaseGraph.connectDatabase(exposedTables, databaseConfig)
+        val databaseTables = databaseFeatures.map { it.tables() }.flatMap { it }
+        println(databaseTables)
+        DatabaseGraph.connectDatabase(databaseTables, databaseConfig)
     }
 
     private fun observeRealTimeMessages() {

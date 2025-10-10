@@ -1,7 +1,7 @@
 package com.slackcat.models
 
-import org.jetbrains.exposed.sql.Table
+import com.slackcat.database.DatabaseTable
 
 interface StorageModule {
-    fun tables(): List<Table>
+    fun tables(): List<DatabaseTable>
 }

@@ -1,5 +1,7 @@
 package com.slackcat.modules.storage.learn
 
+import com.slackcat.database.DatabaseTable
+import com.slackcat.database.asDatabaseTable
 import com.slackcat.database.dbQuery
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table
@@ -9,6 +11,16 @@ import org.jetbrains.exposed.sql.select
 import kotlin.random.Random
 
 class LearnDAO {
+    companion object {
+        /**
+         * Returns the database tables wrapped to hide Exposed implementation.
+         * This is used by LearnModule to register tables with the database layer.
+         */
+        fun getDatabaseTables(): List<DatabaseTable> {
+            return listOf(LearnTable.asDatabaseTable())
+        }
+    }
+
     data class LearnRow(val id: Int, val learnedBy: String, val learnKey: String, val learnText: String)
 
     object LearnTable : Table() {

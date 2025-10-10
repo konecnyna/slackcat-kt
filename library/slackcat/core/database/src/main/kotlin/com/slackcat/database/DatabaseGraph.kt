@@ -1,15 +1,16 @@
 package com.slackcat.database
 
-import org.jetbrains.exposed.sql.Table
 import javax.sql.DataSource
 
 object DatabaseGraph {
     val databaseClient = DatabaseClient()
 
     fun connectDatabase(
-        storageClients: List<Table>,
+        storageClients: List<DatabaseTable>,
         databaseConfig: DataSource,
     ) {
-        databaseClient.initialize(storageClients, databaseConfig)
+        // Convert DatabaseTable wrappers to Exposed Table objects
+        val exposedTables = storageClients.map { it.toExposedTable() }
+        databaseClient.initialize(exposedTables, databaseConfig)
     }
 }

@@ -6,21 +6,16 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.database.DatabaseTable
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
     private val leaderboard = KudosLeaderboard(kudosDAO)
 
-    override fun tables(): List<Table> =
-        listOf(
-            KudosDAO.KudosTable,
-            KudosDAO.KudosMessageTable,
-            KudosDAO.KudosTransactionTable,
-        )
+    override fun tables(): List<DatabaseTable> = KudosDAO.getDatabaseTables()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         // Check if this is a leaderboard command
