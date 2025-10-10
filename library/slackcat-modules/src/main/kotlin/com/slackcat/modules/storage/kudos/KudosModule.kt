@@ -153,11 +153,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
             )
 
         if (rateLimitMessage != null) {
-            // Rate limited - send friendly denial message
+            // Rate limited - send friendly denial message as DM to the giver
+            // Send DM by using user ID as channel ID
             sendMessage(
                 OutgoingChatMessage(
-                    channelId = channelId,
-                    threadId = threadId,
+                    channelId = giverId,
                     content = textMessage(rateLimitMessage),
                 ),
             )
