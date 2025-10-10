@@ -62,6 +62,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     content = textMessage(message),
+                    threadId = incomingChatMessage.messageId,
                 ),
             )
             return
@@ -81,6 +82,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(message),
+                threadId = incomingChatMessage.messageId,
             ),
         )
     }
