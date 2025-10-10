@@ -21,8 +21,9 @@ import org.jetbrains.exposed.sql.Table
  * ```
  */
 @RequiresOptIn(
-    message = "This API exposes the underlying Exposed SQL implementation and may change at any time. " +
-        "Use only if you need features not available through DatabaseTable abstraction.",
+    message =
+        "This API exposes the underlying Exposed SQL implementation and may change at any time. " +
+            "Use only if you need features not available through DatabaseTable abstraction.",
     level = RequiresOptIn.Level.WARNING,
 )
 @Retention(AnnotationRetention.BINARY)

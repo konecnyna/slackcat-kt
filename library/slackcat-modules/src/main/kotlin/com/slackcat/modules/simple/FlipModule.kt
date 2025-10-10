@@ -32,7 +32,18 @@ class FlipModule : SlackcatModule() {
             '}' to '{', '<' to '>', '>' to '<', '&' to '⅋', '_' to '‾',
         )
 
+    // Reverse map for unflipping
+    private val unflipMap = flipMap.entries.associate { (k, v) -> v to k }
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
+        // Check if this is an alias command
+        val alias = FlipAliases.fromAlias(incomingChatMessage.command)
+        if (alias != null) {
+            handleAlias(alias, incomingChatMessage)
+            return
+        }
+
+        // Handle main flip command
         if (incomingChatMessage.userText.isEmpty()) {
             sendMessage(
                 OutgoingChatMessage(
@@ -52,19 +63,73 @@ class FlipModule : SlackcatModule() {
         )
     }
 
+    private suspend fun handleAlias(
+        alias: FlipAliases,
+        incomingChatMessage: IncomingChatMessage,
+    ) {
+        when (alias) {
+            FlipAliases.Unflip -> {
+                if (incomingChatMessage.userText.isEmpty()) {
+                    sendMessage(
+                        OutgoingChatMessage(
+                            channelId = incomingChatMessage.channelId,
+                            content = textMessage("Please provide text to unflip. Example: ?unflip plɹoʍ ollǝɥ"),
+                        ),
+                    )
+                    return
+                }
+
+                val unflippedText = unflipText(incomingChatMessage.userText)
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = incomingChatMessage.channelId,
+                        content = textMessage("┳━ $unflippedText ━┳"),
+                    ),
+                )
+            }
+        }
+    }
+
     private fun flipText(inputText: String): String {
         return inputText.reversed().map { char ->
             flipMap[char] ?: char
         }.joinToString("")
     }
 
-    override fun commandInfo() = CommandInfo(command = "flip")
+    private fun unflipText(inputText: String): String {
+        return inputText.map { char ->
+            unflipMap[char] ?: char
+        }.reversed().joinToString("")
+    }
+
+    override fun commandInfo() =
+        CommandInfo(
+            command = "flip",
+            aliases = FlipAliases.entries.map { it.alias },
+        )
 
     override fun help(): BotMessage =
         buildMessage {
             heading("Flip Help")
             text("This module flips text upside down using Unicode characters.")
             text("Usage: ?flip [text]")
-            text("Example: ?flip hello world → plɹoʍ ollǝɥ")
+            text("Example: ?flip hello world → (╯°□°）╯︵ ┻━ plɹoʍ ollǝɥ ━┻")
+            text("")
+            text("You can also unflip text:")
+            text("Usage: ?unflip [flipped text]")
+            text("Example: ?unflip plɹoʍ ollǝɥ → ┳━ hello world ━┳")
         }
+}
+
+enum class FlipAliases(val alias: String) {
+    Unflip("unflip"),
+    ;
+
+    companion object {
+        private val aliasMap = entries.associateBy { it.alias }
+
+        fun fromAlias(alias: String): FlipAliases? {
+            return aliasMap[alias.lowercase()]
+        }
+    }
 }

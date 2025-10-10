@@ -77,9 +77,10 @@ class FlipModuleTest {
     }
 
     @Test
-    fun `aliases returns empty list`() {
+    fun `aliases returns unflip`() {
         val aliases = flipModule.commandInfo().aliases
-        assertTrue(aliases.isEmpty())
+        assertEquals(1, aliases.size)
+        assertEquals("unflip", aliases[0])
     }
 
     @Test
