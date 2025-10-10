@@ -83,7 +83,7 @@ class FlipModule : SlackcatModule() {
                 sendMessage(
                     OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
-                        content = textMessage("┳━ $unflippedText ━┳"),
+                        content = textMessage("┳━ $unflippedText ━┳ノ( º _ ºノ)"),
                     ),
                 )
             }
@@ -117,7 +117,7 @@ class FlipModule : SlackcatModule() {
             text("")
             text("You can also unflip text:")
             text("Usage: ?unflip [flipped text]")
-            text("Example: ?unflip plɹoʍ ollǝɥ → ┳━ hello world ━┳")
+            text("Example: ?unflip plɹoʍ ollǝɥ → ┳━ hello world ━┳ノ( º _ ºノ)")
         }
 }
 
