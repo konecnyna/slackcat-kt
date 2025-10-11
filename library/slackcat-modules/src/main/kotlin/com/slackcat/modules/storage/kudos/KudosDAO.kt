@@ -1,18 +1,20 @@
 package com.slackcat.modules.storage.kudos
 
 import com.slackcat.database.DatabaseTable
+import com.slackcat.database.DbOp.and
+import com.slackcat.database.DbOp.eq
+import com.slackcat.database.DbOp.greater
+import com.slackcat.database.DbOp.plus
+import com.slackcat.database.DbSortOrder
 import com.slackcat.database.asDatabaseTable
+import com.slackcat.database.dbInsert
+import com.slackcat.database.dbLimit
+import com.slackcat.database.dbOrderBy
 import com.slackcat.database.dbQuery
+import com.slackcat.database.dbSelect
+import com.slackcat.database.dbSelectAll
 import com.slackcat.database.dbUpsert
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.greater
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 
 class KudosDAO {
     companion object {
@@ -96,9 +98,9 @@ class KudosDAO {
 
     suspend fun getTopKudos(limit: Int = 10): List<KudosRow> {
         return dbQuery {
-            KudosTable.selectAll()
-                .orderBy(KudosTable.count, SortOrder.DESC)
-                .limit(limit)
+            KudosTable.dbSelectAll()
+                .dbOrderBy(KudosTable.count, DbSortOrder.DESC)
+                .dbLimit(limit)
                 .map { resultRow ->
                     KudosRow(
                         id = resultRow[KudosTable.id],
@@ -112,7 +114,7 @@ class KudosDAO {
     suspend fun getBotMessageForThread(threadTs: String): KudosMessageRow? {
         return dbQuery {
             KudosMessageTable
-                .select { KudosMessageTable.threadTs eq threadTs }
+                .dbSelect { KudosMessageTable.threadTs eq threadTs }
                 .map { resultRow ->
                     KudosMessageRow(
                         threadTs = resultRow[KudosMessageTable.threadTs],
@@ -130,7 +132,7 @@ class KudosDAO {
         channelId: String,
     ) {
         dbQuery {
-            KudosMessageTable.insert {
+            KudosMessageTable.dbInsert {
                 it[KudosMessageTable.threadTs] = threadTs
                 it[KudosMessageTable.botMessageTs] = botMessageTs
                 it[KudosMessageTable.channelId] = channelId
@@ -157,7 +159,7 @@ class KudosDAO {
             // Check Rule 1: Already gave kudos in this thread?
             val threadTransaction =
                 KudosTransactionTable
-                    .select {
+                    .dbSelect {
                         (KudosTransactionTable.giverId eq giverId) and
                             (KudosTransactionTable.recipientId eq recipientId) and
                             (KudosTransactionTable.threadTs eq threadTs)
@@ -171,13 +173,13 @@ class KudosDAO {
             // Check Rule 2: Gave kudos to same person recently (anywhere)?
             val recentTransaction =
                 KudosTransactionTable
-                    .select {
+                    .dbSelect {
                         (KudosTransactionTable.giverId eq giverId) and
                             (KudosTransactionTable.recipientId eq recipientId) and
                             (KudosTransactionTable.timestamp greater fiveMinutesAgo)
                     }
-                    .orderBy(KudosTransactionTable.timestamp, SortOrder.DESC)
-                    .limit(1)
+                    .dbOrderBy(KudosTransactionTable.timestamp, DbSortOrder.DESC)
+                    .dbLimit(1)
                     .singleOrNull()
 
             if (recentTransaction != null) {
@@ -206,7 +208,7 @@ class KudosDAO {
         threadTs: String,
     ) {
         dbQuery {
-            KudosTransactionTable.insert {
+            KudosTransactionTable.dbInsert {
                 it[KudosTransactionTable.giverId] = giverId
                 it[KudosTransactionTable.recipientId] = recipientId
                 it[KudosTransactionTable.threadTs] = threadTs

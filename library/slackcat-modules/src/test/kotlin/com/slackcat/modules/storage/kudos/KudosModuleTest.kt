@@ -6,6 +6,9 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.MessageElement
 import com.slackcat.common.SlackcatConfig
+import com.slackcat.database.createTestDatabase
+import com.slackcat.database.createTestSchema
+import com.slackcat.database.dropTestSchema
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -13,9 +16,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +32,7 @@ class KudosModuleTest {
     private lateinit var mockChatClient: ChatClient
     private lateinit var mockCoroutineScope: CoroutineScope
     private lateinit var mockConfig: SlackcatConfig
-    private lateinit var database: Database
+    private lateinit var database: org.jetbrains.exposed.sql.Database
 
     @TempDir
     lateinit var tempDir: Path
@@ -51,12 +51,10 @@ class KudosModuleTest {
 
         // Create a temporary SQLite database file for testing
         val dbFile = tempDir.resolve("test.db").toString()
-        database = Database.connect("jdbc:sqlite:$dbFile", driver = "org.sqlite.JDBC")
+        database = createTestDatabase("jdbc:sqlite:$dbFile", driver = "org.sqlite.JDBC")
 
         // Create the table schema synchronously
-        transaction(database) {
-            SchemaUtils.create(KudosDAO.KudosTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTransactionTable)
-        }
+        createTestSchema(database, KudosDAO.KudosTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTransactionTable)
 
         startKoin {
             modules(
@@ -73,9 +71,7 @@ class KudosModuleTest {
 
     @AfterEach
     fun tearDown() {
-        transaction(database) {
-            SchemaUtils.drop(KudosDAO.KudosTransactionTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTable)
-        }
+        dropTestSchema(database, KudosDAO.KudosTransactionTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTable)
         stopKoin()
     }
 
