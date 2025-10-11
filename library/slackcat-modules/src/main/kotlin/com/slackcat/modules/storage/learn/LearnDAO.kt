@@ -1,14 +1,26 @@
 package com.slackcat.modules.storage.learn
 
+import com.slackcat.database.DatabaseTable
+import com.slackcat.database.DbOp.eq
+import com.slackcat.database.asDatabaseTable
+import com.slackcat.database.dbDeleteWhere
+import com.slackcat.database.dbInsert
 import com.slackcat.database.dbQuery
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import com.slackcat.database.dbSelect
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
 import kotlin.random.Random
 
 class LearnDAO {
+    companion object {
+        /**
+         * Returns the database tables wrapped to hide Exposed implementation.
+         * This is used by LearnModule to register tables with the database layer.
+         */
+        fun getDatabaseTables(): List<DatabaseTable> {
+            return listOf(LearnTable.asDatabaseTable())
+        }
+    }
+
     data class LearnRow(val id: Int, val learnedBy: String, val learnKey: String, val learnText: String)
 
     object LearnTable : Table() {
@@ -26,7 +38,7 @@ class LearnDAO {
         dbQuery {
             // Query all rows where learn_key matches the provided key
             val results =
-                LearnTable.select { LearnTable.learnKey eq key }.map {
+                LearnTable.dbSelect { LearnTable.learnKey eq key }.map {
                     LearnRow(
                         id = it[LearnTable.id],
                         learnedBy = it[LearnTable.learnedBy],
@@ -50,7 +62,7 @@ class LearnDAO {
     suspend fun insertLearn(learnRequest: LearnInsertRow): Boolean =
         dbQuery {
             val inserted =
-                LearnTable.insert {
+                LearnTable.dbInsert {
                     it[learnedBy] = learnRequest.learnedBy
                     it[learnKey] = learnRequest.learnKey
                     it[learnText] = learnRequest.learnText
@@ -60,7 +72,7 @@ class LearnDAO {
 
     suspend fun getEntriesByLearnKey(key: String): List<LearnRow> =
         dbQuery {
-            LearnTable.select { LearnTable.learnKey eq key }
+            LearnTable.dbSelect { LearnTable.learnKey eq key }
                 .map {
                     LearnRow(
                         id = it[LearnTable.id],
@@ -77,14 +89,14 @@ class LearnDAO {
     ): Boolean =
         dbQuery {
             val entries =
-                LearnTable.select { LearnTable.learnKey eq key }
+                LearnTable.dbSelect { LearnTable.learnKey eq key }
                     .map { it[LearnTable.id] }
 
             if (index in entries.indices) {
                 // Get the ID of the entry at the specified index
                 val entryId = entries[index]
                 // Delete the entry
-                LearnTable.deleteWhere { LearnTable.id eq entryId } > 0
+                LearnTable.dbDeleteWhere { LearnTable.id eq entryId } > 0
             } else {
                 false // Index out of range
             }

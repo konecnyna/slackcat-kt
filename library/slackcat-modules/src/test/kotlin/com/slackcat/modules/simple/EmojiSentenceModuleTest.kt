@@ -36,7 +36,7 @@ class EmojiSentenceModuleTest {
 
         every { mockConfig.botNameProvider() } returns "TestBot"
         every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
-        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success("mock_timestamp")
 
         startKoin {
             modules(

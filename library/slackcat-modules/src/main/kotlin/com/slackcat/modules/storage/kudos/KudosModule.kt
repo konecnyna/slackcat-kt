@@ -6,16 +6,16 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.database.DatabaseTable
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
     private val leaderboard = KudosLeaderboard(kudosDAO)
 
-    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
+    override fun tables(): List<DatabaseTable> = KudosDAO.getDatabaseTables()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         // Check if this is a leaderboard command
@@ -44,6 +44,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
         validIds.forEach { recipientId ->
             giveKudosToUser(
+                giverId = incomingChatMessage.chatUser.userId,
                 recipientId = recipientId,
                 channelId = incomingChatMessage.channelId,
                 threadId = incomingChatMessage.messageId,
@@ -84,6 +85,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 event.itemUserId?.let { messageAuthorId ->
                     if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
                         giveKudosToUser(
+                            giverId = event.userId,
                             recipientId = messageAuthorId,
                             channelId = event.channelId,
                             threadId = event.messageTimestamp,
@@ -125,21 +127,78 @@ open class KudosModule : SlackcatModule(), StorageModule {
     }
 
     /**
-     * Gives kudos to a user and sends a confirmation message.
+     * Gives kudos to a user and sends/updates a confirmation message.
+     * If a bot message already exists in this thread, it will be updated.
+     * Otherwise, a new message will be sent and tracked.
+     *
+     * Includes rate limiting to prevent spam.
      */
     private suspend fun giveKudosToUser(
+        giverId: String,
         recipientId: String,
         channelId: String,
         threadId: String,
     ) {
+        // Check rate limits
+        val rateLimitMessage =
+            kudosDAO.hasRecentKudos(
+                giverId = giverId,
+                recipientId = recipientId,
+                threadTs = threadId,
+            )
+
+        if (rateLimitMessage != null) {
+            // Rate limited - send friendly denial message as DM to the giver
+            // Send DM by using user ID as channel ID
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = giverId,
+                    content = textMessage(rateLimitMessage),
+                ),
+            )
+            return
+        }
+
+        // Not rate limited - proceed with giving kudos
         val updatedKudos = kudosDAO.upsertKudos(recipientId)
-        sendMessage(
+
+        // Record this transaction for future rate limit checks
+        kudosDAO.recordTransaction(
+            giverId = giverId,
+            recipientId = recipientId,
+            threadTs = threadId,
+        )
+
+        val kudosMessage = getKudosMessage(updatedKudos)
+        val messageContent =
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                content = textMessage(getKudosMessage(updatedKudos)),
-            ),
-        )
+                content = textMessage(kudosMessage),
+            )
+
+        // Check if we already have a bot message in this thread
+        val existingMessage = kudosDAO.getBotMessageForThread(threadId)
+
+        if (existingMessage != null) {
+            // Update the existing message
+            updateMessage(
+                channelId = existingMessage.channelId,
+                messageTs = existingMessage.botMessageTs,
+                message = messageContent,
+            )
+        } else {
+            // Send a new message and store its timestamp
+            val result = sendMessage(messageContent)
+
+            result.onSuccess { messageTs ->
+                kudosDAO.storeBotMessage(
+                    threadTs = threadId,
+                    botMessageTs = messageTs,
+                    channelId = channelId,
+                )
+            }
+        }
     }
 
     private fun extractUserIds(userText: String): Set<String> {
