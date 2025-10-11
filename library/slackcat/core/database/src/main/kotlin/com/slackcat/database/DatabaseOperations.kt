@@ -68,16 +68,16 @@ fun Table.dbSelectAll(): Query = this.selectAll()
  * Inserts a row into a table.
  * @return The InsertStatement result
  */
-fun <T : Table> T.dbInsert(body: T.(InsertStatement<Number>) -> Unit): InsertStatement<Number> =
-    this.insert(body)
+fun <T : Table> T.dbInsert(body: T.(InsertStatement<Number>) -> Unit): InsertStatement<Number> = this.insert(body)
 
 /**
  * Deletes rows from a table based on a where condition.
  * @return The number of deleted rows
  */
-inline fun <T : Table> T.dbDeleteWhere(crossinline op: SqlExpressionBuilder.() -> Op<Boolean>): Int = deleteWhere {
-    SqlExpressionBuilder.op()
-}
+inline fun <T : Table> T.dbDeleteWhere(crossinline op: SqlExpressionBuilder.() -> Op<Boolean>): Int =
+    deleteWhere {
+        SqlExpressionBuilder.op()
+    }
 
 /**
  * SQL expression builder for creating conditions.
