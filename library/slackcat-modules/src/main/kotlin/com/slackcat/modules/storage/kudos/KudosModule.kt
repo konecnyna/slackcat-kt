@@ -81,16 +81,29 @@ open class KudosModule : SlackcatModule(), StorageModule {
     override suspend fun onReaction(event: SlackcatEvent) {
         when (event) {
             is SlackcatEvent.ReactionAdded -> {
+                println("[KudosModule] Reaction added: userId=${event.userId}, reaction=${event.reaction}, itemUserId=${event.itemUserId}")
                 // Give kudos to the user who authored the message
                 event.itemUserId?.let { messageAuthorId ->
+                    println("[KudosModule] Attempting to give kudos from ${event.userId} to $messageAuthorId")
                     if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
-                        giveKudosToUser(
-                            giverId = event.userId,
-                            recipientId = messageAuthorId,
-                            channelId = event.channelId,
-                            threadId = event.messageTimestamp,
-                        )
+                        println("[KudosModule] Kudos validation passed, calling giveKudosToUser")
+                        try {
+                            giveKudosToUser(
+                                giverId = event.userId,
+                                recipientId = messageAuthorId,
+                                channelId = event.channelId,
+                                threadId = event.messageTimestamp,
+                            )
+                            println("[KudosModule] giveKudosToUser completed successfully")
+                        } catch (e: Exception) {
+                            println("[KudosModule] ERROR in giveKudosToUser: ${e.message}")
+                            e.printStackTrace()
+                        }
+                    } else {
+                        println("[KudosModule] Kudos validation failed (self-kudos attempt)")
                     }
+                } ?: run {
+                    println("[KudosModule] itemUserId is null - cannot determine message author")
                 }
             }
 
