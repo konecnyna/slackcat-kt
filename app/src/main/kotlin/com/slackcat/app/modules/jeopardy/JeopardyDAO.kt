@@ -1,5 +1,7 @@
 package com.slackcat.app.modules.jeopardy
 
+import com.slackcat.database.DatabaseTable
+import com.slackcat.database.asDatabaseTable
 import com.slackcat.database.dbQuery
 import com.slackcat.database.dbUpsert
 import com.slackcat.network.NetworkClient
@@ -14,6 +16,19 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.random.Random
 
 class JeopardyDAO(private val networkClient: NetworkClient) {
+    companion object {
+        /**
+         * Returns the database tables wrapped to hide Exposed implementation.
+         * This is used by JeopardyModule to register tables with the database layer.
+         */
+        fun getDatabaseTables(): List<DatabaseTable> {
+            return listOf(
+                JeopardyQuestionsTable.asDatabaseTable(),
+                JeopardyScoreTable.asDatabaseTable(),
+            )
+        }
+    }
+
     data class JeopardyScoreRow(
         val id: Int,
         val userId: String,

@@ -60,8 +60,18 @@ class SlackcatBot(
                     message: OutgoingChatMessage,
                     botName: String,
                     botIcon: com.slackcat.chat.models.BotIcon,
-                ): Result<Unit> {
+                ): Result<String> {
                     return chatEngine.sendMessage(message, botName, botIcon)
+                }
+
+                override suspend fun updateMessage(
+                    channelId: String,
+                    messageTs: String,
+                    message: OutgoingChatMessage,
+                    botName: String,
+                    botIcon: com.slackcat.chat.models.BotIcon,
+                ): Result<String> {
+                    return chatEngine.updateMessage(channelId, messageTs, message, botName, botIcon)
                 }
             }
 
@@ -154,9 +164,9 @@ class SlackcatBot(
             modules
                 .filter { it is StorageModule }
                 .map { it as StorageModule }
-        val exposedTables = databaseFeatures.map { it.tables() }.flatMap { it }
-        println(exposedTables)
-        DatabaseGraph.connectDatabase(exposedTables, databaseConfig)
+        val databaseTables = databaseFeatures.map { it.tables() }.flatMap { it }
+        println(databaseTables)
+        DatabaseGraph.connectDatabase(databaseTables, databaseConfig)
     }
 
     private fun observeRealTimeMessages() {

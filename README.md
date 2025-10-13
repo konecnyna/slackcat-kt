@@ -122,6 +122,87 @@ docker-compose up --build -d && docker exec -it slack-bot /bin/sh
 ```
 
 
+# Database
+
+Slackcat uses [Exposed SQL](https://github.com/JetBrains/Exposed) as the ORM with automatic schema migrations. When you add new tables or columns, they're automatically created on application startup.
+
+## How Schema Management Works
+
+The database layer uses `SchemaUtils.createMissingTablesAndColumns()` which automatically:
+- Creates new tables that don't exist
+- Adds new columns to existing tables
+- Preserves existing data
+
+**Note:** Column deletions and type changes are NOT automatic - you'll need to write manual migrations for those.
+
+## Adding a New Column
+
+Let's say you want to add a `nickname` column to the Kudos table. Here's how:
+
+### 1. Update the Table Definition
+
+In your DAO file (e.g., `KudosDAO.kt`), add the new column to the table object:
+
+```kotlin
+object KudosTable : Table() {
+    val id = integer("id").autoIncrement()
+    val userId = text("user_id").uniqueIndex()
+    val count = integer("count")
+    val nickname = text("nickname").nullable()  // ← Add this line
+    override val primaryKey = PrimaryKey(id)
+}
+```
+
+### 2. Update the Data Class
+
+Add the new field to your data class:
+
+```kotlin
+data class KudosRow(
+    val id: Int,
+    val userId: String,
+    val count: Int,
+    val nickname: String?,  // ← Add this line
+)
+```
+
+### 3. Update Queries
+
+Update any queries that map results to include the new column:
+
+```kotlin
+KudosRow(
+    id = resultRow[KudosTable.id],
+    userId = resultRow[KudosTable.userId],
+    count = resultRow[KudosTable.count],
+    nickname = resultRow[KudosTable.nickname],  // ← Add this line
+)
+```
+
+### 4. Deploy
+
+That's it! When you restart the application, the new column will be automatically created.
+
+```bash
+docker compose down && docker compose up --build -d
+```
+
+## Advanced: Using Exposed Directly
+
+If you need advanced Exposed SQL features not available through the `DatabaseTable` abstraction, you can access the underlying table:
+
+```kotlin
+import com.slackcat.database.UnstableExposedApi
+
+@OptIn(UnstableExposedApi::class)
+fun myAdvancedQuery() {
+    val exposedTable = myDatabaseTable.toExposedTable()
+    // Use Exposed SQL directly
+}
+```
+
+⚠️ **Warning:** This API is marked unstable and may change at any time. Use only when necessary.
+
 ## Dump Databse
 
 ```bash
