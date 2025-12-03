@@ -1,7 +1,7 @@
 import com.slackcat.SlackcatProperties
 
 plugins {
-    id("com.slackcat.plugins.library")
+    id("com.slackcat.plugins.internal-library")
     kotlin("plugin.serialization")
 }
 

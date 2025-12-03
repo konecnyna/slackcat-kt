@@ -30,23 +30,20 @@ gpr.token=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## Publishing the Library
 
-### Option 1: Publish All Library Modules
+### Publish All Public Modules
 
 ```bash
 ./gradlew :library:slackcat:publish
 ./gradlew :library:slackcat-modules:publish
-./gradlew :library:slackcat:core:common:publish
-./gradlew :library:slackcat:core:database:publish
-./gradlew :library:slackcat:core:network:publish
-./gradlew :library:slackcat:core:server:publish
-./gradlew :library:slackcat:data:chat:publish
 ```
 
-### Option 2: Publish Specific Module
+Or publish a specific module:
 
 ```bash
 ./gradlew :library:slackcat:publish
 ```
+
+**Note:** Only `slackcat` and `slackcat-modules` are published. Internal core modules (`common`, `database`, `network`, `server`, `chat`) are included as transitive dependencies and are not published separately.
 
 ### Using Environment Variables (CI/CD)
 
@@ -104,9 +101,11 @@ In your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
+    // Core library with all internal dependencies
     implementation("com.slackcat:slackcat:0.0.1")
+
+    // Optional: Pre-built modules (weather, crypto, emoji, etc.)
     implementation("com.slackcat:slackcat-modules:0.0.1")
-    // Add other modules as needed
 }
 ```
 
@@ -121,26 +120,33 @@ gpr.token=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## Available Modules
 
-- `com.slackcat:slackcat:0.0.1` - Main library
-- `com.slackcat:slackcat-modules:0.0.1` - Modules library
-- `com.slackcat:common:0.0.1` - Common utilities
-- `com.slackcat:database:0.0.1` - Database layer
-- `com.slackcat:network:0.0.1` - Network layer
-- `com.slackcat:server:0.0.1` - Server components
-- `com.slackcat:chat:0.0.1` - Chat data models
+- `com.slackcat:slackcat:0.0.1` - Core library (includes all internal dependencies)
+- `com.slackcat:slackcat-modules:0.0.1` - Pre-built modules (weather, crypto, emoji, kudos, etc.)
+
+**Internal modules (not published separately):**
+These are automatically included as transitive dependencies when you use `slackcat`:
+- `common` - Common utilities and models
+- `database` - Database layer
+- `network` - Network client
+- `server` - Server components
+- `chat` - Chat engine implementations
 
 ## Versioning
 
-The current version is set in the root `build.gradle.kts`:
+The current version is managed in `buildSrc/src/main/kotlin/AppVersion.kt`:
 
 ```kotlin
-allprojects {
-    group = "com.slackcat"
-    version = "0.0.1"
+object AppVersion {
+    const val MAJOR = 0
+    const val MINOR = 0
+    const val PATCH = 1
+
+    val versionName: String
+        get() = "$MAJOR.$MINOR.$PATCH"
 }
 ```
 
-To publish a new version, update the version number and republish.
+To publish a new version, see `VERSIONING.md` for details on the automated release process.
 
 ## Troubleshooting
 

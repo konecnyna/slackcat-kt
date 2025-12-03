@@ -95,8 +95,3 @@ jobs:
           echo "### Published Modules" >> $GITHUB_STEP_SUMMARY
           echo "- \`com.slackcat:slackcat:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`com.slackcat:slackcat-modules:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:common:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:database:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:network:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:server:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:chat:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
