@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "com.slackcat"
-    version = "0.0.1"
+    version = AppVersion.versionName
 
     repositories {
         mavenCentral()
