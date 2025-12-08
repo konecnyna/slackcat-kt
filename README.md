@@ -2,11 +2,98 @@
 
 Slackcat but strongly typed
 
+## Using Slackcat as a Library
+
+You can include slackcat-kt in your own project as a dependency from GitHub Packages.
+
+### 1. Configure GitHub Packages Repository
+
+Add the GitHub Packages repository to your project's `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/konecnyna/slackcat-kt")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.token") as String? ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+```
+
+Or add it directly in your `build.gradle.kts`:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/konecnyna/slackcat-kt")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.token") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+```
+
+### 2. Add Dependencies
+
+Add slackcat modules to your `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    // Core library
+    implementation("com.slackcat:slackcat:0.0.1")
+
+    // Optional: Pre-built modules (weather, crypto, emoji, etc.)
+    implementation("com.slackcat:slackcat-modules:0.0.1")
+}
+```
+
+### 3. Configure Credentials
+
+Create `~/.gradle/gradle.properties` (in your home directory):
+
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.token=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
+```
+
+**To create a GitHub Personal Access Token:**
+1. Go to GitHub Settings → Developer settings → Personal access tokens
+2. Create a token with `read:packages` scope
+3. Copy the token and add it to your gradle.properties
+
+### 4. Basic Usage Example
+
+```kotlin
+import com.slackcat.SlackcatBot
+import com.slackcat.common.SlackcatConfig
+
+fun main() {
+    val config = SlackcatConfig(
+        slackAppToken = System.getenv("SLACK_APP_TOKEN"),
+        slackBotToken = System.getenv("SLACK_BOT_TOKEN")
+    )
+
+    val bot = SlackcatBot(config)
+    bot.start()
+}
+```
+
+For detailed publishing and consumption instructions, see:
+- `PUBLISHING.md` - Complete guide to publishing and consuming the library
+- `VERSIONING.md` - Version management and release process
+
 ## Note
 
-The`*Graphs.kt` classes are a very simple global singleton dependency graph. 
-For a real app, you would use something like Dagger instead.# slackcat-kt
-Slackcat but strongly typed
+The`*Graphs.kt` classes are a very simple global singleton dependency graph.
+For a real app, you would use something like Dagger instead.
 
 ## Run locally
 
