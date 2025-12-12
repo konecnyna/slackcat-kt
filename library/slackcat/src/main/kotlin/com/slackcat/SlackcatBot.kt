@@ -63,6 +63,11 @@ class SlackcatBot(
                 ): Result<Unit> {
                     return chatEngine.sendMessage(message, botName, botIcon)
                 }
+
+                override suspend fun getUserDisplayName(userId: String): Result<String> {
+                    return (chatEngine as? SlackChatEngine)?.getUserDisplayName(userId)
+                        ?: Result.failure(Exception("getUserDisplayName not supported by this chat engine"))
+                }
             }
 
         // Register ChatClient with Koin

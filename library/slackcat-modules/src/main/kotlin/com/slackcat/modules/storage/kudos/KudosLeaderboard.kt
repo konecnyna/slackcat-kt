@@ -18,6 +18,12 @@ class KudosLeaderboard(
             }
         }
 
+        // Fetch all display names before building the message
+        val userDisplayNames =
+            topKudos.associate { kudosRow ->
+                kudosRow.userId to chatClient.getUserDisplayName(kudosRow.userId).getOrElse { kudosRow.userId }
+            }
+
         return buildMessage(MessageStyle.SUCCESS) {
             heading(":trophy: Kudos Leaderboard :trophy:")
             divider()
@@ -29,7 +35,7 @@ class KudosLeaderboard(
                         2 -> ":third_place_medal:"
                         else -> "${index + 1}."
                     }
-                val displayName = chatClient.getUserDisplayName(kudosRow.userId).getOrThrow()
+                val displayName = userDisplayNames[kudosRow.userId] ?: kudosRow.userId
                 val plusText = if (kudosRow.count == 1) "plus" else "pluses"
                 text("$medal $displayName - ${kudosRow.count} $plusText")
             }

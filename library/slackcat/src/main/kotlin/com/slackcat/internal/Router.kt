@@ -179,7 +179,8 @@ class Router(
                             try {
                                 module.onEvent(event)
                             } catch (exception: Exception) {
-                                println("Error in event handler for ${module::class.java.simpleName}: ${exception.message}")
+                                val moduleName = module::class.java.simpleName
+                                println("Error in event handler for $moduleName: ${exception.message}")
                                 exception.printStackTrace()
                             }
                         }
@@ -206,7 +207,9 @@ class Router(
                                             try {
                                                 module.onReaction(event)
                                             } catch (exception: Exception) {
-                                                println("Error in reaction handler for ${module::class.java.simpleName}: ${exception.message}")
+                                                val moduleName = module::class.java.simpleName
+                                                val errorMsg = "Error in reaction handler for $moduleName"
+                                                println("$errorMsg: ${exception.message}")
                                                 exception.printStackTrace()
                                             }
                                         }
