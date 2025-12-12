@@ -53,7 +53,9 @@ publishing {
 
                 scm {
                     connection.set("scm:git:git://github.com/${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git")
-                    developerConnection.set("scm:git:ssh://github.com:${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git")
+                    developerConnection.set(
+                        "scm:git:ssh://github.com:${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git",
+                    )
                     url.set("https://github.com/${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}")
                 }
             }
