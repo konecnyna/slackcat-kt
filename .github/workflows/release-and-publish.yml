@@ -46,6 +46,30 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $VERSION"
 
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          ./gradlew publish --no-daemon --stacktrace
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Release v${{ steps.get_version.outputs.version }}
+          body: |
+            Release v${{ steps.get_version.outputs.version }}
+
+            ## Changes
+            See commit history for details.
+          draft: false
+          prerelease: false
+
       - name: Increment version
         id: increment_version
         run: |
@@ -63,38 +87,14 @@ jobs:
           git commit -m "Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
           git push
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.increment_version.outputs.new_version }}
-          release_name: Release v${{ steps.increment_version.outputs.new_version }}
-          body: |
-            Release v${{ steps.increment_version.outputs.new_version }}
-
-            ## Changes
-            See commit history for details.
-          draft: false
-          prerelease: false
-
-      - name: Publish to GitHub Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          ./gradlew publish --no-daemon --stacktrace
-
       - name: Summary
         run: |
           echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Previous version: **v${{ steps.get_version.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Released version: **v${{ steps.increment_version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Released version: **v${{ steps.get_version.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
           echo "✅ Published to GitHub Packages" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Next version: **v${{ steps.increment_version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published Modules" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:slackcat:${{ steps.increment_version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`com.slackcat:slackcat-modules:${{ steps.increment_version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`com.slackcat:slackcat:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`com.slackcat:slackcat-modules:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
