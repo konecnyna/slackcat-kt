@@ -46,6 +46,7 @@ class KudosModuleTest {
         every { mockConfig.botNameProvider() } returns "TestBot"
         every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
         coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { mockChatClient.getUserDisplayName(any()) } returns Result.success("Test User")
 
         // Create a temporary SQLite database file for testing
         val dbFile = tempDir.resolve("test.db").toString()
@@ -134,15 +135,15 @@ class KudosModuleTest {
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            val hasUser456 =
+            val hasTestUser =
                 sentMessage.content.elements.any { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("<@user456>")
-                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        is MessageElement.Text -> element.content.contains("Test User")
+                        is MessageElement.Heading -> element.content.contains("Test User")
                         else -> false
                     }
                 }
-            assertTrue(hasUser456)
+            assertTrue(hasTestUser)
 
             val hasOnePlus =
                 sentMessage.content.elements.any { element ->
@@ -193,15 +194,15 @@ class KudosModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val hasUser456 =
+            val hasTestUser =
                 sentMessage.content.elements.any { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("<@user456>")
-                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        is MessageElement.Text -> element.content.contains("Test User")
+                        is MessageElement.Heading -> element.content.contains("Test User")
                         else -> false
                     }
                 }
-            assertTrue(hasUser456)
+            assertTrue(hasTestUser)
 
             val hasOnePlus =
                 sentMessage.content.elements.any { element ->
@@ -268,12 +269,8 @@ class KudosModuleTest {
                 val hasExpectedUser =
                     sentMessage.content.elements.any { element ->
                         when (element) {
-                            is MessageElement.Text ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
-                            is MessageElement.Heading ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
+                            is MessageElement.Text -> element.content.contains("Test User")
+                            is MessageElement.Heading -> element.content.contains("Test User")
                             else -> false
                         }
                     }
@@ -283,38 +280,41 @@ class KudosModuleTest {
 
     // Create a test subclass to access protected method
     private class TestKudosModule : KudosModule() {
-        fun testGetKudosMessage(kudos: KudosDAO.KudosRow): String = getKudosMessage(kudos)
+        fun testGetKudosMessage(
+            kudos: KudosDAO.KudosRow,
+            displayName: String,
+        ): String = getKudosMessage(kudos, displayName)
     }
 
     @Test
     fun `getKudosMessage returns correct message for 1 plus`() {
         val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 1)
-        val message = testModule.testGetKudosMessage(kudosRow)
-        assertEquals("<@user123> now has 1 plus", message)
+        val message = testModule.testGetKudosMessage(kudosRow, "Test User")
+        assertEquals("Test User now has 1 plus", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for 10 pluses`() {
         val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 10)
-        val message = testModule.testGetKudosMessage(kudosRow)
-        assertEquals("<@user123> now has 10 pluses! Double digits!", message)
+        val message = testModule.testGetKudosMessage(kudosRow, "Test User")
+        assertEquals("Test User now has 10 pluses! Double digits!", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for 69 pluses`() {
         val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 69)
-        val message = testModule.testGetKudosMessage(kudosRow)
-        assertEquals("Nice <@user123>", message)
+        val message = testModule.testGetKudosMessage(kudosRow, "Test User")
+        assertEquals("Nice Test User", message)
     }
 
     @Test
     fun `getKudosMessage returns correct message for multiple pluses`() {
         val testModule = TestKudosModule()
         val kudosRow = KudosDAO.KudosRow(1, "user123", 5)
-        val message = testModule.testGetKudosMessage(kudosRow)
-        assertEquals("<@user123> now has 5 pluses", message)
+        val message = testModule.testGetKudosMessage(kudosRow, "Test User")
+        assertEquals("Test User now has 5 pluses", message)
     }
 }
