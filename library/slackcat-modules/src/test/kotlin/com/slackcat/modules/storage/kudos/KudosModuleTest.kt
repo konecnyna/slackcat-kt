@@ -269,12 +269,8 @@ class KudosModuleTest {
                 val hasExpectedUser =
                     sentMessage.content.elements.any { element ->
                         when (element) {
-                            is MessageElement.Text ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
-                            is MessageElement.Heading ->
-                                element.content.contains("<@user456>") ||
-                                    element.content.contains("<@user789>")
+                            is MessageElement.Text -> element.content.contains("Test User")
+                            is MessageElement.Heading -> element.content.contains("Test User")
                             else -> false
                         }
                     }

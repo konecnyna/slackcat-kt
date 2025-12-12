@@ -32,6 +32,8 @@ class FlipModule : SlackcatModule() {
             '}' to '{', '<' to '>', '>' to '<', '&' to '⅋', '_' to '‾',
         )
 
+    private val unflipMap = flipMap.entries.associate { (k, v) -> v to k }
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         if (incomingChatMessage.userText.isEmpty()) {
             sendMessage(
