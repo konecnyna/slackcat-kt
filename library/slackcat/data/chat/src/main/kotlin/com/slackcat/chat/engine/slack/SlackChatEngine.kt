@@ -136,6 +136,27 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
+    override suspend fun deleteMessage(
+        channelId: String,
+        timestamp: String,
+    ): Result<Unit> {
+        return try {
+            val response =
+                client.chatDelete { req ->
+                    req.channel(channelId)
+                    req.ts(timestamp)
+                }
+
+            if (response.isOk) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun eventFlow() = messagesFlow
 
     override fun provideEngineName(): String = "SlackRTM"

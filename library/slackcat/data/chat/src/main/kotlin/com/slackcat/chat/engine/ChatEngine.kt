@@ -16,6 +16,17 @@ interface ChatEngine {
         botIcon: BotIcon,
     ): Result<Unit>
 
+    /**
+     * Deletes a message from a channel.
+     * @param channelId The channel ID
+     * @param timestamp The message timestamp
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteMessage(
+        channelId: String,
+        timestamp: String,
+    ): Result<Unit>
+
     suspend fun eventFlow(): SharedFlow<IncomingChatMessage>
 
     fun provideEngineName(): String

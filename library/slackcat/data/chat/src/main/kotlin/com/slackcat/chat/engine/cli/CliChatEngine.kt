@@ -129,6 +129,17 @@ class CliChatEngine(
         }
     }
 
+    override suspend fun deleteMessage(
+        channelId: String,
+        timestamp: String,
+    ): Result<Unit> {
+        println("--------------------------------------")
+        println("CLI: Would delete message in channel=$channelId, ts=$timestamp")
+        println("(Message deletion not supported in CLI mode)")
+        println("--------------------------------------")
+        return Result.success(Unit)
+    }
+
     override suspend fun eventFlow(): SharedFlow<IncomingChatMessage> = messagesFlow
 
     override fun provideEngineName(): String = "Cli"
