@@ -43,6 +43,18 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 return@event ctx.ack()
             }
             globalCoroutineScope.launch {
+                // Emit ALL messages to event listeners (for features like timeout)
+                eventsFlow?.emit(
+                    SlackcatEvent.MessageReceived(
+                        userId = message.user,
+                        channelId = message.channel,
+                        text = message.text,
+                        timestamp = message.ts,
+                        threadTimestamp = message.threadTs,
+                    ),
+                )
+
+                // Also emit commands to the command flow
                 CommandParser.extractCommand(message.text)?.let {
                     _messagesFlow.emit(message.toDomain(it))
                 }
