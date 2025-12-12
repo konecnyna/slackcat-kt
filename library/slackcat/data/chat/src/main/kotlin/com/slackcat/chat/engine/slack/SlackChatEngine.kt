@@ -108,7 +108,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         message: OutgoingChatMessage,
         botName: String,
         botIcon: BotIcon,
-    ): Result<Unit> {
+    ): Result<String> {
         return try {
             val messageBlocks = messageConverter.toSlackBlocks(message.content)
 
@@ -127,7 +127,36 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 }
 
             if (response.isOk) {
-                Result.success(Unit)
+                Result.success(response.ts)
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateMessage(
+        channelId: String,
+        messageTs: String,
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon,
+    ): Result<String> {
+        return try {
+            val messageBlocks = messageConverter.toSlackBlocks(message.content)
+
+            val response =
+                client.chatUpdate { req ->
+                    req.apply {
+                        channel(channelId)
+                        ts(messageTs)
+                        blocks(messageBlocks)
+                    }
+                }
+
+            if (response.isOk) {
+                Result.success(response.ts)
             } else {
                 Result.failure(Exception("Slack API error: ${response.error}"))
             }

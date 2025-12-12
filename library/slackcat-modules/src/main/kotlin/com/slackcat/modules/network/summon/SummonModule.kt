@@ -44,7 +44,6 @@ class SummonModule(
                                 url = imageUrl,
                                 altText = "summon image: ${incomingChatMessage.userText}",
                             )
-                            context("Source: $imageUrl")
                         },
                 ),
             )
