@@ -9,6 +9,7 @@ import com.slackcat.modules.network.status.StatusModule
 import com.slackcat.modules.network.summon.SummonModule
 import com.slackcat.modules.network.translate.TranslateModule
 import com.slackcat.modules.network.weather.WeatherModule
+import com.slackcat.modules.simple.ChannelModule
 import com.slackcat.modules.simple.DateModule
 import com.slackcat.modules.simple.EmojiSentenceModule
 import com.slackcat.modules.simple.FlipModule
@@ -38,6 +39,7 @@ object SlackcatModules {
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
+            ChannelModule::class,
             // Storage modules
             KudosModule::class,
             LearnModule::class,
@@ -65,6 +67,7 @@ object SlackcatModules {
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
+            ChannelModule::class,
         )
 
     /**
@@ -86,6 +89,7 @@ object SlackcatModules {
         listOf(
             PingModule::class,
             DateModule::class,
+            ChannelModule::class,
             WeatherModule::class,
             TranslateModule::class,
             StatusModule::class,

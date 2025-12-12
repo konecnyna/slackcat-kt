@@ -148,7 +148,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         this.eventsFlow = eventsFlow
     }
 
-    override suspend fun getUserDisplayName(userId: String): Result<String> {
+    suspend fun getUserDisplayName(userId: String): Result<String> {
         return try {
             val response = client.usersInfo { req ->
                 req.user(userId)
