@@ -135,15 +135,15 @@ class KudosModuleTest {
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            val hasUser456 =
+            val hasTestUser =
                 sentMessage.content.elements.any { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("<@user456>")
-                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        is MessageElement.Text -> element.content.contains("Test User")
+                        is MessageElement.Heading -> element.content.contains("Test User")
                         else -> false
                     }
                 }
-            assertTrue(hasUser456)
+            assertTrue(hasTestUser)
 
             val hasOnePlus =
                 sentMessage.content.elements.any { element ->
@@ -194,15 +194,15 @@ class KudosModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val hasUser456 =
+            val hasTestUser =
                 sentMessage.content.elements.any { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("<@user456>")
-                        is MessageElement.Heading -> element.content.contains("<@user456>")
+                        is MessageElement.Text -> element.content.contains("Test User")
+                        is MessageElement.Heading -> element.content.contains("Test User")
                         else -> false
                     }
                 }
-            assertTrue(hasUser456)
+            assertTrue(hasTestUser)
 
             val hasOnePlus =
                 sentMessage.content.elements.any { element ->
