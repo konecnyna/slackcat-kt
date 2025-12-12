@@ -1,8 +1,15 @@
 package com.slackcat.plugins
 
+import org.gradle.api.plugins.JavaPluginExtension
+
 plugins {
     id("com.slackcat.plugins.base-internal")
     `maven-publish`
+    `java-library`
+}
+
+configure<JavaPluginExtension> {
+    withSourcesJar()
 }
 
 publishing {

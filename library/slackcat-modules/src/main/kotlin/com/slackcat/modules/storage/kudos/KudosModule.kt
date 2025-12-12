@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
     private val kudosDAO = KudosDAO()
-    private val leaderboard = KudosLeaderboard(kudosDAO)
+    private val leaderboard by lazy { KudosLeaderboard(kudosDAO, chatClient) }
 
     override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
 
@@ -133,11 +133,12 @@ open class KudosModule : SlackcatModule(), StorageModule {
         threadId: String,
     ) {
         val updatedKudos = kudosDAO.upsertKudos(recipientId)
+        val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
         sendMessage(
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                content = textMessage(getKudosMessage(updatedKudos)),
+                content = textMessage(getKudosMessage(updatedKudos, displayName)),
             ),
         )
     }
@@ -147,14 +148,17 @@ open class KudosModule : SlackcatModule(), StorageModule {
         return pattern.findAll(userText).map { it.groupValues[1] }.toSet()
     }
 
-    protected open fun getKudosMessage(kudos: KudosDAO.KudosRow): String {
+    protected open fun getKudosMessage(
+        kudos: KudosDAO.KudosRow,
+        displayName: String,
+    ): String {
         return when (kudos.count) {
-            1 -> "<@${kudos.userId}> now has ${kudos.count} plus"
-            10 -> "<@${kudos.userId}> now has ${kudos.count} pluses! Double digits!"
-            69 -> "Nice <@${kudos.userId}>"
+            1 -> "$displayName now has ${kudos.count} plus"
+            10 -> "$displayName now has ${kudos.count} pluses! Double digits!"
+            69 -> "Nice $displayName"
             else -> {
                 val plusText = if (kudos.count == 1) "plus" else "pluses"
-                "<@${kudos.userId}> now has ${kudos.count} $plusText"
+                "$displayName now has ${kudos.count} $plusText"
             }
         }
     }

@@ -175,7 +175,14 @@ class Router(
                 eventsFlow.collect { event ->
                     // First, notify all SlackcatEventsModule implementations
                     eventModules.forEach { module ->
-                        launch { module.onEvent(event) }
+                        launch {
+                            try {
+                                module.onEvent(event)
+                            } catch (exception: Exception) {
+                                println("Error in event handler for ${module::class.java.simpleName}: ${exception.message}")
+                                exception.printStackTrace()
+                            }
+                        }
                     }
 
                     // Then, handle reaction events with filtering for SlackcatModule implementations
@@ -195,7 +202,14 @@ class Router(
                                         handledReactions.isNotEmpty() && emoji in handledReactions
                                     }
                                     .forEach { module ->
-                                        launch { module.onReaction(event) }
+                                        launch {
+                                            try {
+                                                module.onReaction(event)
+                                            } catch (exception: Exception) {
+                                                println("Error in reaction handler for ${module::class.java.simpleName}: ${exception.message}")
+                                                exception.printStackTrace()
+                                            }
+                                        }
                                     }
                             }
                         }

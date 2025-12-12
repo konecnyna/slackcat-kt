@@ -148,6 +148,26 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         this.eventsFlow = eventsFlow
     }
 
+    override suspend fun getUserDisplayName(userId: String): Result<String> {
+        return try {
+            val response = client.usersInfo { req ->
+                req.user(userId)
+            }
+
+            if (response.isOk && response.user != null) {
+                val displayName = response.user.profile?.displayName?.takeIf { it.isNotBlank() }
+                    ?: response.user.realName
+                    ?: response.user.name
+                    ?: userId
+                Result.success(displayName)
+            } else {
+                Result.failure(Exception("Failed to fetch user info: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun MessageEvent.toDomain(command: String) =
         IncomingChatMessage(
             command = command,
