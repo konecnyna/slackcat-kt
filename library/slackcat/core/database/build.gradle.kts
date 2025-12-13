@@ -1,7 +1,7 @@
 import com.slackcat.SlackcatProperties
 
 plugins {
-    id("com.slackcat.plugins.internal-library")
+    id("com.slackcat.plugins.library")
     kotlin("plugin.serialization")
 }
 
@@ -25,4 +25,6 @@ repositories {
 dependencies {
     // Expose Exposed API so consumers can use it
     api(libs.exposed.core)
+    api(libs.exposed.dao)
+    api(libs.exposed.jdbc)
 }

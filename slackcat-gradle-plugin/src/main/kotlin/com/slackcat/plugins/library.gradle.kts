@@ -12,31 +12,6 @@ configure<JavaPluginExtension> {
     withSourcesJar()
 }
 
-// Disable Gradle module metadata publication - we're bundling internal modules
-// and the POM manipulation is the source of truth for dependencies
-tasks.configureEach {
-    if (name.startsWith("generateMetadataFileFor")) {
-        enabled = false
-    }
-}
-
-// Bundle internal module classes into the main JAR
-tasks.named<Jar>("jar") {
-    // Include classes from project dependencies (internal modules)
-    val projectDeps =
-        configurations.runtimeClasspath.get().allDependencies
-            .filterIsInstance<org.gradle.api.artifacts.ProjectDependency>()
-            .filter { it.dependencyProject.group == "com.slackcat" }
-            .map { it.dependencyProject }
-
-    projectDeps.forEach { dep ->
-        val jarTask = dep.tasks.named<Jar>("jar").get()
-        dependsOn(jarTask)
-        from(zipTree(jarTask.archiveFile))
-    }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
 publishing {
     repositories {
         maven {
@@ -56,42 +31,6 @@ publishing {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
-
-            // Exclude internal modules from POM dependencies - they're bundled in the JAR
-            pom.withXml {
-                val dependenciesNode = asNode().get("dependencies")
-                if (dependenciesNode is groovy.util.NodeList && dependenciesNode.isNotEmpty()) {
-                    val depsNode = dependenciesNode[0] as groovy.util.Node
-                    val toRemove = mutableListOf<groovy.util.Node>()
-
-                    // Collect dependencies to remove (avoid concurrent modification)
-                    depsNode.children().forEach { child ->
-                        if (child is groovy.util.Node) {
-                            val groupIdNode = child.get("groupId")
-                            val artifactIdNode = child.get("artifactId")
-
-                            if (groupIdNode is groovy.util.NodeList &&
-                                artifactIdNode is groovy.util.NodeList &&
-                                groupIdNode.isNotEmpty() &&
-                                artifactIdNode.isNotEmpty()) {
-
-                                // Extract text content from the Groovy XML nodes
-                                val groupId = (groupIdNode[0] as groovy.util.Node).text()
-                                val artifactId = (artifactIdNode[0] as groovy.util.Node).text()
-
-                                // Remove internal slackcat modules (they're bundled in the JAR)
-                                // Keep only slackcat and slackcat-modules as valid transitive dependencies
-                                if (groupId == "com.slackcat" && artifactId !in listOf("slackcat", "slackcat-modules")) {
-                                    toRemove.add(child)
-                                }
-                            }
-                        }
-                    }
-
-                    // Remove all marked dependencies
-                    toRemove.forEach { depsNode.remove(it) }
-                }
-            }
 
             pom {
                 name.set(project.name)
