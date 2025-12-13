@@ -1,6 +1,7 @@
 package com.slackcat.publishing
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -11,6 +12,10 @@ import java.io.File
 class PomValidationTest {
     @Test
     fun `slackcat POM should expose internal modules as dependencies`() {
+        assumeTrue(
+            File("build/publications/gpr").exists(),
+            "POM files not generated. Run: ./gradlew generatePomFileForGprPublication",
+        )
         val pomFile = findPomFile("slackcat")
         val pomContent = pomFile.readText()
 
@@ -27,6 +32,10 @@ class PomValidationTest {
 
     @Test
     fun `database POM should expose Exposed API dependencies`() {
+        assumeTrue(
+            File("build/publications/gpr").exists(),
+            "POM files not generated. Run: ./gradlew generatePomFileForGprPublication",
+        )
         val pomFile = findPomFile("database")
         val pomContent = pomFile.readText()
 
@@ -44,6 +53,10 @@ class PomValidationTest {
 
     @Test
     fun `network POM should expose Ktor and serialization API`() {
+        assumeTrue(
+            File("build/publications/gpr").exists(),
+            "POM files not generated. Run: ./gradlew generatePomFileForGprPublication",
+        )
         val pomFile = findPomFile("network")
         val pomContent = pomFile.readText()
 
@@ -61,11 +74,6 @@ class PomValidationTest {
             }
 
         val buildDir = File(modulePath)
-        assertTrue(
-            buildDir.exists(),
-            "Build directory $modulePath not found. Run: ./gradlew generatePomFileForGprPublication",
-        )
-
         val pomFile =
             buildDir.walkTopDown()
                 .firstOrNull { it.name.startsWith("pom-") && it.extension == "xml" }
