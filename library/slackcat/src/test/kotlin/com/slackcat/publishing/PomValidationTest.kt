@@ -1,16 +1,14 @@
 package com.slackcat.publishing
 
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 
 /**
  * Validates that published POM files contain correct dependencies.
  * Run after: ./gradlew generatePomFileForGprPublication
  */
 class PomValidationTest {
-
     @Test
     fun `slackcat POM should expose internal modules as dependencies`() {
         val pomFile = findPomFile("slackcat")
@@ -38,8 +36,9 @@ class PomValidationTest {
         assertTrue(pomContent.contains("<artifactId>exposed-jdbc</artifactId>"))
 
         // Check they're marked as compile scope (api dependencies)
-        val exposedCoreDep = pomContent.substringAfter("<artifactId>exposed-core</artifactId>")
-            .substringBefore("</dependency>")
+        val exposedCoreDep =
+            pomContent.substringAfter("<artifactId>exposed-core</artifactId>")
+                .substringBefore("</dependency>")
         assertTrue(exposedCoreDep.contains("<scope>compile</scope>") || !exposedCoreDep.contains("<scope>"))
     }
 
@@ -53,12 +52,24 @@ class PomValidationTest {
     }
 
     private fun findPomFile(moduleName: String): File {
-        val buildDir = File("build/publications/gpr")
-        assertTrue(buildDir.exists(), "Build directory not found. Run: ./gradlew generatePomFileForGprPublication")
+        val modulePath =
+            when (moduleName) {
+                "slackcat" -> "build/publications/gpr"
+                "database" -> "core/database/build/publications/gpr"
+                "network" -> "core/network/build/publications/gpr"
+                else -> throw IllegalArgumentException("Unknown module: $moduleName")
+            }
 
-        val pomFile = buildDir.walkTopDown()
-            .firstOrNull { it.name.startsWith("pom-") && it.extension == "xml" }
-            ?: throw IllegalStateException("POM file not found in ${buildDir.absolutePath}")
+        val buildDir = File(modulePath)
+        assertTrue(
+            buildDir.exists(),
+            "Build directory $modulePath not found. Run: ./gradlew generatePomFileForGprPublication",
+        )
+
+        val pomFile =
+            buildDir.walkTopDown()
+                .firstOrNull { it.name.startsWith("pom-") && it.extension == "xml" }
+                ?: throw IllegalStateException("POM file not found in ${buildDir.absolutePath}")
 
         return pomFile
     }
