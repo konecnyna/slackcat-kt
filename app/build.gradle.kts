@@ -34,8 +34,8 @@ dependencies {
     implementation(projects.library.slackcatModules)
 
     implementation(libs.serialization.json)
-    implementation("org.apache.commons:commons-dbcp2:2.13.0")
-    implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
+    implementation(libs.commons.dbcp2)
+    implementation(libs.dotenv.kotlin)
 }
 
 tasks.jar {

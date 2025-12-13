@@ -12,6 +12,14 @@ configure<JavaPluginExtension> {
     withSourcesJar()
 }
 
+// Disable Gradle module metadata publication - we're bundling internal modules
+// and the POM manipulation is the source of truth for dependencies
+tasks.configureEach {
+    if (name.startsWith("generateMetadataFileFor")) {
+        enabled = false
+    }
+}
+
 // Bundle internal module classes into the main JAR
 tasks.named<Jar>("jar") {
     // Include classes from project dependencies (internal modules)
