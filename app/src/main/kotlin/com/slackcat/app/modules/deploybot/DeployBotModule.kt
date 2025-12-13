@@ -36,7 +36,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
         val message =
             when (event) {
                 SlackcatEvent.STARTED -> "I've started! MEOW!"
-                is SlackcatEvent.ReactionAdded, is SlackcatEvent.ReactionRemoved -> return
+                is SlackcatEvent.ReactionAdded, is SlackcatEvent.ReactionRemoved, is SlackcatEvent.MessageReceived -> return
             }
 
         sendMessage(
