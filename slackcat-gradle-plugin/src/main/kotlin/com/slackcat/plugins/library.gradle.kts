@@ -67,8 +67,9 @@ publishing {
                                 groupIdNode.isNotEmpty() &&
                                 artifactIdNode.isNotEmpty()) {
 
-                                val groupId = groupIdNode[0].toString()
-                                val artifactId = artifactIdNode[0].toString()
+                                // Extract text content from the Groovy XML nodes
+                                val groupId = (groupIdNode[0] as groovy.util.Node).text()
+                                val artifactId = (artifactIdNode[0] as groovy.util.Node).text()
 
                                 // Remove internal slackcat modules (they're bundled in the JAR)
                                 // Keep only slackcat and slackcat-modules as valid transitive dependencies
