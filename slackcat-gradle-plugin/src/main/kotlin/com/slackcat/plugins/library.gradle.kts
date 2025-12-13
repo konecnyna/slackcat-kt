@@ -51,19 +51,36 @@ publishing {
 
             // Exclude internal modules from POM dependencies - they're bundled in the JAR
             pom.withXml {
-                val dependenciesNode = asNode().get("dependencies") as groovy.util.NodeList
-                if (dependenciesNode.isNotEmpty()) {
-                    val deps = dependenciesNode[0] as groovy.util.Node
-                    val children = deps.children().toList()
-                    children.forEach { child ->
-                        val dep = child as groovy.util.Node
-                        val groupId = (dep.get("groupId") as groovy.util.NodeList).text()
-                        val artifactId = (dep.get("artifactId") as groovy.util.NodeList).text()
-                        // Remove internal slackcat modules except slackcat and slackcat-modules themselves
-                        if (groupId == "com.slackcat" && artifactId !in listOf("slackcat", "slackcat-modules")) {
-                            deps.remove(dep)
+                val dependenciesNode = asNode().get("dependencies")
+                if (dependenciesNode is groovy.util.NodeList && dependenciesNode.isNotEmpty()) {
+                    val depsNode = dependenciesNode[0] as groovy.util.Node
+                    val toRemove = mutableListOf<groovy.util.Node>()
+
+                    // Collect dependencies to remove (avoid concurrent modification)
+                    depsNode.children().forEach { child ->
+                        if (child is groovy.util.Node) {
+                            val groupIdNode = child.get("groupId")
+                            val artifactIdNode = child.get("artifactId")
+
+                            if (groupIdNode is groovy.util.NodeList &&
+                                artifactIdNode is groovy.util.NodeList &&
+                                groupIdNode.isNotEmpty() &&
+                                artifactIdNode.isNotEmpty()) {
+
+                                val groupId = groupIdNode[0].toString()
+                                val artifactId = artifactIdNode[0].toString()
+
+                                // Remove internal slackcat modules (they're bundled in the JAR)
+                                // Keep only slackcat and slackcat-modules as valid transitive dependencies
+                                if (groupId == "com.slackcat" && artifactId !in listOf("slackcat", "slackcat-modules")) {
+                                    toRemove.add(child)
+                                }
+                            }
                         }
                     }
+
+                    // Remove all marked dependencies
+                    toRemove.forEach { depsNode.remove(it) }
                 }
             }
 
