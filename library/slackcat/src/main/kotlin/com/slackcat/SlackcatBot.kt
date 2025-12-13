@@ -170,11 +170,12 @@ class SlackcatBot(
             println("Starting slackcat using ${chatEngine.provideEngineName()} engine")
             supervisorScope {
                 val isCli = chatEngine is CliChatEngine
-                val flow = if (isCli) {
-                    chatEngine.eventFlow().take(1)
-                } else {
-                    chatEngine.eventFlow()
-                }
+                val flow =
+                    if (isCli) {
+                        chatEngine.eventFlow().take(1)
+                    } else {
+                        chatEngine.eventFlow()
+                    }
 
                 flow.collect { event ->
                     launch {
