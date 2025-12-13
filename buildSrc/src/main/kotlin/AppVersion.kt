@@ -1,7 +1,7 @@
 object AppVersion {
     const val MAJOR = 0
     const val MINOR = 0
-    const val PATCH = 7
+    const val PATCH = 8
 
     val versionName: String
         get() = "$MAJOR.$MINOR.$PATCH"
