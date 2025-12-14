@@ -151,6 +151,7 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
     - `channels:join` (if your bot needs to join channels automatically)
     - `chat:write` (to send messages)
     - `reactions:read` (to receive reaction events like reaction_added and reaction_removed)
+    - `users:read` (to fetch user display names for kudos and other features)
 
 ### Reinstall the App
 
