@@ -73,22 +73,35 @@ class RadarModule : SlackcatModule() {
                     }
                 }
                 else -> {
+                    // Send DM to user with radar list
+                    sendMessage(
+                        OutgoingChatMessage(
+                            channelId = incomingChatMessage.chatUser.userId,
+                            content =
+                                buildMessage {
+                                    heading("Radar Not Found")
+                                    text("""Couldn't find radar for "$inputText".""")
+                                    divider()
+                                    text("**Available radar stations:**")
+                                    text(radars.sortedBy { it.state }.joinToString("\n") { "- ${it.state}" })
+                                },
+                        ),
+                    )
+
+                    // Return thread reply message
                     buildMessage {
-                        text("Radar Not Found")
                         text(
-                            """Couldn't find radar for "$inputText". Available radars:\n${radars.sortedBy { it.state }.joinToString(
-                                "\n",
-                            ) { "- ${it.state}" }}""".trimIndent(),
+                            """Couldn't find radar for "$inputText". """ +
+                                "I've sent you a DM with the available radar stations! 📡",
                         )
                     }
                 }
             }
 
         sendMessage(
-            OutgoingChatMessage(
-                channelId = incomingChatMessage.channelId,
-                content = message,
-            ),
+            incomingMessage = incomingChatMessage,
+            content = message,
+            preserveThreadContext = true,
         )
     }
 
