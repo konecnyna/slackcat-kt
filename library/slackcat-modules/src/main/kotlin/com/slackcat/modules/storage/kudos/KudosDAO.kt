@@ -56,6 +56,7 @@ class KudosDAO(
         val channelId = text("channel_id")
         val createdAt = long("created_at").default(0L)
         val expiresAt = long("expires_at").default(0L)
+
         // Stores user_id -> count mapping as JSON string: {"U123": 5, "U456": 3}
         val userCounts = text("user_counts").default("{}")
         override val primaryKey = PrimaryKey(threadTs, botMessageTs)

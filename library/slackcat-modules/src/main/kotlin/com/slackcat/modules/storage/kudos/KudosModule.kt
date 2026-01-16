@@ -126,16 +126,17 @@ open class KudosModule : SlackcatModule(), StorageModule {
                             currentCount != null && previousCount != null -> {
                                 // User was updated
                                 val delta = currentCount - previousCount
-                                "$displayName: ${currentCount} ${pluralize(currentCount)} (+$delta more)"
+                                "$displayName: $currentCount ${pluralize(currentCount)} (+$delta more)"
                             }
                             currentCount != null -> {
-                                // New user added
-                                "$displayName now has ${currentCount} ${pluralize(currentCount)}"
+                                // New user added to the message
+                                "$displayName now has $currentCount ${pluralize(currentCount)}"
                             }
-                            else -> {
-                                // User was in previous but not current (shouldn't happen)
-                                null
+                            previousCount != null -> {
+                                // User was in previous message, keep them in display
+                                "$displayName: $previousCount ${pluralize(previousCount)}"
                             }
+                            else -> null
                         }
                     }
 
@@ -354,15 +355,15 @@ open class KudosModule : SlackcatModule(), StorageModule {
                         currentCount != null && previousCount != null -> {
                             // User was updated
                             val delta = currentCount - previousCount
-                            "$userName: ${currentCount} ${pluralize(currentCount)} (+$delta more)"
+                            "$userName: $currentCount ${pluralize(currentCount)} (+$delta more)"
                         }
                         currentCount != null -> {
                             // New user added
-                            "$userName now has ${currentCount} ${pluralize(currentCount)}"
+                            "$userName now has $currentCount ${pluralize(currentCount)}"
                         }
                         previousCount != null -> {
                             // User was in previous but not current - keep them in the display
-                            "$userName: ${previousCount} ${pluralize(previousCount)}"
+                            "$userName: $previousCount ${pluralize(previousCount)}"
                         }
                         else -> null
                     }
