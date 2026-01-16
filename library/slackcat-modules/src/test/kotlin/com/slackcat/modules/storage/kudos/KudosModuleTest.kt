@@ -48,7 +48,11 @@ class KudosModuleTest {
         coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success("mock_timestamp")
         coEvery { mockChatClient.updateMessage(any(), any(), any(), any(), any()) } returns
             Result.success("mock_timestamp")
-        coEvery { mockChatClient.getUserDisplayName(any()) } returns Result.success("Test User")
+        // Set up specific display names for different users
+        coEvery { mockChatClient.getUserDisplayName("user456") } returns Result.success("Test User")
+        coEvery { mockChatClient.getUserDisplayName("user789") } returns Result.success("Second User")
+        coEvery { mockChatClient.getUserDisplayName(match { it !in listOf("user456", "user789") }) } returns
+            Result.success("Test User")
 
         // Create a temporary SQLite database file for testing
         val dbFile = tempDir.resolve("test.db").toString()
@@ -178,16 +182,22 @@ class KudosModuleTest {
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            // Verify message contains "Kudos updated!" indicating multiple users were processed
-            val hasKudosUpdated =
-                sentMessage.content.elements.any { element ->
+            // Verify message contains multiple users separated by " | "
+            val messageText =
+                sentMessage.content.elements.mapNotNull { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("Kudos updated!")
-                        is MessageElement.Heading -> element.content.contains("Kudos updated!")
-                        else -> false
+                        is MessageElement.Text -> element.content
+                        is MessageElement.Heading -> element.content
+                        else -> null
                     }
-                }
-            assertTrue(hasKudosUpdated)
+                }.joinToString("")
+
+            // Check for pipe separator (indicates multiple users)
+            assertTrue(messageText.contains(" | "), "Expected pipe separator for multiple users")
+
+            // Check both users are mentioned
+            assertTrue(messageText.contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(messageText.contains("Second User"), "Expected Second User to be mentioned")
         }
 
     @Test
@@ -280,16 +290,22 @@ class KudosModuleTest {
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            // Verify message contains "Kudos updated!" indicating multiple valid users were processed
-            val hasKudosUpdated =
-                sentMessage.content.elements.any { element ->
+            // Verify message contains multiple valid users separated by " | "
+            val messageText =
+                sentMessage.content.elements.mapNotNull { element ->
                     when (element) {
-                        is MessageElement.Text -> element.content.contains("Kudos updated!")
-                        is MessageElement.Heading -> element.content.contains("Kudos updated!")
-                        else -> false
+                        is MessageElement.Text -> element.content
+                        is MessageElement.Heading -> element.content
+                        else -> null
                     }
-                }
-            assertTrue(hasKudosUpdated)
+                }.joinToString("")
+
+            // Check for pipe separator (indicates multiple users)
+            assertTrue(messageText.contains(" | "), "Expected pipe separator for multiple users")
+
+            // Check valid users are mentioned (not user123 who tried to plus themselves)
+            assertTrue(messageText.contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(messageText.contains("Second User"), "Expected Second User to be mentioned")
         }
 
     // Create a test subclass to access protected method

@@ -92,62 +92,106 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 }
             }
 
-        // Send single aggregated message or individual message
+        // Send aggregated message with deltas
         if (kudosResults.isNotEmpty()) {
             println("[KudosModule] kudosResults not empty, preparing message")
-            val messageText =
-                if (kudosResults.size == 1) {
-                    val (kudos, displayName) = kudosResults[0]
-                    getKudosMessage(kudos, displayName)
-                } else {
-                    val updates =
-                        kudosResults.joinToString(", ") { (kudos, displayName) ->
-                            "$displayName (${kudos.count} ${if (kudos.count == 1) "plus" else "pluses"})"
-                        }
-                    "Kudos updated! $updates"
+
+            // Build current user counts from this invocation
+            val currentUserCounts =
+                kudosResults.associate { (kudos, _) ->
+                    kudos.userId to kudos.count
                 }
-
-            println("[KudosModule] Message text: $messageText")
-
-            // Use time-window logic for message update/create
-            val messageContent =
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    threadId = threadRoot,
-                    content = textMessage(messageText),
-                )
 
             val activeMessage = kudosDAO.getActiveMessageForThread(threadRoot)
             println("[KudosModule] Active message for thread $threadRoot: $activeMessage")
 
             if (activeMessage != null) {
                 println("[KudosModule] Updating existing message: ${activeMessage.botMessageTs}")
-                // Add visual indicator for updates
-                val updatedContent =
-                    OutgoingChatMessage(
-                        channelId = messageContent.channelId,
-                        threadId = messageContent.threadId,
-                        content = textMessage("$messageText ✨"),
-                    )
+                // Merge previous and current counts
+                val previousUserCounts = activeMessage.userCounts
+                val allUserIds = (previousUserCounts.keys + currentUserCounts.keys).toSet()
+
+                // Build aggregated message with deltas
+                val userMessages =
+                    allUserIds.mapNotNull { userId ->
+                        val currentCount = currentUserCounts[userId]
+                        val previousCount = previousUserCounts[userId]
+
+                        // Get display name (from kudosResults or fetch if needed)
+                        val displayName =
+                            kudosResults.find { (kudos, _) -> kudos.userId == userId }?.second
+                                ?: chatClient.getUserDisplayName(userId).getOrNull() ?: userId
+
+                        when {
+                            currentCount != null && previousCount != null -> {
+                                // User was updated
+                                val delta = currentCount - previousCount
+                                "$displayName: ${currentCount} ${pluralize(currentCount)} (+$delta more)"
+                            }
+                            currentCount != null -> {
+                                // New user added
+                                "$displayName now has ${currentCount} ${pluralize(currentCount)}"
+                            }
+                            else -> {
+                                // User was in previous but not current (shouldn't happen)
+                                null
+                            }
+                        }
+                    }
+
+                val messageText = userMessages.joinToString(" | ")
+                val newUserCounts = previousUserCounts + currentUserCounts
+
                 updateMessage(
                     channelId = activeMessage.channelId,
                     messageTs = activeMessage.botMessageTs,
-                    message = updatedContent,
+                    message =
+                        OutgoingChatMessage(
+                            channelId = incomingChatMessage.channelId,
+                            threadId = threadRoot,
+                            content = textMessage(messageText),
+                        ),
+                )
+
+                // Update stored user counts
+                kudosDAO.updateMessageUserCounts(
+                    threadTs = threadRoot,
+                    botMessageTs = activeMessage.botMessageTs,
+                    userCounts = newUserCounts,
                 )
             } else {
                 println("[KudosModule] Creating new message")
-                sendMessage(messageContent).onSuccess { ts ->
+                // First time - no deltas needed
+                val userMessages =
+                    kudosResults.map { (kudos, displayName) ->
+                        "$displayName now has ${kudos.count} ${pluralize(kudos.count)}"
+                    }
+
+                val messageText = userMessages.joinToString(" | ")
+
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = incomingChatMessage.channelId,
+                        threadId = threadRoot,
+                        content = textMessage(messageText),
+                    ),
+                ).onSuccess { ts ->
                     println("[KudosModule] Message sent successfully, storing with window: $ts")
                     kudosDAO.storeMessageWithWindow(
                         threadTs = threadRoot,
                         botMessageTs = ts,
                         channelId = incomingChatMessage.channelId,
+                        userCounts = currentUserCounts,
                     )
                 }
             }
         } else {
             println("[KudosModule] kudosResults is empty - no message will be sent")
         }
+    }
+
+    private fun pluralize(count: Int): String {
+        return if (count == 1) "plus" else "pluses"
     }
 
     override fun commandInfo() =
@@ -282,39 +326,87 @@ open class KudosModule : SlackcatModule(), StorageModule {
         )
 
         val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
-        val kudosMessage = getKudosMessage(updatedKudos, displayName)
-        val messageContent =
-            OutgoingChatMessage(
-                channelId = channelId,
-                threadId = threadId,
-                content = textMessage(kudosMessage),
-            )
+        val currentUserCounts = mapOf(recipientId to updatedKudos.count)
 
         // Check for ACTIVE message within time window
         val activeMessage = kudosDAO.getActiveMessageForThread(threadId)
 
         if (activeMessage != null) {
-            // Window still active - UPDATE existing message with visual indicator
-            val updatedContent =
-                OutgoingChatMessage(
-                    channelId = messageContent.channelId,
-                    threadId = messageContent.threadId,
-                    content = textMessage("$kudosMessage ✨"),
-                )
+            // Window still active - UPDATE existing message with aggregation and deltas
+            val previousUserCounts = activeMessage.userCounts
+            val allUserIds = (previousUserCounts.keys + currentUserCounts.keys).toSet()
+
+            // Build aggregated message with deltas
+            val userMessages =
+                allUserIds.mapNotNull { userId ->
+                    val currentCount = currentUserCounts[userId]
+                    val previousCount = previousUserCounts[userId]
+
+                    // Get display name
+                    val userName =
+                        if (userId == recipientId) {
+                            displayName
+                        } else {
+                            chatClient.getUserDisplayName(userId).getOrNull() ?: userId
+                        }
+
+                    when {
+                        currentCount != null && previousCount != null -> {
+                            // User was updated
+                            val delta = currentCount - previousCount
+                            "$userName: ${currentCount} ${pluralize(currentCount)} (+$delta more)"
+                        }
+                        currentCount != null -> {
+                            // New user added
+                            "$userName now has ${currentCount} ${pluralize(currentCount)}"
+                        }
+                        previousCount != null -> {
+                            // User was in previous but not current - keep them in the display
+                            "$userName: ${previousCount} ${pluralize(previousCount)}"
+                        }
+                        else -> null
+                    }
+                }
+
+            val messageText = userMessages.joinToString(" | ")
+            val newUserCounts = previousUserCounts + currentUserCounts
+
             updateMessage(
                 channelId = activeMessage.channelId,
                 messageTs = activeMessage.botMessageTs,
-                message = updatedContent,
+                message =
+                    OutgoingChatMessage(
+                        channelId = channelId,
+                        threadId = threadId,
+                        content = textMessage(messageText),
+                    ),
+            )
+
+            // Update stored user counts
+            kudosDAO.updateMessageUserCounts(
+                threadTs = threadId,
+                botMessageTs = activeMessage.botMessageTs,
+                userCounts = newUserCounts,
             )
         } else {
             // No active window - CREATE new message
-            val result = sendMessage(messageContent)
+            val messageText = "$displayName now has ${updatedKudos.count} ${pluralize(updatedKudos.count)}"
+
+            val result =
+                sendMessage(
+                    OutgoingChatMessage(
+                        channelId = channelId,
+                        threadId = threadId,
+                        content = textMessage(messageText),
+                    ),
+                )
 
             result.onSuccess { messageTs ->
                 kudosDAO.storeMessageWithWindow(
                     threadTs = threadId,
                     botMessageTs = messageTs,
                     channelId = channelId,
+                    userCounts = currentUserCounts,
                 )
             }
         }
