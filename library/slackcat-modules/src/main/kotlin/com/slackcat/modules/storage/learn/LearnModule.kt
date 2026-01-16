@@ -5,11 +5,11 @@ import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.database.DatabaseTable
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
-import org.jetbrains.exposed.sql.Table
 
 class LearnModule(private var router: com.slackcat.internal.Router? = null) :
     SlackcatModule(),
@@ -27,7 +27,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
         this.router = router
     }
 
-    override fun tables(): List<Table> = listOf(LearnDAO.LearnTable)
+    override fun tables(): List<DatabaseTable> = LearnDAO.getDatabaseTables()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val aliasMessage = aliasHandler.handleAliases(incomingChatMessage)
@@ -62,6 +62,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     content = textMessage(message),
+                    threadId = incomingChatMessage.messageId,
                 ),
             )
             return
@@ -81,6 +82,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(message),
+                threadId = incomingChatMessage.messageId,
             ),
         )
     }

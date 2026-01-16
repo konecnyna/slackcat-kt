@@ -108,7 +108,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         message: OutgoingChatMessage,
         botName: String,
         botIcon: BotIcon,
-    ): Result<Unit> {
+    ): Result<String> {
         return try {
             val messageBlocks = messageConverter.toSlackBlocks(message.content)
 
@@ -127,12 +127,55 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 }
 
             if (response.isOk) {
-                Result.success(Unit)
+                Result.success(response.ts)
             } else {
                 Result.failure(Exception("Slack API error: ${response.error}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun updateMessage(
+        channelId: String,
+        messageTs: String,
+        message: OutgoingChatMessage,
+        botName: String,
+        botIcon: BotIcon,
+    ): Result<String> {
+        return try {
+            val messageBlocks = messageConverter.toSlackBlocks(message.content)
+
+            val response =
+                client.chatUpdate { req ->
+                    req.apply {
+                        channel(channelId)
+                        ts(messageTs)
+                        blocks(messageBlocks)
+                    }
+                }
+
+            if (response.isOk) {
+                Result.success(response.ts)
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun toPlainText(message: com.slackcat.common.BotMessage): String {
+        return message.elements.joinToString("\n") { element ->
+            when (element) {
+                is com.slackcat.common.MessageElement.Text -> element.content
+                is com.slackcat.common.MessageElement.Heading -> "*${element.content}*"
+                is com.slackcat.common.MessageElement.Image -> "[Image: ${element.altText}]"
+                is com.slackcat.common.MessageElement.Divider -> "---"
+                is com.slackcat.common.MessageElement.KeyValueList ->
+                    element.items.joinToString("\n") { "${it.key}: ${it.value}" }
+                is com.slackcat.common.MessageElement.Context -> element.content
+            }
         }
     }
 
@@ -153,6 +196,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             ChatCapability.CUSTOM_BOT_ICON,
             ChatCapability.CUSTOM_BOT_NAME,
             ChatCapability.MESSAGE_COLORS,
+            ChatCapability.MESSAGE_UPDATES,
         )
     }
 

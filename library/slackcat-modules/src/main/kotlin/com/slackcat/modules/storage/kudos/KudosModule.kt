@@ -6,16 +6,18 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatEvent
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
+import com.slackcat.database.DatabaseTable
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
-import org.jetbrains.exposed.sql.Table
 
 open class KudosModule : SlackcatModule(), StorageModule {
-    private val kudosDAO = KudosDAO()
+    protected open val spamProtectionEnabled: Boolean = true
+
+    private val kudosDAO by lazy { KudosDAO(spamProtectionEnabled = spamProtectionEnabled) }
     private val leaderboard by lazy { KudosLeaderboard(kudosDAO, chatClient) }
 
-    override fun tables(): List<Table> = listOf(KudosDAO.KudosTable)
+    override fun tables(): List<DatabaseTable> = KudosDAO.getDatabaseTables()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         // Check if this is a leaderboard command
@@ -42,12 +44,77 @@ open class KudosModule : SlackcatModule(), StorageModule {
             return
         }
 
-        validIds.forEach { recipientId ->
-            giveKudosToUser(
-                recipientId = recipientId,
-                channelId = incomingChatMessage.channelId,
-                threadId = incomingChatMessage.messageId,
-            )
+        // Process all recipients and collect results
+        val kudosResults =
+            validIds.mapNotNull { recipientId ->
+                // Check rate limit
+                val rateLimitMessage =
+                    kudosDAO.hasRecentKudos(
+                        giverId = incomingChatMessage.chatUser.userId,
+                        recipientId = recipientId,
+                        threadTs = incomingChatMessage.messageId,
+                    )
+
+                if (rateLimitMessage != null) {
+                    // Send DM for rate limit
+                    sendMessage(
+                        OutgoingChatMessage(
+                            channelId = incomingChatMessage.chatUser.userId,
+                            content = textMessage(rateLimitMessage),
+                        ),
+                    )
+                    null // Skip this recipient
+                } else {
+                    // Give kudos
+                    val kudos = kudosDAO.upsertKudos(recipientId)
+                    kudosDAO.recordTransaction(
+                        giverId = incomingChatMessage.chatUser.userId,
+                        recipientId = recipientId,
+                        threadTs = incomingChatMessage.messageId,
+                    )
+                    val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
+                    kudos to displayName
+                }
+            }
+
+        // Send single aggregated message or individual message
+        if (kudosResults.isNotEmpty()) {
+            val messageText =
+                if (kudosResults.size == 1) {
+                    val (kudos, displayName) = kudosResults[0]
+                    getKudosMessage(kudos, displayName)
+                } else {
+                    val updates =
+                        kudosResults.joinToString(", ") { (kudos, displayName) ->
+                            "$displayName (${kudos.count} ${if (kudos.count == 1) "plus" else "pluses"})"
+                        }
+                    "Kudos updated! $updates"
+                }
+
+            // Use time-window logic for message update/create
+            val messageContent =
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    threadId = incomingChatMessage.messageId,
+                    content = textMessage(messageText),
+                )
+
+            val activeMessage = kudosDAO.getActiveMessageForThread(incomingChatMessage.messageId)
+            if (activeMessage != null) {
+                updateMessage(
+                    channelId = activeMessage.channelId,
+                    messageTs = activeMessage.botMessageTs,
+                    message = messageContent,
+                )
+            } else {
+                sendMessage(messageContent).onSuccess { ts ->
+                    kudosDAO.storeMessageWithWindow(
+                        threadTs = incomingChatMessage.messageId,
+                        botMessageTs = ts,
+                        channelId = incomingChatMessage.channelId,
+                    )
+                }
+            }
         }
     }
 
@@ -80,15 +147,32 @@ open class KudosModule : SlackcatModule(), StorageModule {
     override suspend fun onReaction(event: SlackcatEvent) {
         when (event) {
             is SlackcatEvent.ReactionAdded -> {
+                println(
+                    "[KudosModule] Reaction added: userId=${event.userId}, " +
+                        "reaction=${event.reaction}, itemUserId=${event.itemUserId}",
+                )
                 // Give kudos to the user who authored the message
                 event.itemUserId?.let { messageAuthorId ->
+                    println("[KudosModule] Attempting to give kudos from ${event.userId} to $messageAuthorId")
                     if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
-                        giveKudosToUser(
-                            recipientId = messageAuthorId,
-                            channelId = event.channelId,
-                            threadId = event.messageTimestamp,
-                        )
+                        println("[KudosModule] Kudos validation passed, calling giveKudosToUser")
+                        try {
+                            giveKudosToUser(
+                                giverId = event.userId,
+                                recipientId = messageAuthorId,
+                                channelId = event.channelId,
+                                threadId = event.messageTimestamp,
+                            )
+                            println("[KudosModule] giveKudosToUser completed successfully")
+                        } catch (e: Exception) {
+                            println("[KudosModule] ERROR in giveKudosToUser: ${e.message}")
+                            e.printStackTrace()
+                        }
+                    } else {
+                        println("[KudosModule] Kudos validation failed (self-kudos attempt)")
                     }
+                } ?: run {
+                    println("[KudosModule] itemUserId is null - cannot determine message author")
                 }
             }
 
@@ -125,22 +209,75 @@ open class KudosModule : SlackcatModule(), StorageModule {
     }
 
     /**
-     * Gives kudos to a user and sends a confirmation message.
+     * Gives kudos to a user triggered by a reaction.
+     * Uses time-window logic for message aggregation.
      */
     private suspend fun giveKudosToUser(
+        giverId: String,
         recipientId: String,
         channelId: String,
         threadId: String,
     ) {
+        // Check rate limits
+        val rateLimitMessage =
+            kudosDAO.hasRecentKudos(
+                giverId = giverId,
+                recipientId = recipientId,
+                threadTs = threadId,
+            )
+
+        if (rateLimitMessage != null) {
+            // Rate limited - send friendly denial message as DM to the giver
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = giverId,
+                    content = textMessage(rateLimitMessage),
+                ),
+            )
+            return
+        }
+
+        // Not rate limited - proceed with giving kudos
         val updatedKudos = kudosDAO.upsertKudos(recipientId)
+
+        // Record this transaction for future rate limit checks
+        kudosDAO.recordTransaction(
+            giverId = giverId,
+            recipientId = recipientId,
+            threadTs = threadId,
+        )
+
         val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
-        sendMessage(
+        val kudosMessage = getKudosMessage(updatedKudos, displayName)
+        val messageContent =
             OutgoingChatMessage(
                 channelId = channelId,
                 threadId = threadId,
-                content = textMessage(getKudosMessage(updatedKudos, displayName)),
-            ),
-        )
+                content = textMessage(kudosMessage),
+            )
+
+        // Check for ACTIVE message within time window
+        val activeMessage = kudosDAO.getActiveMessageForThread(threadId)
+
+        if (activeMessage != null) {
+            // Window still active - UPDATE existing message
+            updateMessage(
+                channelId = activeMessage.channelId,
+                messageTs = activeMessage.botMessageTs,
+                message = messageContent,
+            )
+        } else {
+            // No active window - CREATE new message
+            val result = sendMessage(messageContent)
+
+            result.onSuccess { messageTs ->
+                kudosDAO.storeMessageWithWindow(
+                    threadTs = threadId,
+                    botMessageTs = messageTs,
+                    channelId = channelId,
+                )
+            }
+        }
     }
 
     private fun extractUserIds(userText: String): Set<String> {

@@ -36,7 +36,7 @@ class FlipModuleTest {
 
         every { mockConfig.botNameProvider() } returns "TestBot"
         every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
-        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success("mock_timestamp")
 
         startKoin {
             modules(
@@ -77,9 +77,10 @@ class FlipModuleTest {
     }
 
     @Test
-    fun `aliases returns empty list`() {
+    fun `aliases returns unflip`() {
         val aliases = flipModule.commandInfo().aliases
-        assertTrue(aliases.isEmpty())
+        assertEquals(1, aliases.size)
+        assertEquals("unflip", aliases[0])
     }
 
     @Test

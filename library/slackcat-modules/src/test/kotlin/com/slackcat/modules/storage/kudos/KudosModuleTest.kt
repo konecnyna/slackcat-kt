@@ -45,7 +45,9 @@ class KudosModuleTest {
 
         every { mockConfig.botNameProvider() } returns "TestBot"
         every { mockConfig.botIconProvider() } returns mockk(relaxed = true)
-        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { mockChatClient.sendMessage(any(), any(), any()) } returns Result.success("mock_timestamp")
+        coEvery { mockChatClient.updateMessage(any(), any(), any(), any(), any()) } returns
+            Result.success("mock_timestamp")
         coEvery { mockChatClient.getUserDisplayName(any()) } returns Result.success("Test User")
 
         // Create a temporary SQLite database file for testing
@@ -54,7 +56,7 @@ class KudosModuleTest {
 
         // Create the table schema synchronously
         transaction(database) {
-            SchemaUtils.create(KudosDAO.KudosTable)
+            SchemaUtils.create(KudosDAO.KudosTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTransactionTable)
         }
 
         startKoin {
@@ -73,7 +75,7 @@ class KudosModuleTest {
     @AfterEach
     fun tearDown() {
         transaction(database) {
-            SchemaUtils.drop(KudosDAO.KudosTable)
+            SchemaUtils.drop(KudosDAO.KudosTransactionTable, KudosDAO.KudosMessageTable, KudosDAO.KudosTable)
         }
         stopKoin()
     }
@@ -168,13 +170,24 @@ class KudosModuleTest {
 
             kudosModule.onInvoke(incomingMessage)
 
-            val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
+            // Implementation sends one aggregated message for all users
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
-            messageSlots.forEach { sentMessage ->
-                assertEquals("channel123", sentMessage.channelId)
-                assertEquals("msg123", sentMessage.threadId)
-            }
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
+            assertEquals("msg123", sentMessage.threadId)
+
+            // Verify message contains "Kudos updated!" indicating multiple users were processed
+            val hasKudosUpdated =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Kudos updated!")
+                        is MessageElement.Heading -> element.content.contains("Kudos updated!")
+                        else -> false
+                    }
+                }
+            assertTrue(hasKudosUpdated)
         }
 
     @Test
@@ -259,23 +272,24 @@ class KudosModuleTest {
 
             kudosModule.onInvoke(incomingMessage)
 
-            val messageSlots = mutableListOf<OutgoingChatMessage>()
-            coVerify(exactly = 2) { mockChatClient.sendMessage(capture(messageSlots), any(), any()) }
+            // Implementation sends one aggregated message for valid users (user123 is filtered out)
+            val messageSlot = slot<OutgoingChatMessage>()
+            coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
-            messageSlots.forEach { sentMessage ->
-                assertEquals("channel123", sentMessage.channelId)
-                assertEquals("msg123", sentMessage.threadId)
+            val sentMessage = messageSlot.captured
+            assertEquals("channel123", sentMessage.channelId)
+            assertEquals("msg123", sentMessage.threadId)
 
-                val hasExpectedUser =
-                    sentMessage.content.elements.any { element ->
-                        when (element) {
-                            is MessageElement.Text -> element.content.contains("Test User")
-                            is MessageElement.Heading -> element.content.contains("Test User")
-                            else -> false
-                        }
+            // Verify message contains "Kudos updated!" indicating multiple valid users were processed
+            val hasKudosUpdated =
+                sentMessage.content.elements.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("Kudos updated!")
+                        is MessageElement.Heading -> element.content.contains("Kudos updated!")
+                        else -> false
                     }
-                assertTrue(hasExpectedUser)
-            }
+                }
+            assertTrue(hasKudosUpdated)
         }
 
     // Create a test subclass to access protected method
@@ -317,4 +331,78 @@ class KudosModuleTest {
         val message = testModule.testGetKudosMessage(kudosRow, "Test User")
         assertEquals("Test User now has 5 pluses", message)
     }
+
+    @Test
+    fun `onInvoke allows unlimited kudos when spam protection is disabled`() =
+        runTest {
+            // Create a custom module with spam protection disabled
+            val customKudosModule =
+                object : KudosModule() {
+                    override val spamProtectionEnabled = false
+                }
+
+            // Give kudos to the same user in different threads (no cooldown)
+            val message1 =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "msg1",
+                )
+            val message2 =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "msg2",
+                )
+            val message3 =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "msg3",
+                )
+
+            customKudosModule.onInvoke(message1)
+            customKudosModule.onInvoke(message2)
+            customKudosModule.onInvoke(message3)
+
+            // Verify all three were successful (3 sendMessage calls to channel)
+            coVerify(exactly = 3) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+        }
+
+    @Test
+    fun `onInvoke allows duplicate kudos in same thread when spam protection is disabled`() =
+        runTest {
+            val customKudosModule =
+                object : KudosModule() {
+                    override val spamProtectionEnabled = false
+                }
+
+            val message =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "same_thread",
+                )
+
+            // Give kudos 3 times to same thread
+            customKudosModule.onInvoke(message)
+            customKudosModule.onInvoke(message)
+            customKudosModule.onInvoke(message)
+
+            // Verify that:
+            // 1. First invocation sends a new message (1 sendMessage call to channel)
+            // 2. Second and third invocations update the existing message (2 updateMessage calls)
+            // 3. No DM warnings about "already gave kudos" (0 sendMessage to user's DM)
+            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+            coVerify(exactly = 2) {
+                mockChatClient.updateMessage(
+                    match { it == "channel123" },
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
+            coVerify(exactly = 0) { mockChatClient.sendMessage(match { it.channelId == "user123" }, any(), any()) }
+        }
 }

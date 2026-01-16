@@ -5,11 +5,11 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
+import com.slackcat.database.DatabaseTable
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.network.NetworkClient
-import org.jetbrains.exposed.sql.Table
 
 class JeopardyModule(
     private val networkClient: NetworkClient,
@@ -23,11 +23,7 @@ class JeopardyModule(
             "https://emoji.slack-edge.com/T07UUET6K51/alex-trebek/e0c94c765b85bb71.jpg",
         )
 
-    override fun tables(): List<Table> =
-        listOf(
-            JeopardyDAO.JeopardyQuestionsTable,
-            JeopardyDAO.JeopardyScoreTable,
-        )
+    override fun tables(): List<DatabaseTable> = JeopardyDAO.getDatabaseTables()
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         if (jeopardyDAO.getJeopardyTableLength() == 0L) {

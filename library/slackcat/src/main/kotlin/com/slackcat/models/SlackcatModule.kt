@@ -29,12 +29,24 @@ abstract class SlackcatModule : KoinComponent {
     open val botName: String? = null
     open val botIcon: BotIcon? = null
 
-    suspend fun sendMessage(message: OutgoingChatMessage): Result<Unit> {
+    suspend fun sendMessage(message: OutgoingChatMessage): Result<String> {
         // Apply module-level overrides or fall back to config providers
         val finalBotName = botName ?: config.botNameProvider()
         val finalBotIcon = botIcon ?: config.botIconProvider()
 
         return chatClient.sendMessage(message, finalBotName, finalBotIcon)
+    }
+
+    suspend fun updateMessage(
+        channelId: String,
+        messageTs: String,
+        message: OutgoingChatMessage,
+    ): Result<String> {
+        // Apply module-level overrides or fall back to config providers
+        val finalBotName = botName ?: config.botNameProvider()
+        val finalBotIcon = botIcon ?: config.botIconProvider()
+
+        return chatClient.updateMessage(channelId, messageTs, message, finalBotName, finalBotIcon)
     }
 
     suspend fun postHelpMessage(channelId: String): Result<Unit> {
@@ -43,7 +55,7 @@ abstract class SlackcatModule : KoinComponent {
                 channelId = channelId,
                 content = help(),
             ),
-        )
+        ).map { }
     }
 
     /**

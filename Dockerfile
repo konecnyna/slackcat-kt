@@ -10,7 +10,7 @@ COPY . /app
 RUN gradle :app:shadowJar --no-daemon
 
 # Switch to a smaller JDK image for the final container
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-alpine
 
 # Set the working directory for the final container
 WORKDIR /app

@@ -34,4 +34,7 @@ enum class ChatCapability {
 
     /** Platform supports colored message styling (info, warning, error, etc.) */
     MESSAGE_COLORS,
+
+    /** Platform supports updating/editing existing messages */
+    MESSAGE_UPDATES,
 }
