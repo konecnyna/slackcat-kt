@@ -370,41 +370,28 @@ class KudosModuleTest {
         }
 
     @Test
-    fun `onInvoke enforces per-thread deduplication even when spam protection is disabled`() =
+    fun `onInvoke allows duplicate kudos in same thread when spam protection is disabled`() =
         runTest {
-            // Create a custom module with spam protection disabled
             val customKudosModule =
                 object : KudosModule() {
                     override val spamProtectionEnabled = false
                 }
 
-            val message1 =
+            val message =
                 createTestMessage(
                     command = "++",
                     userText = "<@user456>",
                     messageId = "same_thread",
                 )
 
-            // Give kudos twice in the SAME thread - second should be blocked
-            customKudosModule.onInvoke(message1)
-            customKudosModule.onInvoke(message1) // Same message/thread
+            // Give kudos 3 times to same thread
+            customKudosModule.onInvoke(message)
+            customKudosModule.onInvoke(message)
+            customKudosModule.onInvoke(message)
 
-            // Verify: 1 success to channel + 1 DM warning about duplicate in thread
-            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
-            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "user123" }, any(), any()) }
-
-            // Verify the DM contains "already gave kudos here"
-            val capturedMessages = mutableListOf<OutgoingChatMessage>()
-            coVerify { mockChatClient.sendMessage(capture(capturedMessages), any(), any()) }
-
-            val dmMessage = capturedMessages.firstOrNull { it.channelId == "user123" }
-            val containsExpectedText =
-                dmMessage?.content?.elements?.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("already gave kudos here")
-                        else -> false
-                    }
-                } ?: false
-            assertTrue(containsExpectedText)
+            // Verify all three were successful (3 sendMessage calls to channel)
+            // No DM warnings about "already gave kudos"
+            coVerify(exactly = 3) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+            coVerify(exactly = 0) { mockChatClient.sendMessage(match { it.channelId == "user123" }, any(), any()) }
         }
 }

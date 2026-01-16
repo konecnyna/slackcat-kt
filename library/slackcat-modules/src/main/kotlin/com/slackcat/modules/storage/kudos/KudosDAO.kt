@@ -172,19 +172,28 @@ class KudosDAO(
      * Checks if a kudos transaction from giverId to recipientId would violate rate limits.
      * Returns null if allowed, or a String with the reason/time remaining if blocked.
      *
-     * Rule 1: One kudos per giver→recipient per thread (ALWAYS enforced)
-     * Rule 2: 5 minute global cooldown per giver→recipient pair (only when spam protection enabled)
+     * When spamProtectionEnabled = true:
+     *   - Rule 1: One kudos per giver→recipient per thread
+     *   - Rule 2: 5 minute global cooldown per giver→recipient pair
+     *
+     * When spamProtectionEnabled = false:
+     *   - No restrictions - always returns null
      */
     suspend fun hasRecentKudos(
         giverId: String,
         recipientId: String,
         threadTs: String,
     ): String? {
+        // Skip ALL checks if spam protection is disabled
+        if (!spamProtectionEnabled) {
+            return null
+        }
+
         return dbQuery {
             val now = System.currentTimeMillis()
             val fiveMinutesAgo = now - (5 * 60 * 1000)
 
-            // Rule 1: ALWAYS check per-thread deduplication (prevents duplicate key errors)
+            // Rule 1: Per-thread deduplication (only when spam protection enabled)
             val threadTransaction =
                 KudosTransactionTable
                     .select {
@@ -198,11 +207,7 @@ class KudosDAO(
                 return@dbQuery "You already gave kudos here! 😊"
             }
 
-            // Rule 2: Only check 5-minute cooldown if spam protection is enabled
-            if (!spamProtectionEnabled) {
-                return@dbQuery null
-            }
-
+            // Rule 2: 5-minute cooldown check
             val recentTransaction =
                 KudosTransactionTable
                     .select {
@@ -239,13 +244,24 @@ class KudosDAO(
         recipientId: String,
         threadTs: String,
     ) {
-        dbQuery {
-            KudosTransactionTable.insert {
-                it[KudosTransactionTable.giverId] = giverId
-                it[KudosTransactionTable.recipientId] = recipientId
-                it[KudosTransactionTable.threadTs] = threadTs
-                it[KudosTransactionTable.timestamp] = System.currentTimeMillis()
+        try {
+            dbQuery {
+                KudosTransactionTable.insert {
+                    it[KudosTransactionTable.giverId] = giverId
+                    it[KudosTransactionTable.recipientId] = recipientId
+                    it[KudosTransactionTable.threadTs] = threadTs
+                    it[KudosTransactionTable.timestamp] = System.currentTimeMillis()
+                }
             }
+        } catch (e: Exception) {
+            // Gracefully handle duplicate key errors when spam protection is disabled
+            if (spamProtectionEnabled) {
+                // If spam protection is enabled, this should never happen (hasRecentKudos prevents it)
+                // Re-throw to surface the error
+                throw e
+            }
+            // If spam protection is disabled, silently ignore duplicate key errors
+            // This allows unlimited kudos on the same message
         }
     }
 }

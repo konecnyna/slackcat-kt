@@ -168,17 +168,37 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
 
 ## Slack Workspace setup:
 
-### Enable Event Subscriptions
+### Option 1: Using the App Manifest (Recommended)
 
-1. Go to your Slack app's dashboard.
-2. Navigate to **Features** > **Event Subscriptions**.
-3. Toggle **Enable Events** to **On**.
+The easiest way to set up your Slack app is to use the provided manifest file:
 
-### Subscribe to Bot Events
+1. Go to https://api.slack.com/apps
+2. Click **Create New App**
+3. Select **From an app manifest**
+4. Choose your workspace
+5. Copy the contents of `slack-manifest.yml` from this repository
+6. Paste it into the YAML tab
+7. Click **Next** → **Create**
+8. Navigate to **OAuth & Permissions** and click **Install App to Workspace**
+9. Approve the permissions
 
-1. In the **Event Subscriptions** page, scroll down to **Subscribe to bot events**.
-2. Click on **Add Bot User Event**.
-3. Add the following events based on your needs:
+The manifest includes all required scopes and event subscriptions automatically.
+
+### Option 2: Manual Configuration
+
+If you prefer to configure manually or need to update an existing app:
+
+#### Enable Event Subscriptions
+
+1. Go to your Slack app's dashboard at https://api.slack.com/apps
+2. Navigate to **Features** > **Event Subscriptions**
+3. Toggle **Enable Events** to **On**
+
+#### Subscribe to Bot Events
+
+1. In the **Event Subscriptions** page, scroll down to **Subscribe to bot events**
+2. Click on **Add Bot User Event**
+3. Add the following events:
     - `message.channels` (for messages in public channels)
     - `message.im` (for direct messages)
     - `message.groups` (for private channels)
@@ -186,29 +206,32 @@ Outgoing message: OutgoingChatMessage(channelId=123456789, text=pong)
     - `reaction_added` (for emoji reactions added to messages)
     - `reaction_removed` (for emoji reactions removed from messages)
 
-### Set Up OAuth Scopes
+#### Set Up OAuth Scopes
 
-1. Navigate to **OAuth & Permissions** in your app's dashboard.
+1. Navigate to **OAuth & Permissions** in your app's dashboard
 2. In the **Scopes** section, under **Bot Token Scopes**, add the following scopes:
+    - `chat:write` (to send messages)
     - `channels:history` (to read messages in channels)
     - `groups:history` (for private channels)
     - `im:history` (for direct messages)
     - `mpim:history` (for group direct messages)
     - `channels:join` (if your bot needs to join channels automatically)
-    - `chat:write` (to send messages)
-    - `reactions:read` (to receive reaction events like reaction_added and reaction_removed)
-    - `users:read` (to fetch user display names for kudos and other features)
+    - `reactions:read` (to receive reaction events)
+    - **`users:read`** ⚠️ **REQUIRED** - To fetch user display names for kudos and other features
 
-### Reinstall the App
+**⚠️ Important:** The `users:read` scope is critical for modules like KudosModule that display user information. Without it, you'll see `missing_scope` errors in the logs.
 
-1. After making changes to scopes and event subscriptions, you need to reinstall the app to your workspace for the changes to take effect.
-2. Go to **OAuth & Permissions** and click **Install App to Workspace**.
-3. Approve the new permissions when prompted.
+#### Reinstall the App
 
-### Add the Bot to Channels
+1. After making changes to scopes and event subscriptions, you **must reinstall** the app to your workspace
+2. Go to **OAuth & Permissions** and click **Reinstall App to Workspace**
+3. Approve the new permissions when prompted
+4. Restart your bot: `docker compose down && docker compose up -d`
 
-1. Ensure that your bot is a member of the channels where it needs to listen to messages.
-2. You can invite the bot to a channel by typing `/invite @YourBotName` in Slack.
+#### Add the Bot to Channels
+
+1. Ensure that your bot is a member of the channels where it needs to listen to messages
+2. You can invite the bot to a channel by typing `/invite @YourBotName` in Slack
 
 ## Enabling Reaction Features
 
@@ -240,7 +263,57 @@ docker compose down && docker compose up --build -d
 ### Verify It's Working
 - Add a `:heavy_plus_sign:` (➕) reaction to any message in a channel where the bot is present
 - The bot should respond with a kudos message for the message author
-- Check logs if not working: `docker logs slack-bot --tail 50`
+- Check logs if not working: `docker compose logs --tail 50`
+
+## Troubleshooting
+
+### Error: `missing_scope` - `needed=users:read`
+
+**Symptoms:**
+```
+x-slack-failure: missing_scope
+needed=users:read
+java.lang.Exception: Failed to fetch user info: missing_scope
+```
+
+**Cause:** Your Slack app doesn't have the `users:read` OAuth scope, which is required for features that display user information (like kudos).
+
+**Solution:**
+1. Go to https://api.slack.com/apps and select your app
+2. Navigate to **OAuth & Permissions**
+3. Under **Bot Token Scopes**, add `users:read`
+4. Click **Reinstall App to Workspace** at the top of the page
+5. Approve the new permissions
+6. Restart your bot: `docker compose down && docker compose up -d`
+
+### Error: `duplicate key value violates unique constraint`
+
+**Symptoms:**
+```
+ERROR: duplicate key value violates unique constraint "kudos_transactions_giver_id_recipient_id_thread_ts_unique"
+```
+
+**Cause:** Per-thread deduplication is being violated (attempting to give kudos twice in the same thread).
+
+**Solution:** This is expected behavior - users can only give kudos once per thread. The error indicates the validation is working correctly. If you're seeing this in production logs, it means someone tried to give kudos multiple times in the same thread rapidly.
+
+### Bot Not Responding to Messages
+
+**Checklist:**
+1. Verify the bot is invited to the channel: `/invite @YourBotName`
+2. Check that Socket Mode is enabled in your app settings
+3. Verify environment variables are set correctly:
+   - `SLACK_APP_TOKEN` should start with `xapp-`
+   - `SLACK_BOT_TOKEN` should start with `xoxb-`
+4. Check logs for connection errors: `docker compose logs -f`
+
+### Bot Not Responding to Reactions
+
+**Checklist:**
+1. Verify `reactions:read` scope is enabled (see OAuth Scopes above)
+2. Verify `reaction_added` event is subscribed (see Bot Events above)
+3. Reinstall the app if you just added these permissions
+4. Check logs for the reaction event: `docker compose logs -f | grep "Reaction added"`
 
 
 

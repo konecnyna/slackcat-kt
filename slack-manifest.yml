@@ -11,14 +11,14 @@ features:
 oauth_config:
   scopes:
     bot:
-      - chat:write
-      - channels:history
-      - groups:history
-      - im:history
-      - mpim:history
-      - reactions:read
-      - channels:join
-      - users:read
+      - chat:write          # Send messages
+      - channels:history    # Read messages in public channels
+      - groups:history      # Read messages in private channels
+      - im:history          # Read direct messages
+      - mpim:history        # Read group direct messages
+      - reactions:read      # Receive reaction_added/reaction_removed events
+      - channels:join       # Join channels automatically
+      - users:read          # Fetch user display names (REQUIRED for kudos and user mentions)
 
 settings:
   event_subscriptions:
