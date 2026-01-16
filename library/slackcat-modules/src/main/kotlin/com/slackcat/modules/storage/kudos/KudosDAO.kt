@@ -52,8 +52,8 @@ class KudosDAO(
         val threadTs = text("thread_ts")
         val botMessageTs = text("bot_message_ts")
         val channelId = text("channel_id")
-        val createdAt = long("created_at")
-        val expiresAt = long("expires_at")
+        val createdAt = long("created_at").default(0L)
+        val expiresAt = long("expires_at").default(0L)
         override val primaryKey = PrimaryKey(threadTs, botMessageTs)
 
         init {
