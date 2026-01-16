@@ -233,7 +233,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             chatUser = ChatUser(userId = user),
             messageId = ts,
             rawMessage = text,
-            threadId = ts,
+            threadId = threadTs,
             arguments = CommandParser.extractArguments(text),
             userText = CommandParser.extractUserText(text),
         )

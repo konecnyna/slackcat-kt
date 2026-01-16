@@ -29,6 +29,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
             return
         }
 
+        // Determine the effective thread root (for top-level messages, use messageId)
+        val threadRoot = incomingChatMessage.threadId ?: incomingChatMessage.messageId
+
         // Handle kudos giving
         val allIds = extractUserIds(incomingChatMessage.userText)
         val validIds = filterValidKudosRecipients(allIds, incomingChatMessage.chatUser.userId)
@@ -37,7 +40,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
             sendMessage(
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    threadId = incomingChatMessage.messageId,
+                    threadId = threadRoot,
                     content = textMessage("You'll go blind doing that!"),
                 ),
             )
@@ -52,7 +55,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     kudosDAO.hasRecentKudos(
                         giverId = incomingChatMessage.chatUser.userId,
                         recipientId = recipientId,
-                        threadTs = incomingChatMessage.messageId,
+                        threadTs = threadRoot,
                     )
 
                 if (rateLimitMessage != null) {
@@ -70,7 +73,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     kudosDAO.recordTransaction(
                         giverId = incomingChatMessage.chatUser.userId,
                         recipientId = recipientId,
-                        threadTs = incomingChatMessage.messageId,
+                        threadTs = threadRoot,
                     )
                     val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
                     kudos to displayName
@@ -95,11 +98,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
             val messageContent =
                 OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
-                    threadId = incomingChatMessage.messageId,
+                    threadId = threadRoot,
                     content = textMessage(messageText),
                 )
 
-            val activeMessage = kudosDAO.getActiveMessageForThread(incomingChatMessage.messageId)
+            val activeMessage = kudosDAO.getActiveMessageForThread(threadRoot)
             if (activeMessage != null) {
                 updateMessage(
                     channelId = activeMessage.channelId,
@@ -109,7 +112,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
             } else {
                 sendMessage(messageContent).onSuccess { ts ->
                     kudosDAO.storeMessageWithWindow(
-                        threadTs = incomingChatMessage.messageId,
+                        threadTs = threadRoot,
                         botMessageTs = ts,
                         channelId = incomingChatMessage.channelId,
                     )
@@ -121,7 +124,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
     override fun commandInfo() =
         CommandInfo(
             command = "++",
-            aliases = listOf("leaderboard", "kudosleaderboard", "pluses"),
+            aliases = listOf("kudos", "leaderboard", "kudosleaderboard", "pluses"),
         )
 
     override fun help(): BotMessage =
