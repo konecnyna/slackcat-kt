@@ -31,10 +31,12 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
         // Determine the effective thread root (for top-level messages, use messageId)
         val threadRoot = incomingChatMessage.threadId ?: incomingChatMessage.messageId
+        println("[KudosModule] Processing ?++ command: threadId=${incomingChatMessage.threadId}, messageId=${incomingChatMessage.messageId}, threadRoot=$threadRoot")
 
         // Handle kudos giving
         val allIds = extractUserIds(incomingChatMessage.userText)
         val validIds = filterValidKudosRecipients(allIds, incomingChatMessage.chatUser.userId)
+        println("[KudosModule] Extracted IDs: allIds=$allIds, validIds=$validIds")
 
         if (allIds.size == 1 && validIds.isEmpty()) {
             sendMessage(
@@ -58,8 +60,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
                         threadTs = threadRoot,
                     )
 
+                println("[KudosModule] Rate limit check: recipientId=$recipientId, rateLimitMessage=$rateLimitMessage")
+
                 if (rateLimitMessage != null) {
                     // Send DM for rate limit
+                    println("[KudosModule] Rate limited - sending DM")
                     sendMessage(
                         OutgoingChatMessage(
                             channelId = incomingChatMessage.chatUser.userId,
@@ -69,6 +74,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     null // Skip this recipient
                 } else {
                     // Give kudos
+                    println("[KudosModule] Giving kudos to $recipientId")
                     val kudos = kudosDAO.upsertKudos(recipientId)
                     kudosDAO.recordTransaction(
                         giverId = incomingChatMessage.chatUser.userId,
@@ -76,12 +82,14 @@ open class KudosModule : SlackcatModule(), StorageModule {
                         threadTs = threadRoot,
                     )
                     val displayName = chatClient.getUserDisplayName(recipientId).getOrThrow()
+                    println("[KudosModule] Kudos given: ${kudos.count} pluses to $displayName")
                     kudos to displayName
                 }
             }
 
         // Send single aggregated message or individual message
         if (kudosResults.isNotEmpty()) {
+            println("[KudosModule] kudosResults not empty, preparing message")
             val messageText =
                 if (kudosResults.size == 1) {
                     val (kudos, displayName) = kudosResults[0]
@@ -94,6 +102,8 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     "Kudos updated! $updates"
                 }
 
+            println("[KudosModule] Message text: $messageText")
+
             // Use time-window logic for message update/create
             val messageContent =
                 OutgoingChatMessage(
@@ -103,14 +113,19 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 )
 
             val activeMessage = kudosDAO.getActiveMessageForThread(threadRoot)
+            println("[KudosModule] Active message for thread $threadRoot: $activeMessage")
+
             if (activeMessage != null) {
+                println("[KudosModule] Updating existing message: ${activeMessage.botMessageTs}")
                 updateMessage(
                     channelId = activeMessage.channelId,
                     messageTs = activeMessage.botMessageTs,
                     message = messageContent,
                 )
             } else {
+                println("[KudosModule] Creating new message")
                 sendMessage(messageContent).onSuccess { ts ->
+                    println("[KudosModule] Message sent successfully, storing with window: $ts")
                     kudosDAO.storeMessageWithWindow(
                         threadTs = threadRoot,
                         botMessageTs = ts,
@@ -118,6 +133,8 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     )
                 }
             }
+        } else {
+            println("[KudosModule] kudosResults is empty - no message will be sent")
         }
     }
 
@@ -160,11 +177,13 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     if (isValidKudos(giverId = event.userId, recipientId = messageAuthorId)) {
                         println("[KudosModule] Kudos validation passed, calling giveKudosToUser")
                         try {
+                            // Use thread root for proper message aggregation
+                            val threadRoot = event.threadTimestamp ?: event.messageTimestamp
                             giveKudosToUser(
                                 giverId = event.userId,
                                 recipientId = messageAuthorId,
                                 channelId = event.channelId,
-                                threadId = event.messageTimestamp,
+                                threadId = threadRoot,
                             )
                             println("[KudosModule] giveKudosToUser completed successfully")
                         } catch (e: Exception) {
