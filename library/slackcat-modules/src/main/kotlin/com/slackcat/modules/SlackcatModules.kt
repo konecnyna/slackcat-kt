@@ -17,7 +17,6 @@ import com.slackcat.modules.simple.FrameModule
 import com.slackcat.modules.simple.ModulesModule
 import com.slackcat.modules.simple.PingModule
 import com.slackcat.modules.simple.ReactionCounterModule
-import com.slackcat.modules.simple.UnflipModule
 import com.slackcat.modules.storage.kudos.KudosModule
 import com.slackcat.modules.storage.learn.LearnModule
 import kotlin.reflect.KClass
@@ -36,7 +35,7 @@ object SlackcatModules {
             PingModule::class,
             DateModule::class,
             FlipModule::class,
-            UnflipModule::class,
+            // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
@@ -65,7 +64,7 @@ object SlackcatModules {
             PingModule::class,
             DateModule::class,
             FlipModule::class,
-            UnflipModule::class,
+            // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
@@ -81,7 +80,7 @@ object SlackcatModules {
             PokeCatModule::class,
             EmojiModule::class,
             FlipModule::class,
-            UnflipModule::class,
+            // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
             EmojiSentenceModule::class,
         )
