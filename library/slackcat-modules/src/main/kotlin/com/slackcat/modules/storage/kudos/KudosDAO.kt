@@ -14,7 +14,9 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 
-class KudosDAO {
+class KudosDAO(
+    private val spamProtectionEnabled: Boolean = true,
+) {
     companion object {
         /**
          * Returns the database tables wrapped to hide Exposed implementation.
@@ -178,6 +180,11 @@ class KudosDAO {
         recipientId: String,
         threadTs: String,
     ): String? {
+        // Skip spam protection if disabled
+        if (!spamProtectionEnabled) {
+            return null
+        }
+
         return dbQuery {
             val now = System.currentTimeMillis()
             val fiveMinutesAgo = now - (5 * 60 * 1000)

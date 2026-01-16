@@ -12,7 +12,9 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 
 open class KudosModule : SlackcatModule(), StorageModule {
-    private val kudosDAO = KudosDAO()
+    protected open val spamProtectionEnabled: Boolean = true
+
+    private val kudosDAO by lazy { KudosDAO(spamProtectionEnabled = spamProtectionEnabled) }
     private val leaderboard by lazy { KudosLeaderboard(kudosDAO, chatClient) }
 
     override fun tables(): List<DatabaseTable> = KudosDAO.getDatabaseTables()
