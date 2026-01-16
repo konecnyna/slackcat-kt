@@ -38,13 +38,26 @@ class KudosDAO {
         override val primaryKey = PrimaryKey(id)
     }
 
-    data class KudosMessageRow(val threadTs: String, val botMessageTs: String, val channelId: String)
+    data class KudosMessageRow(
+        val threadTs: String,
+        val botMessageTs: String,
+        val channelId: String,
+        val createdAt: Long,
+        val expiresAt: Long,
+    )
 
     object KudosMessageTable : Table("kudos_messages") {
-        val threadTs = text("thread_ts").uniqueIndex()
+        val threadTs = text("thread_ts")
         val botMessageTs = text("bot_message_ts")
         val channelId = text("channel_id")
-        override val primaryKey = PrimaryKey(threadTs)
+        val createdAt = long("created_at")
+        val expiresAt = long("expires_at")
+        override val primaryKey = PrimaryKey(threadTs, botMessageTs)
+
+        init {
+            // Index for fetching active message in thread
+            index(isUnique = false, threadTs, expiresAt)
+        }
     }
 
     data class KudosTransactionRow(
@@ -109,31 +122,46 @@ class KudosDAO {
         }
     }
 
-    suspend fun getBotMessageForThread(threadTs: String): KudosMessageRow? {
+    suspend fun getActiveMessageForThread(
+        threadTs: String,
+        currentTime: Long = System.currentTimeMillis(),
+    ): KudosMessageRow? {
         return dbQuery {
             KudosMessageTable
-                .select { KudosMessageTable.threadTs eq threadTs }
+                .select {
+                    (KudosMessageTable.threadTs eq threadTs) and
+                        (KudosMessageTable.expiresAt greater currentTime)
+                }
+                .orderBy(KudosMessageTable.createdAt, SortOrder.DESC)
+                .limit(1)
                 .map { resultRow ->
                     KudosMessageRow(
                         threadTs = resultRow[KudosMessageTable.threadTs],
                         botMessageTs = resultRow[KudosMessageTable.botMessageTs],
                         channelId = resultRow[KudosMessageTable.channelId],
+                        createdAt = resultRow[KudosMessageTable.createdAt],
+                        expiresAt = resultRow[KudosMessageTable.expiresAt],
                     )
                 }
                 .singleOrNull()
         }
     }
 
-    suspend fun storeBotMessage(
+    suspend fun storeMessageWithWindow(
         threadTs: String,
         botMessageTs: String,
         channelId: String,
+        // 3 hours default window
+        windowDurationMs: Long = 3 * 60 * 60 * 1000,
     ) {
+        val now = System.currentTimeMillis()
         dbQuery {
             KudosMessageTable.insert {
                 it[KudosMessageTable.threadTs] = threadTs
                 it[KudosMessageTable.botMessageTs] = botMessageTs
                 it[KudosMessageTable.channelId] = channelId
+                it[createdAt] = now
+                it[expiresAt] = now + windowDurationMs
             }
         }
     }

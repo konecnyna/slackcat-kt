@@ -165,6 +165,20 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
+    private fun toPlainText(message: com.slackcat.common.BotMessage): String {
+        return message.elements.joinToString("\n") { element ->
+            when (element) {
+                is com.slackcat.common.MessageElement.Text -> element.content
+                is com.slackcat.common.MessageElement.Heading -> "*${element.content}*"
+                is com.slackcat.common.MessageElement.Image -> "[Image: ${element.altText}]"
+                is com.slackcat.common.MessageElement.Divider -> "---"
+                is com.slackcat.common.MessageElement.KeyValueList ->
+                    element.items.joinToString("\n") { "${it.key}: ${it.value}" }
+                is com.slackcat.common.MessageElement.Context -> element.content
+            }
+        }
+    }
+
     override suspend fun eventFlow() = messagesFlow
 
     override fun provideEngineName(): String = "SlackRTM"
@@ -182,6 +196,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             ChatCapability.CUSTOM_BOT_ICON,
             ChatCapability.CUSTOM_BOT_NAME,
             ChatCapability.MESSAGE_COLORS,
+            ChatCapability.MESSAGE_UPDATES,
         )
     }
 
