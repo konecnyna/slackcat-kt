@@ -1,8 +1,15 @@
 package com.slackcat.plugins
 
+import org.gradle.api.plugins.JavaPluginExtension
+
 plugins {
     id("com.slackcat.plugins.base-internal")
     `maven-publish`
+    `java-library`
+}
+
+configure<JavaPluginExtension> {
+    withSourcesJar()
 }
 
 publishing {
@@ -46,7 +53,9 @@ publishing {
 
                 scm {
                     connection.set("scm:git:git://github.com/${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git")
-                    developerConnection.set("scm:git:ssh://github.com:${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git")
+                    developerConnection.set(
+                        "scm:git:ssh://github.com:${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}.git",
+                    )
                     url.set("https://github.com/${System.getenv("GITHUB_REPOSITORY") ?: "OWNER/REPO"}")
                 }
             }

@@ -7,6 +7,11 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
+              <build path="$PROJECT_DIR$/buildSrc" name="buildSrc">
+                <projects>
+                  <project path="$PROJECT_DIR$/buildSrc" />
+                </projects>
+              </build>
               <build path="$PROJECT_DIR$/slackcat-gradle-plugin" name="slackcat-gradle-plugin">
                 <projects>
                   <project path="$PROJECT_DIR$/slackcat-gradle-plugin" />
@@ -20,6 +25,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/library/slackcat" />
             <option value="$PROJECT_DIR$/library/slackcat-modules" />

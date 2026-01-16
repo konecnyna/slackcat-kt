@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -45,6 +46,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $VERSION"
 
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          ./gradlew publish --no-daemon --stacktrace
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -61,20 +70,14 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Publish to GitHub Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          ./gradlew publish --no-daemon --stacktrace
-
       - name: Increment version
         id: increment_version
         run: |
+          chmod +x ./scripts/increment-version.sh
           ./scripts/increment-version.sh ${{ github.event.inputs.increment_type }}
-          NEW_VERSION=$(./scripts/increment-version.sh ${{ github.event.inputs.increment_type }} | tail -1)
+          NEW_VERSION=$(grep "const val MAJOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/').$(grep "const val MINOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/').$(grep "const val PATCH" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/')
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
 
       - name: Commit and push version bump
         run: |
@@ -90,7 +93,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Released version: **v${{ steps.get_version.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
           echo "✅ Published to GitHub Packages" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Bumped version to: **${{ steps.increment_version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Next version: **v${{ steps.increment_version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published Modules" >> $GITHUB_STEP_SUMMARY
           echo "- \`com.slackcat:slackcat:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY

@@ -9,6 +9,7 @@ import com.slackcat.modules.network.status.StatusModule
 import com.slackcat.modules.network.summon.SummonModule
 import com.slackcat.modules.network.translate.TranslateModule
 import com.slackcat.modules.network.weather.WeatherModule
+import com.slackcat.modules.simple.ChannelModule
 import com.slackcat.modules.simple.DateModule
 import com.slackcat.modules.simple.EmojiSentenceModule
 import com.slackcat.modules.simple.FlipModule
@@ -16,6 +17,7 @@ import com.slackcat.modules.simple.FrameModule
 import com.slackcat.modules.simple.ModulesModule
 import com.slackcat.modules.simple.PingModule
 import com.slackcat.modules.simple.ReactionCounterModule
+import com.slackcat.modules.simple.UnflipModule
 import com.slackcat.modules.storage.kudos.KudosModule
 import com.slackcat.modules.storage.learn.LearnModule
 import kotlin.reflect.KClass
@@ -34,10 +36,12 @@ object SlackcatModules {
             PingModule::class,
             DateModule::class,
             FlipModule::class,
+            UnflipModule::class,
             FrameModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
+            ChannelModule::class,
             // Storage modules
             KudosModule::class,
             LearnModule::class,
@@ -61,10 +65,12 @@ object SlackcatModules {
             PingModule::class,
             DateModule::class,
             FlipModule::class,
+            UnflipModule::class,
             FrameModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
+            ChannelModule::class,
         )
 
     /**
@@ -75,6 +81,7 @@ object SlackcatModules {
             PokeCatModule::class,
             EmojiModule::class,
             FlipModule::class,
+            UnflipModule::class,
             FrameModule::class,
             EmojiSentenceModule::class,
         )
@@ -86,6 +93,7 @@ object SlackcatModules {
         listOf(
             PingModule::class,
             DateModule::class,
+            ChannelModule::class,
             WeatherModule::class,
             TranslateModule::class,
             StatusModule::class,

@@ -14,4 +14,6 @@ interface ChatClient {
         botName: String,
         botIcon: BotIcon,
     ): Result<String>
+
+    suspend fun getUserDisplayName(userId: String): Result<String>
 }

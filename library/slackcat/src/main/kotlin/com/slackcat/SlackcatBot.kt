@@ -14,6 +14,7 @@ import com.slackcat.network.NetworkClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
@@ -72,6 +73,11 @@ class SlackcatBot(
                     botIcon: com.slackcat.chat.models.BotIcon,
                 ): Result<String> {
                     return chatEngine.updateMessage(channelId, messageTs, message, botName, botIcon)
+                }
+
+                override suspend fun getUserDisplayName(userId: String): Result<String> {
+                    return (chatEngine as? SlackChatEngine)?.getUserDisplayName(userId)
+                        ?: Result.failure(Exception("getUserDisplayName not supported by this chat engine"))
                 }
             }
 
@@ -173,13 +179,21 @@ class SlackcatBot(
         runBlocking {
             println("Starting slackcat using ${chatEngine.provideEngineName()} engine")
             supervisorScope {
-                chatEngine.eventFlow().collect { event ->
+                val isCli = chatEngine is CliChatEngine
+                val flow =
+                    if (isCli) {
+                        chatEngine.eventFlow().take(1)
+                    } else {
+                        chatEngine.eventFlow()
+                    }
+
+                flow.collect { event ->
                     launch {
                         val handled = router.onMessage(event)
-                        if (!handled && chatEngine is CliChatEngine) {
+                        if (!handled && isCli) {
                             println(CliChatEngine.ERROR_MESSAGE)
                         }
-                    }
+                    }.join() // Wait for the message to be handled
                 }
             }
         }
