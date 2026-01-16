@@ -90,6 +90,52 @@ For detailed publishing and consumption instructions, see:
 - `PUBLISHING.md` - Complete guide to publishing and consuming the library
 - `VERSIONING.md` - Version management and release process
 
+## Customizing Modules
+
+Slackcat modules are designed to be customizable through inheritance. You can override module behavior by extending the module class and overriding protected properties or methods.
+
+### Example: Customizing KudosModule
+
+The `KudosModule` includes spam protection by default (5-minute cooldown between giving kudos to the same user). You can disable this by creating a custom module:
+
+```kotlin
+class CustomKudosModule : KudosModule() {
+    override val spamProtectionEnabled = false  // Disable spam protection
+}
+```
+
+Then register your custom module instead of the default:
+
+```kotlin
+// In your DI configuration (e.g., Koin)
+single<SlackcatModule> { CustomKudosModule() }
+```
+
+### Best Practices for Module Customization
+
+1. **Use `protected open` properties** for configurable behavior
+   - Makes customization explicit and type-safe
+   - Follows Kotlin property override pattern
+   - Example: `protected open val spamProtectionEnabled: Boolean = true`
+
+2. **Provide sensible defaults**
+   - Default values should represent the most common use case
+   - Downstream users must explicitly opt-out of defaults
+
+3. **Document overridable properties**
+   - Clearly document what each property controls
+   - Specify the default behavior
+   - Example use cases help users understand when to customize
+
+4. **Pass configuration through constructor parameters**
+   - DAOs and internal components should accept configuration via constructor
+   - Use default parameters for backward compatibility
+   - Example: `class KudosDAO(private val spamProtectionEnabled: Boolean = true)`
+
+### Pattern Reference
+
+See `JeopardyModule` for another example that overrides `botName` and `botIcon` properties.
+
 ## Note
 
 The`*Graphs.kt` classes are a very simple global singleton dependency graph.
@@ -222,6 +268,51 @@ The database layer uses `SchemaUtils.createMissingTablesAndColumns()` which auto
 - Preserves existing data
 
 **Note:** Column deletions and type changes are NOT automatic - you'll need to write manual migrations for those.
+
+## Best Practices for Schema Changes
+
+### Always Use Default Values for NOT NULL Columns
+
+When adding a NOT NULL column to an existing table with data, **ALWAYS** specify a default value. This allows Exposed to automatically migrate existing rows.
+
+**❌ Bad - Will Fail on Tables with Data:**
+```kotlin
+object KudosMessageTable : Table("kudos_messages") {
+    val threadTs = text("thread_ts")
+    val botMessageTs = text("bot_message_ts")
+    val createdAt = long("created_at")  // ❌ No default - breaks migration!
+    val expiresAt = long("expires_at")  // ❌ No default - breaks migration!
+}
+```
+
+**✅ Good - Automatic Migration Works:**
+```kotlin
+object KudosMessageTable : Table("kudos_messages") {
+    val threadTs = text("thread_ts")
+    val botMessageTs = text("bot_message_ts")
+    val createdAt = long("created_at").default(0L)  // ✅ Default value
+    val expiresAt = long("expires_at").default(0L)  // ✅ Default value
+}
+```
+
+**Why This Matters:**
+- PostgreSQL/SQLite cannot add NOT NULL columns to tables with existing data unless a default is provided
+- Exposed generates: `ALTER TABLE kudos_messages ADD COLUMN created_at BIGINT DEFAULT 0`
+- Existing rows automatically get the default value (0)
+- New rows get actual values from application code
+- Works seamlessly for all downstream users
+
+**When to Use This Pattern:**
+- Adding timestamp columns (`created_at`, `updated_at`, `expires_at`)
+- Adding counters or numeric fields
+- Adding status flags or enum columns
+- Any NOT NULL column added after the table already has data
+
+**Alternative: Nullable Columns**
+If a sensible default doesn't exist, make the column nullable instead:
+```kotlin
+val nickname = text("nickname").nullable()  // ✅ No default needed
+```
 
 ## Adding a New Column
 

@@ -365,7 +365,46 @@ class KudosModuleTest {
             customKudosModule.onInvoke(message2)
             customKudosModule.onInvoke(message3)
 
-            // Verify all three were successful (3 sendMessage calls)
-            coVerify(exactly = 3) { mockChatClient.sendMessage(any(), any(), any()) }
+            // Verify all three were successful (3 sendMessage calls to channel)
+            coVerify(exactly = 3) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+        }
+
+    @Test
+    fun `onInvoke enforces per-thread deduplication even when spam protection is disabled`() =
+        runTest {
+            // Create a custom module with spam protection disabled
+            val customKudosModule =
+                object : KudosModule() {
+                    override val spamProtectionEnabled = false
+                }
+
+            val message1 =
+                createTestMessage(
+                    command = "++",
+                    userText = "<@user456>",
+                    messageId = "same_thread",
+                )
+
+            // Give kudos twice in the SAME thread - second should be blocked
+            customKudosModule.onInvoke(message1)
+            customKudosModule.onInvoke(message1) // Same message/thread
+
+            // Verify: 1 success to channel + 1 DM warning about duplicate in thread
+            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "user123" }, any(), any()) }
+
+            // Verify the DM contains "already gave kudos here"
+            val capturedMessages = mutableListOf<OutgoingChatMessage>()
+            coVerify { mockChatClient.sendMessage(capture(capturedMessages), any(), any()) }
+
+            val dmMessage = capturedMessages.firstOrNull { it.channelId == "user123" }
+            val containsExpectedText =
+                dmMessage?.content?.elements?.any { element ->
+                    when (element) {
+                        is MessageElement.Text -> element.content.contains("already gave kudos here")
+                        else -> false
+                    }
+                } ?: false
+            assertTrue(containsExpectedText)
         }
 }

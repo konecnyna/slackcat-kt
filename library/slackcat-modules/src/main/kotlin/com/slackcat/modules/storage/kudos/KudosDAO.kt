@@ -172,24 +172,19 @@ class KudosDAO(
      * Checks if a kudos transaction from giverId to recipientId would violate rate limits.
      * Returns null if allowed, or a String with the reason/time remaining if blocked.
      *
-     * Rule 1: One kudos per giver→recipient per thread
-     * Rule 2: 5 minute global cooldown per giver→recipient pair
+     * Rule 1: One kudos per giver→recipient per thread (ALWAYS enforced)
+     * Rule 2: 5 minute global cooldown per giver→recipient pair (only when spam protection enabled)
      */
     suspend fun hasRecentKudos(
         giverId: String,
         recipientId: String,
         threadTs: String,
     ): String? {
-        // Skip spam protection if disabled
-        if (!spamProtectionEnabled) {
-            return null
-        }
-
         return dbQuery {
             val now = System.currentTimeMillis()
             val fiveMinutesAgo = now - (5 * 60 * 1000)
 
-            // Check Rule 1: Already gave kudos in this thread?
+            // Rule 1: ALWAYS check per-thread deduplication (prevents duplicate key errors)
             val threadTransaction =
                 KudosTransactionTable
                     .select {
@@ -203,7 +198,11 @@ class KudosDAO(
                 return@dbQuery "You already gave kudos here! 😊"
             }
 
-            // Check Rule 2: Gave kudos to same person recently (anywhere)?
+            // Rule 2: Only check 5-minute cooldown if spam protection is enabled
+            if (!spamProtectionEnabled) {
+                return@dbQuery null
+            }
+
             val recentTransaction =
                 KudosTransactionTable
                     .select {
