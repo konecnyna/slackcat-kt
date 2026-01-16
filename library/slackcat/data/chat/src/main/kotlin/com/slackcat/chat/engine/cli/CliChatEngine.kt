@@ -96,7 +96,8 @@ class CliChatEngine(
                     reaction = emoji,
                     channelId = "123456789",
                     messageTimestamp = messageTs,
-                    threadTimestamp = null, // CLI engine doesn't track threads
+                    // CLI engine doesn't track threads
+                    threadTimestamp = null,
                     itemUserId = "U987654321",
                     eventTimestamp = Instant.now().epochSecond.toString(),
                 )
