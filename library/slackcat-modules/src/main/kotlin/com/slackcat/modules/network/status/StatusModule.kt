@@ -1,7 +1,6 @@
 package com.slackcat.modules.network.status
 
 import com.slackcat.chat.models.IncomingChatMessage
-import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
@@ -23,18 +22,16 @@ class StatusModule(
 
         val response = statusClient.fetch(statusService)
 
-        val message =
+        val content =
             response?.let {
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    content = textMessage(response.toMessage()),
-                )
-            } ?: OutgoingChatMessage(
-                channelId = incomingChatMessage.channelId,
-                content = textMessage("Got en error when trying fetch status..."),
-            )
+                textMessage(response.toMessage())
+            } ?: textMessage("Got en error when trying fetch status...")
 
-        sendMessage(message)
+        sendMessage(
+            incomingMessage = incomingChatMessage,
+            content = content,
+            preserveThreadContext = true,
+        )
     }
 
     override fun commandInfo() = CommandInfo(command = "status")

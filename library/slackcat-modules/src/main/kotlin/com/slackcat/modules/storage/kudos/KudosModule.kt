@@ -32,7 +32,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
         // Determine the effective thread root (for top-level messages, use messageId)
         val threadRoot = incomingChatMessage.threadId ?: incomingChatMessage.messageId
         println(
-            "[KudosModule] Processing ?++ command: threadId=${incomingChatMessage.threadId}, messageId=${incomingChatMessage.messageId}, threadRoot=$threadRoot",
+            "[KudosModule] Processing ?++ command: " +
+                "threadId=${incomingChatMessage.threadId}, " +
+                "messageId=${incomingChatMessage.messageId}, " +
+                "threadRoot=$threadRoot",
         )
 
         // Handle kudos giving
@@ -119,10 +122,17 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
             if (activeMessage != null) {
                 println("[KudosModule] Updating existing message: ${activeMessage.botMessageTs}")
+                // Add visual indicator for updates
+                val updatedContent =
+                    OutgoingChatMessage(
+                        channelId = messageContent.channelId,
+                        threadId = messageContent.threadId,
+                        content = textMessage("$messageText ✨"),
+                    )
                 updateMessage(
                     channelId = activeMessage.channelId,
                     messageTs = activeMessage.botMessageTs,
-                    message = messageContent,
+                    message = updatedContent,
                 )
             } else {
                 println("[KudosModule] Creating new message")
@@ -284,11 +294,17 @@ open class KudosModule : SlackcatModule(), StorageModule {
         val activeMessage = kudosDAO.getActiveMessageForThread(threadId)
 
         if (activeMessage != null) {
-            // Window still active - UPDATE existing message
+            // Window still active - UPDATE existing message with visual indicator
+            val updatedContent =
+                OutgoingChatMessage(
+                    channelId = messageContent.channelId,
+                    threadId = messageContent.threadId,
+                    content = textMessage("$kudosMessage ✨"),
+                )
             updateMessage(
                 channelId = activeMessage.channelId,
                 messageTs = activeMessage.botMessageTs,
-                message = messageContent,
+                message = updatedContent,
             )
         } else {
             // No active window - CREATE new message
