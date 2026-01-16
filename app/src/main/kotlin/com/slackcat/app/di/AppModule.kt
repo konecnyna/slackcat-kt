@@ -2,6 +2,7 @@ package com.slackcat.app.di
 
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
+import com.slackcat.app.modules.kudos.CustomKudosModule
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.common.DatabaseConfig
 import com.slackcat.common.SlackcatAppDefaults
@@ -9,6 +10,7 @@ import com.slackcat.common.SlackcatConfig
 import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.SlackcatModules
 import com.slackcat.modules.simple.emojitext.EmojiTextModule
+import com.slackcat.modules.storage.kudos.KudosModule
 import org.koin.dsl.module
 import java.time.LocalDate
 import java.time.Month
@@ -18,8 +20,10 @@ val appModule =
     module {
         // Module classes - combining library modules with app-specific modules
         single<List<KClass<out SlackcatModule>>> {
-            SlackcatModules.all +
+            // Remove default KudosModule and add our custom one
+            SlackcatModules.all.filterNot { it == KudosModule::class } +
                 listOf(
+                    CustomKudosModule::class,
                     DeployBotModule::class,
                     EmojiTextModule::class,
                     JeopardyModule::class,
