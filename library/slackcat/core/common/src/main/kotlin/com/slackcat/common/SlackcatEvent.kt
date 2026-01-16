@@ -16,6 +16,7 @@ sealed interface SlackcatEvent {
         val reaction: String,
         val channelId: String,
         val messageTimestamp: String,
+        val threadTimestamp: String?,
         val itemUserId: String?,
         val eventTimestamp: String,
     ) : SlackcatEvent

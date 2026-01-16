@@ -37,6 +37,29 @@ abstract class SlackcatModule : KoinComponent {
         return chatClient.sendMessage(message, finalBotName, finalBotIcon)
     }
 
+    /**
+     * Sends a message in reply to an incoming message with optional thread context preservation.
+     *
+     * @param incomingMessage The message being replied to
+     * @param content The content of the reply
+     * @param preserveThreadContext If true, replies in the same thread as the incoming message.
+     *                             If false (default), always replies at top-level regardless of thread context.
+     * @return Result containing the message timestamp if successful
+     */
+    suspend fun sendMessage(
+        incomingMessage: IncomingChatMessage,
+        content: BotMessage,
+        preserveThreadContext: Boolean = false,
+    ): Result<String> {
+        val message =
+            OutgoingChatMessage(
+                channelId = incomingMessage.channelId,
+                threadId = if (preserveThreadContext) incomingMessage.threadId else null,
+                content = content,
+            )
+        return sendMessage(message)
+    }
+
     suspend fun updateMessage(
         channelId: String,
         messageTs: String,

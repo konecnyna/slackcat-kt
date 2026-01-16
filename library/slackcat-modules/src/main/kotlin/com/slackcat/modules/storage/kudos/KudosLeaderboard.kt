@@ -24,21 +24,26 @@ class KudosLeaderboard(
                 kudosRow.userId to chatClient.getUserDisplayName(kudosRow.userId).getOrElse { kudosRow.userId }
             }
 
+        val leaderboardText =
+            buildString {
+                topKudos.forEachIndexed { index, kudosRow ->
+                    val medal =
+                        when (index) {
+                            0 -> ":first_place_medal:"
+                            1 -> ":second_place_medal:"
+                            2 -> ":third_place_medal:"
+                            else -> "${index + 1}."
+                        }
+                    val displayName = userDisplayNames[kudosRow.userId] ?: kudosRow.userId
+                    val plusText = if (kudosRow.count == 1) "plus" else "pluses"
+                    appendLine("$medal $displayName - ${kudosRow.count} $plusText")
+                }
+            }.trimEnd()
+
         return buildMessage(MessageStyle.SUCCESS) {
             heading(":trophy: Kudos Leaderboard :trophy:")
             divider()
-            topKudos.forEachIndexed { index, kudosRow ->
-                val medal =
-                    when (index) {
-                        0 -> ":first_place_medal:"
-                        1 -> ":second_place_medal:"
-                        2 -> ":third_place_medal:"
-                        else -> "${index + 1}."
-                    }
-                val displayName = userDisplayNames[kudosRow.userId] ?: kudosRow.userId
-                val plusText = if (kudosRow.count == 1) "plus" else "pluses"
-                text("$medal $displayName - ${kudosRow.count} $plusText")
-            }
+            text(leaderboardText)
         }
     }
 }

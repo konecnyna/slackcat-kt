@@ -1,7 +1,6 @@
 package com.slackcat.modules.network.summon
 
 import com.slackcat.chat.models.IncomingChatMessage
-import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
@@ -36,16 +35,15 @@ class SummonModule(
 
         val result =
             sendMessage(
-                OutgoingChatMessage(
-                    channelId = incomingChatMessage.channelId,
-                    content =
-                        buildMessage {
-                            image(
-                                url = imageUrl,
-                                altText = "summon image: ${incomingChatMessage.userText}",
-                            )
-                        },
-                ),
+                incomingMessage = incomingChatMessage,
+                content =
+                    buildMessage {
+                        image(
+                            url = imageUrl,
+                            altText = "summon image: ${incomingChatMessage.userText}",
+                        )
+                    },
+                preserveThreadContext = true,
             )
 
         result.fold(
@@ -53,13 +51,11 @@ class SummonModule(
                 // Message sent successfully, nothing to do
             },
             onFailure = { error ->
-                // Send fallback message as plain text in a thread
+                // Send fallback message as plain text, preserving thread context
                 sendMessage(
-                    OutgoingChatMessage(
-                        channelId = incomingChatMessage.channelId,
-                        threadId = incomingChatMessage.messageId,
-                        content = textMessage("<$imageUrl>"),
-                    ),
+                    incomingMessage = incomingChatMessage,
+                    content = textMessage("<$imageUrl>"),
+                    preserveThreadContext = true,
                 )
             },
         )

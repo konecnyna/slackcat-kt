@@ -30,6 +30,13 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val client = app.client
     private val messageConverter = SlackMessageConverter()
 
+    // Cache for message_ts -> thread_ts mappings to avoid API calls on reactions
+    // TTL: 24 hours (reactions typically happen on recent messages)
+    private data class ThreadCacheEntry(val threadTs: String?, val timestamp: Long)
+
+    private val threadCache = mutableMapOf<String, ThreadCacheEntry>()
+    private val cacheTtlMs = 24 * 60 * 60 * 1000L // 24 hours
+
     override fun connect(ready: () -> Unit) {
         app.event(MessageBotEvent::class.java) { _, ctx ->
             // No - op. Need to handle it from the logs
@@ -43,6 +50,9 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 return@event ctx.ack()
             }
             globalCoroutineScope.launch {
+                // Cache the thread mapping (message_ts -> thread_ts)
+                cacheThreadMapping(message.ts, message.threadTs)
+
                 // Emit ALL messages to event listeners (for features like timeout)
                 eventsFlow?.emit(
                     SlackcatEvent.MessageReceived(
@@ -65,12 +75,16 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         app.event(ReactionAddedEvent::class.java) { payload, ctx ->
             val event = payload.event
             globalCoroutineScope.launch {
+                // Resolve thread root: check cache first, then API if needed
+                val threadRoot = resolveThreadRoot(event.item.channel, event.item.ts)
+
                 eventsFlow?.emit(
                     SlackcatEvent.ReactionAdded(
                         userId = event.user,
                         reaction = event.reaction,
                         channelId = event.item.channel,
                         messageTimestamp = event.item.ts,
+                        threadTimestamp = threadRoot,
                         itemUserId = event.itemUser,
                         eventTimestamp = event.eventTs,
                     ),
@@ -226,6 +240,63 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
+    /**
+     * Cache thread mapping with TTL cleanup
+     */
+    private fun cacheThreadMapping(
+        messageTs: String,
+        threadTs: String?,
+    ) {
+        val now = System.currentTimeMillis()
+        threadCache[messageTs] = ThreadCacheEntry(threadTs, now)
+
+        // Cleanup expired entries (older than TTL)
+        threadCache.entries.removeIf { (_, entry) ->
+            now - entry.timestamp > cacheTtlMs
+        }
+    }
+
+    /**
+     * Resolve thread root for a message, checking cache first, then API
+     * Returns the thread root timestamp, or null if it's a top-level message
+     */
+    private suspend fun resolveThreadRoot(
+        channelId: String,
+        messageTs: String,
+    ): String? {
+        // Check cache first
+        val cached = threadCache[messageTs]
+        if (cached != null) {
+            return cached.threadTs
+        }
+
+        // Cache miss - fetch from API
+        return try {
+            val response =
+                client.conversationsHistory { req ->
+                    req.channel(channelId)
+                        .latest(messageTs)
+                        .inclusive(true)
+                        .limit(1)
+                }
+
+            if (response.isOk && response.messages.isNotEmpty()) {
+                val message = response.messages[0]
+                val threadTs = message.threadTs
+
+                // Cache the result for future lookups
+                cacheThreadMapping(messageTs, threadTs)
+
+                threadTs
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            println("[SlackChatEngine] Failed to fetch thread info for $messageTs: ${e.message}")
+            null
+        }
+    }
+
     fun MessageEvent.toDomain(command: String) =
         IncomingChatMessage(
             command = command,
@@ -233,7 +304,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             chatUser = ChatUser(userId = user),
             messageId = ts,
             rawMessage = text,
-            threadId = ts,
+            threadId = threadTs,
             arguments = CommandParser.extractArguments(text),
             userText = CommandParser.extractUserText(text),
         )

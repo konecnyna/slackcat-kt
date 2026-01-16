@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 
 class KudosDAO(
     private val spamProtectionEnabled: Boolean = true,
@@ -46,6 +47,7 @@ class KudosDAO(
         val channelId: String,
         val createdAt: Long,
         val expiresAt: Long,
+        val userCounts: Map<String, Int> = emptyMap(),
     )
 
     object KudosMessageTable : Table("kudos_messages") {
@@ -54,6 +56,9 @@ class KudosDAO(
         val channelId = text("channel_id")
         val createdAt = long("created_at").default(0L)
         val expiresAt = long("expires_at").default(0L)
+
+        // Stores user_id -> count mapping as JSON string: {"U123": 5, "U456": 3}
+        val userCounts = text("user_counts").default("{}")
         override val primaryKey = PrimaryKey(threadTs, botMessageTs)
 
         init {
@@ -143,9 +148,42 @@ class KudosDAO(
                         channelId = resultRow[KudosMessageTable.channelId],
                         createdAt = resultRow[KudosMessageTable.createdAt],
                         expiresAt = resultRow[KudosMessageTable.expiresAt],
+                        userCounts = parseUserCounts(resultRow[KudosMessageTable.userCounts]),
                     )
                 }
                 .singleOrNull()
+        }
+    }
+
+    private fun parseUserCounts(json: String): Map<String, Int> {
+        if (json.isBlank() || json == "{}") return emptyMap()
+        return try {
+            json.trim('{', '}')
+                .split(",")
+                .mapNotNull { entry ->
+                    val parts = entry.split(":")
+                    if (parts.size == 2) {
+                        val userId = parts[0].trim().trim('"')
+                        val count = parts[1].trim().toIntOrNull()
+                        if (count != null) userId to count else null
+                    } else {
+                        null
+                    }
+                }
+                .toMap()
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    private fun serializeUserCounts(userCounts: Map<String, Int>): String {
+        if (userCounts.isEmpty()) return "{}"
+        return userCounts.entries.joinToString(
+            separator = ",",
+            prefix = "{",
+            postfix = "}",
+        ) { (userId, count) ->
+            "\"$userId\":$count"
         }
     }
 
@@ -153,6 +191,7 @@ class KudosDAO(
         threadTs: String,
         botMessageTs: String,
         channelId: String,
+        userCounts: Map<String, Int> = emptyMap(),
         // 3 hours default window
         windowDurationMs: Long = 3 * 60 * 60 * 1000,
     ) {
@@ -164,6 +203,24 @@ class KudosDAO(
                 it[KudosMessageTable.channelId] = channelId
                 it[createdAt] = now
                 it[expiresAt] = now + windowDurationMs
+                it[KudosMessageTable.userCounts] = serializeUserCounts(userCounts)
+            }
+        }
+    }
+
+    suspend fun updateMessageUserCounts(
+        threadTs: String,
+        botMessageTs: String,
+        userCounts: Map<String, Int>,
+    ) {
+        dbQuery {
+            KudosMessageTable.update(
+                where = {
+                    (KudosMessageTable.threadTs eq threadTs) and
+                        (KudosMessageTable.botMessageTs eq botMessageTs)
+                },
+            ) {
+                it[KudosMessageTable.userCounts] = serializeUserCounts(userCounts)
             }
         }
     }
