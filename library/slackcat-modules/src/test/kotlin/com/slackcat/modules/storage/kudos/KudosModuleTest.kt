@@ -389,9 +389,20 @@ class KudosModuleTest {
             customKudosModule.onInvoke(message)
             customKudosModule.onInvoke(message)
 
-            // Verify all three were successful (3 sendMessage calls to channel)
-            // No DM warnings about "already gave kudos"
-            coVerify(exactly = 3) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+            // Verify that:
+            // 1. First invocation sends a new message (1 sendMessage call to channel)
+            // 2. Second and third invocations update the existing message (2 updateMessage calls)
+            // 3. No DM warnings about "already gave kudos" (0 sendMessage to user's DM)
+            coVerify(exactly = 1) { mockChatClient.sendMessage(match { it.channelId == "channel123" }, any(), any()) }
+            coVerify(exactly = 2) {
+                mockChatClient.updateMessage(
+                    match { it == "channel123" },
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
             coVerify(exactly = 0) { mockChatClient.sendMessage(match { it.channelId == "user123" }, any(), any()) }
         }
 }
