@@ -31,7 +31,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
         // Determine the effective thread root (for top-level messages, use messageId)
         val threadRoot = incomingChatMessage.threadId ?: incomingChatMessage.messageId
-        println("[KudosModule] Processing ?++ command: threadId=${incomingChatMessage.threadId}, messageId=${incomingChatMessage.messageId}, threadRoot=$threadRoot")
+        println(
+            "[KudosModule] Processing ?++ command: threadId=${incomingChatMessage.threadId}, messageId=${incomingChatMessage.messageId}, threadRoot=$threadRoot",
+        )
 
         // Handle kudos giving
         val allIds = extractUserIds(incomingChatMessage.userText)
