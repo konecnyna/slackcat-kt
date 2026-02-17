@@ -226,6 +226,24 @@ class KudosDAO(
     }
 
     /**
+     * Returns the number of kudos transactions for a given recipient in a specific thread.
+     */
+    suspend fun getThreadKudosCount(
+        recipientId: String,
+        threadTs: String,
+    ): Int {
+        return dbQuery {
+            KudosTransactionTable
+                .select {
+                    (KudosTransactionTable.recipientId eq recipientId) and
+                        (KudosTransactionTable.threadTs eq threadTs)
+                }
+                .count()
+                .toInt()
+        }
+    }
+
+    /**
      * Checks if a kudos transaction from giverId to recipientId would violate rate limits.
      * Returns null if allowed, or a String with the reason/time remaining if blocked.
      *

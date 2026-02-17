@@ -218,6 +218,51 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         this.eventsFlow = eventsFlow
     }
 
+    suspend fun getMessageText(
+        channelId: String,
+        messageTs: String,
+        threadTs: String?,
+    ): Result<String> {
+        return try {
+            if (threadTs != null) {
+                val response =
+                    client.conversationsReplies { req ->
+                        req.channel(channelId)
+                            .ts(threadTs)
+                            .latest(messageTs)
+                            .inclusive(true)
+                            .limit(1)
+                    }
+                if (response.isOk && response.messages.isNotEmpty()) {
+                    val message =
+                        response.messages.find { it.ts == messageTs }
+                            ?: response.messages[0]
+                    Result.success(message.text ?: "")
+                } else {
+                    Result.failure(Exception("Failed to fetch message: ${response.error}"))
+                }
+            } else {
+                val response =
+                    client.conversationsHistory { req ->
+                        req.channel(channelId)
+                            .latest(messageTs)
+                            .inclusive(true)
+                            .limit(1)
+                    }
+                if (response.isOk && response.messages.isNotEmpty()) {
+                    val message =
+                        response.messages.find { it.ts == messageTs }
+                            ?: response.messages[0]
+                    Result.success(message.text ?: "")
+                } else {
+                    Result.failure(Exception("Failed to fetch message: ${response.error}"))
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getUserDisplayName(userId: String): Result<String> {
         return try {
             val response =
