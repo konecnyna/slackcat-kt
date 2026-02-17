@@ -16,4 +16,10 @@ interface ChatClient {
     ): Result<String>
 
     suspend fun getUserDisplayName(userId: String): Result<String>
+
+    suspend fun getMessageText(
+        channelId: String,
+        messageTs: String,
+        threadTs: String? = null,
+    ): Result<String> = Result.failure(UnsupportedOperationException("Not supported"))
 }

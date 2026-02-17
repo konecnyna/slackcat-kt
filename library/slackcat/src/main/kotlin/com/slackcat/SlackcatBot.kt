@@ -79,6 +79,15 @@ class SlackcatBot(
                     return (chatEngine as? SlackChatEngine)?.getUserDisplayName(userId)
                         ?: Result.failure(Exception("getUserDisplayName not supported by this chat engine"))
                 }
+
+                override suspend fun getMessageText(
+                    channelId: String,
+                    messageTs: String,
+                    threadTs: String?,
+                ): Result<String> {
+                    return (chatEngine as? SlackChatEngine)?.getMessageText(channelId, messageTs, threadTs)
+                        ?: Result.failure(Exception("getMessageText not supported by this chat engine"))
+                }
             }
 
         // Register ChatClient with Koin

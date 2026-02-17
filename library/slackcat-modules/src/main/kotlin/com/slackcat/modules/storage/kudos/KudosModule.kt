@@ -14,7 +14,7 @@ import com.slackcat.models.StorageModule
 open class KudosModule : SlackcatModule(), StorageModule {
     protected open val spamProtectionEnabled: Boolean = true
 
-    private val kudosDAO by lazy { KudosDAO(spamProtectionEnabled = spamProtectionEnabled) }
+    protected val kudosDAO by lazy { KudosDAO(spamProtectionEnabled = spamProtectionEnabled) }
     private val leaderboard by lazy { KudosLeaderboard(kudosDAO, chatClient) }
 
     override fun tables(): List<DatabaseTable> = KudosDAO.getDatabaseTables()
@@ -111,7 +111,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 val previousUserCounts = activeMessage.userCounts
                 val allUserIds = (previousUserCounts.keys + currentUserCounts.keys).toSet()
 
-                // Build aggregated message with deltas
+                // Build aggregated message with thread counts
                 val userMessages =
                     allUserIds.mapNotNull { userId ->
                         val currentCount = currentUserCounts[userId]
@@ -123,18 +123,12 @@ open class KudosModule : SlackcatModule(), StorageModule {
                                 ?: chatClient.getUserDisplayName(userId).getOrNull() ?: userId
 
                         when {
-                            currentCount != null && previousCount != null -> {
-                                // User was updated
-                                val delta = currentCount - previousCount
-                                "$displayName: $currentCount ${pluralize(currentCount)} (+$delta more)"
-                            }
                             currentCount != null -> {
-                                // New user added to the message
-                                "$displayName now has $currentCount ${pluralize(currentCount)}"
+                                buildKudosUserMessage(displayName, currentCount, userId, threadRoot)
                             }
                             previousCount != null -> {
                                 // User was in previous message, keep them in display
-                                "$displayName: $previousCount ${pluralize(previousCount)}"
+                                buildKudosUserMessage(displayName, previousCount, userId, threadRoot)
                             }
                             else -> null
                         }
@@ -193,6 +187,24 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
     private fun pluralize(count: Int): String {
         return if (count == 1) "plus" else "pluses"
+    }
+
+    /**
+     * Builds a user message line showing total kudos and thread contribution.
+     * Used by both onInvoke (command path) and giveKudosToUser (reaction path).
+     */
+    private suspend fun buildKudosUserMessage(
+        displayName: String,
+        totalCount: Int,
+        recipientId: String,
+        threadTs: String,
+    ): String {
+        val threadCount = kudosDAO.getThreadKudosCount(recipientId, threadTs)
+        return if (threadCount > 0) {
+            "$displayName now has $totalCount ${pluralize(totalCount)} (+$threadCount from this thread)"
+        } else {
+            "$displayName now has $totalCount ${pluralize(totalCount)}"
+        }
     }
 
     override fun commandInfo() =
@@ -267,10 +279,9 @@ open class KudosModule : SlackcatModule(), StorageModule {
     }
 
     /**
-     * Centralized validation logic for kudos.
      * Returns true if the kudos is valid (not self-kudos).
      */
-    private fun isValidKudos(
+    protected fun isValidKudos(
         giverId: String,
         recipientId: String,
     ): Boolean {
@@ -291,7 +302,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
      * Gives kudos to a user triggered by a reaction.
      * Uses time-window logic for message aggregation.
      */
-    private suspend fun giveKudosToUser(
+    protected open suspend fun giveKudosToUser(
         giverId: String,
         recipientId: String,
         channelId: String,
@@ -333,11 +344,11 @@ open class KudosModule : SlackcatModule(), StorageModule {
         val activeMessage = kudosDAO.getActiveMessageForThread(threadId)
 
         if (activeMessage != null) {
-            // Window still active - UPDATE existing message with aggregation and deltas
+            // Window still active - UPDATE existing message with aggregation
             val previousUserCounts = activeMessage.userCounts
             val allUserIds = (previousUserCounts.keys + currentUserCounts.keys).toSet()
 
-            // Build aggregated message with deltas
+            // Build aggregated message with thread counts
             val userMessages =
                 allUserIds.mapNotNull { userId ->
                     val currentCount = currentUserCounts[userId]
@@ -351,22 +362,8 @@ open class KudosModule : SlackcatModule(), StorageModule {
                             chatClient.getUserDisplayName(userId).getOrNull() ?: userId
                         }
 
-                    when {
-                        currentCount != null && previousCount != null -> {
-                            // User was updated
-                            val delta = currentCount - previousCount
-                            "$userName: $currentCount ${pluralize(currentCount)} (+$delta more)"
-                        }
-                        currentCount != null -> {
-                            // New user added
-                            "$userName now has $currentCount ${pluralize(currentCount)}"
-                        }
-                        previousCount != null -> {
-                            // User was in previous but not current - keep them in the display
-                            "$userName: $previousCount ${pluralize(previousCount)}"
-                        }
-                        else -> null
-                    }
+                    val count = currentCount ?: previousCount ?: return@mapNotNull null
+                    buildKudosUserMessage(userName, count, userId, threadId)
                 }
 
             val messageText = userMessages.joinToString(" | ")
@@ -413,7 +410,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
         }
     }
 
-    private fun extractUserIds(userText: String): Set<String> {
+    protected fun extractUserIds(userText: String): Set<String> {
         val pattern = """<@(\w+)>""".toRegex()
         return pattern.findAll(userText).map { it.groupValues[1] }.toSet()
     }
