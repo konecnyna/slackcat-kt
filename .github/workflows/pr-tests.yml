@@ -55,6 +55,7 @@ jobs:
         if: always()
         with:
           check_name: Module Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             library/slackcat-modules/build/test-results/**/*.xml
 
@@ -96,6 +97,7 @@ jobs:
         if: always()
         with:
           check_name: Library Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             library/slackcat/**/build/test-results/**/*.xml
 
