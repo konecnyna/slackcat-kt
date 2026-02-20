@@ -14,7 +14,7 @@ class EmojiSentenceModule : SlackcatModule() {
         val text = incomingChatMessage.userText
         val outgoingText = convertString(text)
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(outgoingText),
             ),

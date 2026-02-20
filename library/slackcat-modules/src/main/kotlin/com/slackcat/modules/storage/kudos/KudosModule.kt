@@ -45,10 +45,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
         if (allIds.size == 1 && validIds.isEmpty()) {
             sendMessage(
-                OutgoingChatMessage(
+                OutgoingChatMessage.ThreadReply(
                     channelId = incomingChatMessage.channelId,
                     threadId = threadRoot,
-                    content = textMessage("You'll go blind doing that!"),
+                    text = "You'll go blind doing that!",
                 ),
             )
             return
@@ -71,7 +71,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     // Send DM for rate limit
                     println("[KudosModule] Rate limited - sending DM")
                     sendMessage(
-                        OutgoingChatMessage(
+                        OutgoingChatMessage.ChannelMessage(
                             channelId = incomingChatMessage.chatUser.userId,
                             content = textMessage(rateLimitMessage),
                         ),
@@ -141,10 +141,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
                     channelId = activeMessage.channelId,
                     messageTs = activeMessage.botMessageTs,
                     message =
-                        OutgoingChatMessage(
+                        OutgoingChatMessage.ThreadReply(
                             channelId = incomingChatMessage.channelId,
                             threadId = threadRoot,
-                            content = textMessage(messageText),
+                            text = messageText,
                         ),
                 )
 
@@ -165,10 +165,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 val messageText = userMessages.joinToString(" | ")
 
                 sendMessage(
-                    OutgoingChatMessage(
+                    OutgoingChatMessage.ThreadReply(
                         channelId = incomingChatMessage.channelId,
                         threadId = threadRoot,
-                        content = textMessage(messageText),
+                        text = messageText,
                     ),
                 ).onSuccess { ts ->
                     println("[KudosModule] Message sent successfully, storing with window: $ts")
@@ -224,7 +224,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
     private suspend fun handleLeaderboard(incomingChatMessage: IncomingChatMessage) {
         val leaderboardMessage = leaderboard.getLeaderboardMessage()
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = incomingChatMessage.channelId,
                 content = leaderboardMessage,
             ),
@@ -319,7 +319,7 @@ open class KudosModule : SlackcatModule(), StorageModule {
         if (rateLimitMessage != null) {
             // Rate limited - send friendly denial message as DM to the giver
             sendMessage(
-                OutgoingChatMessage(
+                OutgoingChatMessage.ChannelMessage(
                     channelId = giverId,
                     content = textMessage(rateLimitMessage),
                 ),
@@ -373,10 +373,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
                 channelId = activeMessage.channelId,
                 messageTs = activeMessage.botMessageTs,
                 message =
-                    OutgoingChatMessage(
+                    OutgoingChatMessage.ThreadReply(
                         channelId = channelId,
                         threadId = threadId,
-                        content = textMessage(messageText),
+                        text = messageText,
                     ),
             )
 
@@ -392,10 +392,10 @@ open class KudosModule : SlackcatModule(), StorageModule {
 
             val result =
                 sendMessage(
-                    OutgoingChatMessage(
+                    OutgoingChatMessage.ThreadReply(
                         channelId = channelId,
                         threadId = threadId,
-                        content = textMessage(messageText),
+                        text = messageText,
                     ),
                 )
 

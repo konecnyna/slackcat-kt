@@ -51,13 +51,38 @@ abstract class SlackcatModule : KoinComponent {
         content: BotMessage,
         preserveThreadContext: Boolean = false,
     ): Result<String> {
-        val message =
-            OutgoingChatMessage(
-                channelId = incomingMessage.channelId,
-                threadId = if (preserveThreadContext) incomingMessage.threadId else null,
-                content = content,
-            )
+        val threadId = if (preserveThreadContext) incomingMessage.threadId else null
+        val message: OutgoingChatMessage =
+            if (threadId != null) {
+                OutgoingChatMessage.ThreadReply(
+                    channelId = incomingMessage.channelId,
+                    threadId = threadId,
+                    text = content.toPlainText(),
+                )
+            } else {
+                OutgoingChatMessage.ChannelMessage(
+                    channelId = incomingMessage.channelId,
+                    content = content,
+                )
+            }
         return sendMessage(message)
+    }
+
+    /**
+     * Sends a plain text reply in a thread.
+     */
+    suspend fun sendThreadReply(
+        incomingMessage: IncomingChatMessage,
+        text: String,
+    ): Result<String> {
+        val threadId = incomingMessage.threadId ?: incomingMessage.messageId
+        return sendMessage(
+            OutgoingChatMessage.ThreadReply(
+                channelId = incomingMessage.channelId,
+                threadId = threadId,
+                text = text,
+            ),
+        )
     }
 
     suspend fun updateMessage(
@@ -74,7 +99,7 @@ abstract class SlackcatModule : KoinComponent {
 
     suspend fun postHelpMessage(channelId: String): Result<Unit> {
         return sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = channelId,
                 content = help(),
             ),

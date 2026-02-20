@@ -113,9 +113,10 @@ class FrameModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // The message should contain the framed image URL
             val hasFramedImageUrl =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/nickelback")
                         else -> false
@@ -138,9 +139,10 @@ class FrameModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // The message should contain the framed image URL
             val hasFramedImageUrl =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Image -> element.url.contains("home-remote-api.herokuapp.com/krang")
                         else -> false
@@ -162,9 +164,10 @@ class FrameModuleTest {
 
             val sentMessage = messageSlot.captured
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain the URL without angle brackets
             val hasCleanUrl =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Image -> element.url.contains("https://example.com/image.jpg")
                         else -> false

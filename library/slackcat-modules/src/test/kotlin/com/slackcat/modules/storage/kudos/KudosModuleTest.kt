@@ -138,28 +138,12 @@ class KudosModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
+            sentMessage as OutgoingChatMessage.ThreadReply
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-
-            val hasTestUser =
-                sentMessage.content.elements.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("Test User")
-                        is MessageElement.Heading -> element.content.contains("Test User")
-                        else -> false
-                    }
-                }
-            assertTrue(hasTestUser)
-
-            val hasOnePlus =
-                sentMessage.content.elements.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("1 plus")
-                        is MessageElement.Heading -> element.content.contains("1 plus")
-                        else -> false
-                    }
-                }
-            assertTrue(hasOnePlus)
+            assertTrue(sentMessage.text.contains("Test User"))
+            assertTrue(sentMessage.text.contains("1 plus"))
         }
 
     @Test
@@ -179,25 +163,17 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
+            sentMessage as OutgoingChatMessage.ThreadReply
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            // Verify message contains multiple users separated by " | "
-            val messageText =
-                sentMessage.content.elements.mapNotNull { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content
-                        is MessageElement.Heading -> element.content
-                        else -> null
-                    }
-                }.joinToString("")
-
             // Check for pipe separator (indicates multiple users)
-            assertTrue(messageText.contains(" | "), "Expected pipe separator for multiple users")
+            assertTrue(sentMessage.text.contains(" | "), "Expected pipe separator for multiple users")
 
             // Check both users are mentioned
-            assertTrue(messageText.contains("Test User"), "Expected Test User to be mentioned")
-            assertTrue(messageText.contains("Second User"), "Expected Second User to be mentioned")
+            assertTrue(sentMessage.text.contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(sentMessage.text.contains("Second User"), "Expected Second User to be mentioned")
         }
 
     @Test
@@ -216,26 +192,10 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-
-            val hasTestUser =
-                sentMessage.content.elements.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("Test User")
-                        is MessageElement.Heading -> element.content.contains("Test User")
-                        else -> false
-                    }
-                }
-            assertTrue(hasTestUser)
-
-            val hasOnePlus =
-                sentMessage.content.elements.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("1 plus")
-                        is MessageElement.Heading -> element.content.contains("1 plus")
-                        else -> false
-                    }
-                }
-            assertTrue(hasOnePlus)
+            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
+            sentMessage as OutgoingChatMessage.ThreadReply
+            assertTrue(sentMessage.text.contains("Test User"))
+            assertTrue(sentMessage.text.contains("1 plus"))
         }
 
     @Test
@@ -255,18 +215,11 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
+            sentMessage as OutgoingChatMessage.ThreadReply
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-
-            val hasWarningMessage =
-                sentMessage.content.elements.any { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content.contains("You'll go blind doing that!")
-                        is MessageElement.Heading -> element.content.contains("You'll go blind doing that!")
-                        else -> false
-                    }
-                }
-            assertTrue(hasWarningMessage)
+            assertTrue(sentMessage.text.contains("You'll go blind doing that!"))
         }
 
     @Test
@@ -287,25 +240,17 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
+            sentMessage as OutgoingChatMessage.ThreadReply
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
-            // Verify message contains multiple valid users separated by " | "
-            val messageText =
-                sentMessage.content.elements.mapNotNull { element ->
-                    when (element) {
-                        is MessageElement.Text -> element.content
-                        is MessageElement.Heading -> element.content
-                        else -> null
-                    }
-                }.joinToString("")
-
             // Check for pipe separator (indicates multiple users)
-            assertTrue(messageText.contains(" | "), "Expected pipe separator for multiple users")
+            assertTrue(sentMessage.text.contains(" | "), "Expected pipe separator for multiple users")
 
             // Check valid users are mentioned (not user123 who tried to plus themselves)
-            assertTrue(messageText.contains("Test User"), "Expected Test User to be mentioned")
-            assertTrue(messageText.contains("Second User"), "Expected Second User to be mentioned")
+            assertTrue(sentMessage.text.contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(sentMessage.text.contains("Second User"), "Expected Second User to be mentioned")
         }
 
     // Create a test subclass to access protected method

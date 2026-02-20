@@ -124,15 +124,20 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         botIcon: BotIcon,
     ): Result<String> {
         return try {
-            val messageBlocks = messageConverter.toSlackBlocks(message.content)
-
             val response =
                 client.chatPostMessage { req ->
                     req.apply {
                         channel(message.channelId)
-                        blocks(messageBlocks)
                         username(botName)
-                        message.threadId?.let { threadTs(it) }
+                        when (message) {
+                            is OutgoingChatMessage.ChannelMessage -> {
+                                blocks(messageConverter.toSlackBlocks(message.content))
+                            }
+                            is OutgoingChatMessage.ThreadReply -> {
+                                text(message.text)
+                                threadTs(message.threadId)
+                            }
+                        }
                         when (botIcon) {
                             is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
                             is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
@@ -158,14 +163,19 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         botIcon: BotIcon,
     ): Result<String> {
         return try {
-            val messageBlocks = messageConverter.toSlackBlocks(message.content)
-
             val response =
                 client.chatUpdate { req ->
                     req.apply {
                         channel(channelId)
                         ts(messageTs)
-                        blocks(messageBlocks)
+                        when (message) {
+                            is OutgoingChatMessage.ChannelMessage -> {
+                                blocks(messageConverter.toSlackBlocks(message.content))
+                            }
+                            is OutgoingChatMessage.ThreadReply -> {
+                                text(message.text)
+                            }
+                        }
                     }
                 }
 
@@ -176,20 +186,6 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             }
         } catch (e: Exception) {
             Result.failure(e)
-        }
-    }
-
-    private fun toPlainText(message: com.slackcat.common.BotMessage): String {
-        return message.elements.joinToString("\n") { element ->
-            when (element) {
-                is com.slackcat.common.MessageElement.Text -> element.content
-                is com.slackcat.common.MessageElement.Heading -> "*${element.content}*"
-                is com.slackcat.common.MessageElement.Image -> "[Image: ${element.altText}]"
-                is com.slackcat.common.MessageElement.Divider -> "---"
-                is com.slackcat.common.MessageElement.KeyValueList ->
-                    element.items.joinToString("\n") { "${it.key}: ${it.value}" }
-                is com.slackcat.common.MessageElement.Context -> element.content
-            }
         }
     }
 

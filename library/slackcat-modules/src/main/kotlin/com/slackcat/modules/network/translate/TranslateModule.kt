@@ -39,7 +39,7 @@ class TranslateModule(
                 }
 
             sendMessage(
-                OutgoingChatMessage(
+                OutgoingChatMessage.ChannelMessage(
                     channelId = incomingChatMessage.channelId,
                     content = textMessage(outgoingText),
                 ),
