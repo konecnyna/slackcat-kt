@@ -15,7 +15,7 @@ class StatusModule(
     private val statusClient by lazy { StatusClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val statusService = getStatusSource(incomingChatMessage.arguments)
+        val statusService = getStatusSource(incomingChatMessage.userText)
         if (statusService == null) {
             postHelpMessage(incomingChatMessage.channelId)
             return
@@ -41,15 +41,16 @@ class StatusModule(
                 "Check service status pages. Usage: ?status <service>\n" +
                     "Services: ${
                         StatusClient.Service.entries.joinToString(", ") {
-                            "${it.label} (${it.arguments.joinToString(", ")})"
+                            "${it.label} (${it.keywords.joinToString(", ")})"
                         }
                     }",
             )
         }
 
-    private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
+    private fun getStatusSource(userText: String): StatusClient.Service? {
+        val query = userText.trim().lowercase()
         return StatusClient.Service.entries.find { service ->
-            service.arguments.any { arg -> arguments.contains(arg) }
+            service.keywords.any { keyword -> keyword == query }
         }
     }
 }
