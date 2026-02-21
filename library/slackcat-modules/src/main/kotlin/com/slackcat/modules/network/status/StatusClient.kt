@@ -42,20 +42,23 @@ class StatusClient(private val networkClient: NetworkClient) {
         val activeIncidents: List<String>,
     ) {
         fun toMessage(): String {
+            val hasIssues = degradedComponents.isNotEmpty() || activeIncidents.isNotEmpty()
+            val emoji = if (hasIssues) "🔴" else "🟢"
+
             val parts = mutableListOf<String>()
-            parts.add("*${service.label}:* $summary")
+            parts.add("$emoji *${service.label}:* $summary")
 
             if (degradedComponents.isNotEmpty()) {
-                parts.add("Issues: ${degradedComponents.joinToString(", ")}")
+                parts.add("⚠️ Issues: ${degradedComponents.joinToString(", ")}")
             }
 
             if (activeIncidents.isNotEmpty()) {
-                parts.add("Incidents: ${activeIncidents.joinToString(", ")}")
+                parts.add("🚨 Incidents: ${activeIncidents.joinToString(", ")}")
             }
 
             parts.add(service.statusPageUrl)
 
-            return parts.joinToString(" | ")
+            return parts.joinToString("\n")
         }
     }
 
