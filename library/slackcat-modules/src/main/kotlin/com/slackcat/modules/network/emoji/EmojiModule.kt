@@ -21,7 +21,7 @@ class EmojiModule(
         }
 
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = incomingChatMessage.channelId,
                 content =
                     buildMessage {

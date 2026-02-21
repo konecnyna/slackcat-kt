@@ -117,9 +117,10 @@ class EmojiSentenceModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain emoji alphabet format
             val hasEmojiAlphabet =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(":alphabet-")
                         is MessageElement.Heading -> element.content.contains(":alphabet-")
@@ -146,9 +147,10 @@ class EmojiSentenceModuleTest {
 
             val sentMessage = messageSlot.captured
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain alphabet emoji
             val hasAlphabet =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(":alphabet-")
                         is MessageElement.Heading -> element.content.contains(":alphabet-")
@@ -158,7 +160,7 @@ class EmojiSentenceModuleTest {
             assertTrue(hasAlphabet)
 
             val hasLetterA =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("-a:")
                         is MessageElement.Heading -> element.content.contains("-a:")
@@ -185,9 +187,10 @@ class EmojiSentenceModuleTest {
 
             val sentMessage = messageSlot.captured
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should convert to lowercase and contain emoji format
             val hasAlphabet =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(":alphabet-")
                         is MessageElement.Heading -> element.content.contains(":alphabet-")
@@ -197,7 +200,7 @@ class EmojiSentenceModuleTest {
             assertTrue(hasAlphabet)
 
             val hasLetterA =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("-a:")
                         is MessageElement.Heading -> element.content.contains("-a:")
@@ -207,7 +210,7 @@ class EmojiSentenceModuleTest {
             assertTrue(hasLetterA)
 
             val hasLetterB =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("-b:")
                         is MessageElement.Heading -> element.content.contains("-b:")
@@ -217,7 +220,7 @@ class EmojiSentenceModuleTest {
             assertTrue(hasLetterB)
 
             val hasLetterC =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("-c:")
                         is MessageElement.Heading -> element.content.contains("-c:")
@@ -244,9 +247,10 @@ class EmojiSentenceModuleTest {
 
             val sentMessage = messageSlot.captured
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should preserve the space between letters
             val hasAlphabet =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(":alphabet-")
                         is MessageElement.Heading -> element.content.contains(":alphabet-")
@@ -257,7 +261,7 @@ class EmojiSentenceModuleTest {
 
             // The space should be preserved
             val hasSpace =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(" ")
                         is MessageElement.Heading -> element.content.contains(" ")
@@ -303,9 +307,10 @@ class EmojiSentenceModuleTest {
 
             val sentMessage = messageSlot.captured
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should convert 'a' to emoji but preserve '1' and '!'
             val hasAlphabet =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains(":alphabet-")
                         is MessageElement.Heading -> element.content.contains(":alphabet-")
@@ -315,7 +320,7 @@ class EmojiSentenceModuleTest {
             assertTrue(hasAlphabet)
 
             val hasLetterA =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("-a:")
                         is MessageElement.Heading -> element.content.contains("-a:")

@@ -130,8 +130,9 @@ class ModulesModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasActiveModules =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("Active Slackcat Modules")
                         is MessageElement.Heading -> element.content.contains("Active Slackcat Modules")
@@ -141,7 +142,7 @@ class ModulesModuleTest {
             assertTrue(hasActiveModules)
 
             val hasPing =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("ping")
                         is MessageElement.Heading -> element.content.contains("ping")
@@ -151,7 +152,7 @@ class ModulesModuleTest {
             assertTrue(hasPing)
 
             val hasDate =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("date")
                         is MessageElement.Heading -> element.content.contains("date")
@@ -162,7 +163,7 @@ class ModulesModuleTest {
 
             // ModulesModule should be filtered out
             val hasModulesCommand =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("?modules")
                         is MessageElement.Heading -> element.content.contains("?modules")
@@ -186,8 +187,9 @@ class ModulesModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasSimple =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("Simple")
                         is MessageElement.Heading -> element.content.contains("Simple")
@@ -212,8 +214,9 @@ class ModulesModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasModuleCount =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("Total: 3 modules")
                         is MessageElement.Heading -> element.content.contains("Total: 3 modules")
@@ -235,8 +238,9 @@ class ModulesModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
+            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasHelpHint =
-                sentMessage.content.elements.any { element ->
+                channelMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("--help")
                         is MessageElement.Heading -> element.content.contains("--help")

@@ -4,17 +4,16 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
-import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 class ChannelModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ThreadReply(
                 channelId = incomingChatMessage.channelId,
-                content = textMessage("Channel ID: ${incomingChatMessage.channelId}"),
                 threadId = incomingChatMessage.messageId,
+                text = "Channel ID: ${incomingChatMessage.channelId}",
             ),
         )
     }

@@ -33,7 +33,7 @@ class ReactionCounterModule : SlackcatModule() {
             }
 
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(message),
             ),

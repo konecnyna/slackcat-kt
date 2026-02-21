@@ -1,6 +1,7 @@
 package com.slackcat.modules.network.status
 
 import com.slackcat.chat.models.IncomingChatMessage
+import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
@@ -14,23 +15,20 @@ class StatusModule(
     private val statusClient by lazy { StatusClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val statusService = getStatusSource(incomingChatMessage.arguments)
+        val statusService = getStatusSource(incomingChatMessage.userText)
         if (statusService == null) {
             postHelpMessage(incomingChatMessage.channelId)
             return
         }
 
         val response = statusClient.fetch(statusService)
-
-        val content =
-            response?.let {
-                textMessage(response.toMessage())
-            } ?: textMessage("Got en error when trying fetch status...")
+        val message = response?.toMessage() ?: "Got an error when trying to fetch status..."
 
         sendMessage(
-            incomingMessage = incomingChatMessage,
-            content = content,
-            preserveThreadContext = true,
+            OutgoingChatMessage.ChannelMessage(
+                channelId = incomingChatMessage.channelId,
+                content = textMessage(message),
+            ),
         )
     }
 
@@ -39,19 +37,20 @@ class StatusModule(
     override fun help(): BotMessage =
         buildMessage {
             heading("StatusModule Help")
-            text("Quickly check slacks status page with ?status command.")
-            text("Usage: ?status --github")
-
-            val entries =
-                StatusClient.Service.entries
-                    .map { "${it.label} (${it.arguments.joinToString(", ")})" }
-                    .joinToString(", ")
-            text("Availiable services: $entries")
+            text(
+                "Check service status pages. Usage: ?status <service>\n" +
+                    "Services: ${
+                        StatusClient.Service.entries.joinToString(", ") {
+                            "${it.label} (${it.keywords.joinToString(", ")})"
+                        }
+                    }",
+            )
         }
 
-    private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
+    private fun getStatusSource(userText: String): StatusClient.Service? {
+        val query = userText.trim().lowercase()
         return StatusClient.Service.entries.find { service ->
-            service.arguments.any { arg -> arguments.contains(arg) }
+            service.keywords.any { keyword -> keyword == query }
         }
     }
 }

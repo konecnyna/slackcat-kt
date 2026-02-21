@@ -19,7 +19,7 @@ class PingModule : SlackcatModule() {
             }
 
         sendMessage(
-            OutgoingChatMessage(
+            OutgoingChatMessage.ChannelMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(text),
             ),

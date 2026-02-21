@@ -8,47 +8,56 @@ import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
 
 /**
- * Create an outgoing message with platform-agnostic format.
+ * Create an outgoing channel message with platform-agnostic format.
  */
 fun message(
     channelId: String,
     content: BotMessage,
-    threadId: String? = null,
-): OutgoingChatMessage {
-    return OutgoingChatMessage(
+): OutgoingChatMessage.ChannelMessage {
+    return OutgoingChatMessage.ChannelMessage(
         channelId = channelId,
         content = content,
-        threadId = threadId,
     )
 }
 
 /**
- * Create an outgoing message using the builder DSL.
+ * Create an outgoing channel message using the builder DSL.
  */
 fun message(
     channelId: String,
     style: MessageStyle? = null,
-    threadId: String? = null,
     block: MessageBuilder.() -> Unit,
-): OutgoingChatMessage {
-    return OutgoingChatMessage(
+): OutgoingChatMessage.ChannelMessage {
+    return OutgoingChatMessage.ChannelMessage(
         channelId = channelId,
         content = buildMessage(style, block),
-        threadId = threadId,
     )
 }
 
 /**
- * Create a simple text message.
+ * Create a simple text channel message.
  */
 fun textMessage(
     channelId: String,
     text: String,
-    threadId: String? = null,
-): OutgoingChatMessage {
-    return OutgoingChatMessage(
+): OutgoingChatMessage.ChannelMessage {
+    return OutgoingChatMessage.ChannelMessage(
         channelId = channelId,
         content = textMessage(text),
+    )
+}
+
+/**
+ * Create a thread reply with plain text only.
+ */
+fun threadReply(
+    channelId: String,
+    threadId: String,
+    text: String,
+): OutgoingChatMessage.ThreadReply {
+    return OutgoingChatMessage.ThreadReply(
+        channelId = channelId,
         threadId = threadId,
+        text = text,
     )
 }
