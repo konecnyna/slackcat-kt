@@ -8,21 +8,29 @@ import kotlinx.serialization.json.Json
 class StatusClient(private val networkClient: NetworkClient) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    enum class Service(val label: String, val url: String, val keywords: List<String>) {
-        Slack(label = "Slack", url = "https://status.slack.com/api/v2.0.0/current", keywords = listOf("slack")),
+    enum class Service(val label: String, val url: String, val statusPageUrl: String, val keywords: List<String>) {
+        Slack(
+            label = "Slack",
+            url = "https://status.slack.com/api/v2.0.0/current",
+            statusPageUrl = "https://status.slack.com",
+            keywords = listOf("slack"),
+        ),
         Github(
             label = "GitHub",
             url = "https://www.githubstatus.com/api/v2/summary.json",
+            statusPageUrl = "https://www.githubstatus.com",
             keywords = listOf("gh", "github"),
         ),
         CircleCi(
             label = "CircleCI",
             url = "https://status.circleci.com/api/v2/summary.json",
+            statusPageUrl = "https://status.circleci.com",
             keywords = listOf("circle", "circleci"),
         ),
         CloudFlare(
             label = "CloudFlare",
             url = "https://www.cloudflarestatus.com/api/v2/summary.json",
+            statusPageUrl = "https://www.cloudflarestatus.com",
             keywords = listOf("cf", "cloudflare"),
         ),
     }
@@ -44,6 +52,8 @@ class StatusClient(private val networkClient: NetworkClient) {
             if (activeIncidents.isNotEmpty()) {
                 parts.add("Incidents: ${activeIncidents.joinToString(", ")}")
             }
+
+            parts.add(service.statusPageUrl)
 
             return parts.joinToString(" | ")
         }
