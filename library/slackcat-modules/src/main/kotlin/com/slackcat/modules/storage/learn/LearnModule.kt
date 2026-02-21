@@ -59,10 +59,10 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
                 "Cannot learn '${learnRequest.learnKey}' because it conflicts with an existing command " +
                     "from ${conflictingModule::class.java.simpleName}."
             sendMessage(
-                OutgoingChatMessage.ThreadReply(
+                OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
+                    content = textMessage(message),
                     threadId = incomingChatMessage.messageId,
-                    text = message,
                 ),
             )
             return
@@ -79,10 +79,10 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
             }
 
         sendMessage(
-            OutgoingChatMessage.ThreadReply(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
+                content = textMessage(message),
                 threadId = incomingChatMessage.messageId,
-                text = message,
             ),
         )
     }
@@ -115,7 +115,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
         when (isImage) {
             true -> {
                 sendMessage(
-                    OutgoingChatMessage.ChannelMessage(
+                    OutgoingChatMessage(
                         channelId = channelId,
                         content =
                             buildMessage {
@@ -130,7 +130,7 @@ class LearnModule(private var router: com.slackcat.internal.Router? = null) :
 
             false -> {
                 sendMessage(
-                    OutgoingChatMessage.ChannelMessage(
+                    OutgoingChatMessage(
                         channelId = channelId,
                         content = textMessage(learnItem.learnText),
                     ),

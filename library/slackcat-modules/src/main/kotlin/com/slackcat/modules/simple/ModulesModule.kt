@@ -21,7 +21,7 @@ class ModulesModule(
         val modulesList = buildModulesList()
 
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = modulesList,
             ),

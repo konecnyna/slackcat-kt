@@ -25,7 +25,7 @@ class StatusModule(
         val message = response?.toMessage() ?: "Got an error when trying to fetch status..."
 
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(message),
             ),

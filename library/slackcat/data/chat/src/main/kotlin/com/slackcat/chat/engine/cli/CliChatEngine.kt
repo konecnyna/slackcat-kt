@@ -121,10 +121,12 @@ class CliChatEngine(
             println("--------------------------------------")
             println("Outgoing message: channelId=${message.channelId}, botName=$botName, botIcon=$botIcon")
 
+            val plainText = messageConverter.toPlainText(message.content)
             val displayText =
-                when (message) {
-                    is OutgoingChatMessage.ChannelMessage -> messageConverter.toPlainText(message.content)
-                    is OutgoingChatMessage.ThreadReply -> "[Thread ${message.threadId}] ${message.text}"
+                if (message.threadId != null) {
+                    "[Thread ${message.threadId}] $plainText"
+                } else {
+                    plainText
                 }
 
             println("User sees rich text:\n$displayText")
@@ -146,10 +148,12 @@ class CliChatEngine(
             println("--------------------------------------")
             println("Updating message: channelId=$channelId, messageTs=$messageTs, botName=$botName, botIcon=$botIcon")
 
+            val plainText = messageConverter.toPlainText(message.content)
             val displayText =
-                when (message) {
-                    is OutgoingChatMessage.ChannelMessage -> messageConverter.toPlainText(message.content)
-                    is OutgoingChatMessage.ThreadReply -> "[Thread ${message.threadId}] ${message.text}"
+                if (message.threadId != null) {
+                    "[Thread ${message.threadId}] $plainText"
+                } else {
+                    plainText
                 }
 
             println("User sees updated rich text:\n$displayText")

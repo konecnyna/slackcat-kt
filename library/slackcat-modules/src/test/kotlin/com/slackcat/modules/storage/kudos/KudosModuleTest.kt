@@ -138,12 +138,11 @@ class KudosModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
-            sentMessage as OutgoingChatMessage.ThreadReply
+
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-            assertTrue(sentMessage.text.contains("Test User"))
-            assertTrue(sentMessage.text.contains("1 plus"))
+            assertTrue(sentMessage.content.toPlainText().contains("Test User"))
+            assertTrue(sentMessage.content.toPlainText().contains("1 plus"))
         }
 
     @Test
@@ -163,17 +162,19 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
-            sentMessage as OutgoingChatMessage.ThreadReply
+
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
             // Check for pipe separator (indicates multiple users)
-            assertTrue(sentMessage.text.contains(" | "), "Expected pipe separator for multiple users")
+            assertTrue(sentMessage.content.toPlainText().contains(" | "), "Expected pipe separator for multiple users")
 
             // Check both users are mentioned
-            assertTrue(sentMessage.text.contains("Test User"), "Expected Test User to be mentioned")
-            assertTrue(sentMessage.text.contains("Second User"), "Expected Second User to be mentioned")
+            assertTrue(sentMessage.content.toPlainText().contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(
+                sentMessage.content.toPlainText().contains("Second User"),
+                "Expected Second User to be mentioned",
+            )
         }
 
     @Test
@@ -192,10 +193,9 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
-            sentMessage as OutgoingChatMessage.ThreadReply
-            assertTrue(sentMessage.text.contains("Test User"))
-            assertTrue(sentMessage.text.contains("1 plus"))
+
+            assertTrue(sentMessage.content.toPlainText().contains("Test User"))
+            assertTrue(sentMessage.content.toPlainText().contains("1 plus"))
         }
 
     @Test
@@ -215,11 +215,10 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
-            sentMessage as OutgoingChatMessage.ThreadReply
+
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
-            assertTrue(sentMessage.text.contains("You'll go blind doing that!"))
+            assertTrue(sentMessage.content.toPlainText().contains("You'll go blind doing that!"))
         }
 
     @Test
@@ -240,17 +239,19 @@ class KudosModuleTest {
             coVerify(exactly = 1) { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            assertTrue(sentMessage is OutgoingChatMessage.ThreadReply)
-            sentMessage as OutgoingChatMessage.ThreadReply
+
             assertEquals("channel123", sentMessage.channelId)
             assertEquals("msg123", sentMessage.threadId)
 
             // Check for pipe separator (indicates multiple users)
-            assertTrue(sentMessage.text.contains(" | "), "Expected pipe separator for multiple users")
+            assertTrue(sentMessage.content.toPlainText().contains(" | "), "Expected pipe separator for multiple users")
 
             // Check valid users are mentioned (not user123 who tried to plus themselves)
-            assertTrue(sentMessage.text.contains("Test User"), "Expected Test User to be mentioned")
-            assertTrue(sentMessage.text.contains("Second User"), "Expected Second User to be mentioned")
+            assertTrue(sentMessage.content.toPlainText().contains("Test User"), "Expected Test User to be mentioned")
+            assertTrue(
+                sentMessage.content.toPlainText().contains("Second User"),
+                "Expected Second User to be mentioned",
+            )
         }
 
     // Create a test subclass to access protected method

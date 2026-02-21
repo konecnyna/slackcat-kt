@@ -19,7 +19,7 @@ class WeatherModule(
         when (val result = weatherClient.getForecast(incomingChatMessage.userText)) {
             null ->
                 sendMessage(
-                    OutgoingChatMessage.ChannelMessage(
+                    OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
                         content =
                             textMessage(
@@ -34,7 +34,7 @@ class WeatherModule(
             else -> {
                 val botMessage = weatherMessageFactory.makeMessage(result)
                 sendMessage(
-                    OutgoingChatMessage.ChannelMessage(
+                    OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
                         content = textMessage(botMessage),
                     ),

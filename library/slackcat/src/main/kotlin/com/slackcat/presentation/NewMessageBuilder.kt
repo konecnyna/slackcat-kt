@@ -8,56 +8,77 @@ import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
 
 /**
- * Create an outgoing channel message with platform-agnostic format.
+ * Create an outgoing message with platform-agnostic format.
  */
 fun message(
     channelId: String,
     content: BotMessage,
-): OutgoingChatMessage.ChannelMessage {
-    return OutgoingChatMessage.ChannelMessage(
+    threadId: String? = null,
+): OutgoingChatMessage {
+    return OutgoingChatMessage(
         channelId = channelId,
         content = content,
+        threadId = threadId,
     )
 }
 
 /**
- * Create an outgoing channel message using the builder DSL.
+ * Create an outgoing message using the builder DSL.
  */
 fun message(
     channelId: String,
     style: MessageStyle? = null,
+    threadId: String? = null,
     block: MessageBuilder.() -> Unit,
-): OutgoingChatMessage.ChannelMessage {
-    return OutgoingChatMessage.ChannelMessage(
+): OutgoingChatMessage {
+    return OutgoingChatMessage(
         channelId = channelId,
         content = buildMessage(style, block),
+        threadId = threadId,
     )
 }
 
 /**
- * Create a simple text channel message.
+ * Create a simple text message.
  */
 fun textMessage(
     channelId: String,
     text: String,
-): OutgoingChatMessage.ChannelMessage {
-    return OutgoingChatMessage.ChannelMessage(
+    threadId: String? = null,
+): OutgoingChatMessage {
+    return OutgoingChatMessage(
         channelId = channelId,
         content = textMessage(text),
+        threadId = threadId,
     )
 }
 
 /**
- * Create a thread reply with plain text only.
+ * Create a thread reply with plain text.
  */
 fun threadReply(
     channelId: String,
     threadId: String,
     text: String,
-): OutgoingChatMessage.ThreadReply {
-    return OutgoingChatMessage.ThreadReply(
+): OutgoingChatMessage {
+    return OutgoingChatMessage(
         channelId = channelId,
+        content = textMessage(text),
         threadId = threadId,
-        text = text,
+    )
+}
+
+/**
+ * Create a thread reply with rich content.
+ */
+fun threadReply(
+    channelId: String,
+    threadId: String,
+    content: BotMessage,
+): OutgoingChatMessage {
+    return OutgoingChatMessage(
+        channelId = channelId,
+        content = content,
+        threadId = threadId,
     )
 }

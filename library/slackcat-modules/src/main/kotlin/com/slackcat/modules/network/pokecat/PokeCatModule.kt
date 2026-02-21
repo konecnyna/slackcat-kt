@@ -37,7 +37,7 @@ class PokeCatModule(
             return
         }
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = buildPokemonMessage(pokemon),
             ),

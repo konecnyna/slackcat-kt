@@ -20,7 +20,7 @@ class JeopardyAliasHandler(private val jeopardyDAO: JeopardyDAO) {
                 JeopardyAliases.Points -> handlePoints(incomingChatMessage)
             }
 
-        return OutgoingChatMessage.ChannelMessage(
+        return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
             content = message,
         )

@@ -17,6 +17,7 @@ import com.slackcat.modules.simple.FrameModule
 import com.slackcat.modules.simple.ModulesModule
 import com.slackcat.modules.simple.PingModule
 import com.slackcat.modules.simple.ReactionCounterModule
+import com.slackcat.modules.simple.ThreadTestModule
 import com.slackcat.modules.storage.kudos.KudosModule
 import com.slackcat.modules.storage.learn.LearnModule
 import kotlin.reflect.KClass
@@ -41,6 +42,7 @@ object SlackcatModules {
             ModulesModule::class,
             ReactionCounterModule::class,
             ChannelModule::class,
+            ThreadTestModule::class,
             // Storage modules
             KudosModule::class,
             LearnModule::class,
@@ -70,6 +72,7 @@ object SlackcatModules {
             ModulesModule::class,
             ReactionCounterModule::class,
             ChannelModule::class,
+            ThreadTestModule::class,
         )
 
     /**

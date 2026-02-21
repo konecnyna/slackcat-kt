@@ -17,7 +17,7 @@ class DateModule : SlackcatModule() {
         val dateString = dateFormat.format(currentDate)
 
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage("Currently, it's $dateString where I am"),
             ),

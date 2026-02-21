@@ -6,6 +6,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.SlackcatConfig
+import com.slackcat.common.textMessage
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -52,20 +53,13 @@ abstract class SlackcatModule : KoinComponent {
         preserveThreadContext: Boolean = false,
     ): Result<String> {
         val threadId = if (preserveThreadContext) incomingMessage.threadId else null
-        val message: OutgoingChatMessage =
-            if (threadId != null) {
-                OutgoingChatMessage.ThreadReply(
-                    channelId = incomingMessage.channelId,
-                    threadId = threadId,
-                    text = content.toPlainText(),
-                )
-            } else {
-                OutgoingChatMessage.ChannelMessage(
-                    channelId = incomingMessage.channelId,
-                    content = content,
-                )
-            }
-        return sendMessage(message)
+        return sendMessage(
+            OutgoingChatMessage(
+                channelId = incomingMessage.channelId,
+                content = content,
+                threadId = threadId,
+            ),
+        )
     }
 
     /**
@@ -77,10 +71,10 @@ abstract class SlackcatModule : KoinComponent {
     ): Result<String> {
         val threadId = incomingMessage.threadId ?: incomingMessage.messageId
         return sendMessage(
-            OutgoingChatMessage.ThreadReply(
+            OutgoingChatMessage(
                 channelId = incomingMessage.channelId,
+                content = textMessage(text),
                 threadId = threadId,
-                text = text,
             ),
         )
     }
@@ -99,7 +93,7 @@ abstract class SlackcatModule : KoinComponent {
 
     suspend fun postHelpMessage(channelId: String): Result<Unit> {
         return sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = channelId,
                 content = help(),
             ),

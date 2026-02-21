@@ -129,15 +129,8 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     req.apply {
                         channel(message.channelId)
                         username(botName)
-                        when (message) {
-                            is OutgoingChatMessage.ChannelMessage -> {
-                                blocks(messageConverter.toSlackBlocks(message.content))
-                            }
-                            is OutgoingChatMessage.ThreadReply -> {
-                                text(message.text)
-                                threadTs(message.threadId)
-                            }
-                        }
+                        blocks(messageConverter.toSlackBlocks(message.content))
+                        message.threadId?.let { threadTs(it) }
                         when (botIcon) {
                             is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
                             is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
@@ -168,14 +161,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     req.apply {
                         channel(channelId)
                         ts(messageTs)
-                        when (message) {
-                            is OutgoingChatMessage.ChannelMessage -> {
-                                blocks(messageConverter.toSlackBlocks(message.content))
-                            }
-                            is OutgoingChatMessage.ThreadReply -> {
-                                text(message.text)
-                            }
-                        }
+                        blocks(messageConverter.toSlackBlocks(message.content))
                     }
                 }
 

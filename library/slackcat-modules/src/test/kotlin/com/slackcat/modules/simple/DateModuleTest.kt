@@ -115,9 +115,9 @@ class DateModuleTest {
 
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
+
             val hasExpectedText =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("Currently, it's")
                         else -> false
@@ -142,9 +142,9 @@ class DateModuleTest {
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
+
             val hasExpectedText =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text ->
                             element.content.contains("Currently") ||

@@ -13,20 +13,11 @@ data class IncomingChatMessage(
     val userText: String,
 )
 
-sealed class OutgoingChatMessage {
-    abstract val channelId: String
-
-    data class ChannelMessage(
-        override val channelId: String,
-        val content: BotMessage,
-    ) : OutgoingChatMessage()
-
-    data class ThreadReply(
-        override val channelId: String,
-        val threadId: String,
-        val text: String,
-    ) : OutgoingChatMessage()
-}
+data class OutgoingChatMessage(
+    val channelId: String,
+    val content: BotMessage,
+    val threadId: String? = null,
+)
 
 sealed interface BotIcon {
     data class BotEmojiIcon(val emoji: String) : BotIcon

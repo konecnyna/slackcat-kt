@@ -75,7 +75,7 @@ class RadarModule : SlackcatModule() {
                 else -> {
                     // Send DM to user with radar list
                     sendMessage(
-                        OutgoingChatMessage.ChannelMessage(
+                        OutgoingChatMessage(
                             channelId = incomingChatMessage.chatUser.userId,
                             content =
                                 buildMessage {
