@@ -16,7 +16,7 @@ class LearnAliasHandler(private val learnDAO: LearnDAO) {
                 LearnAliases.List -> handleList(incomingChatMessage.userText)
             }
 
-        return OutgoingChatMessage.ChannelMessage(
+        return OutgoingChatMessage(
             channelId = incomingChatMessage.channelId,
             content = textMessage(message),
         )

@@ -14,7 +14,7 @@ class EmojiTextModule : SlackcatModule() {
         val input = parseInput(incomingChatMessage.userText ?: "")
         if (input == null) {
             sendMessage(
-                OutgoingChatMessage.ChannelMessage(
+                OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     content = help(),
                 ),
@@ -25,7 +25,7 @@ class EmojiTextModule : SlackcatModule() {
         val output = renderText(input.letterArray, input.emojiOne, input.emojiTwo)
 
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(output),
             ),

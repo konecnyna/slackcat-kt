@@ -1,120 +1,65 @@
 package com.slackcat.modules.network.status
 
 import com.slackcat.network.NetworkClient
+import com.slackcat.presentation.buildMessage
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class StatusClient(private val networkClient: NetworkClient) {
-    private val json = Json { ignoreUnknownKeys = true }
-
-    enum class Service(val label: String, val url: String, val statusPageUrl: String, val keywords: List<String>) {
-        Slack(
-            label = "Slack",
-            url = "https://status.slack.com/api/v2.0.0/current",
-            statusPageUrl = "https://status.slack.com",
-            keywords = listOf("slack"),
-        ),
+    enum class Service(val label: String, val url: String, val arguments: List<String>) {
+        Slack(label = "Slack", url = "https://status.slack.com/api/v2.0.0/current", arguments = listOf("--slack")),
         Github(
-            label = "GitHub",
-            url = "https://www.githubstatus.com/api/v2/summary.json",
-            statusPageUrl = "https://www.githubstatus.com",
-            keywords = listOf("gh", "github"),
+            label = "Github",
+            url = "https://www.githubstatus.com/api/v2/status.json",
+            arguments = listOf("--gh", "--github"),
         ),
         CircleCi(
-            label = "CircleCI",
-            url = "https://status.circleci.com/api/v2/summary.json",
-            statusPageUrl = "https://status.circleci.com",
-            keywords = listOf("circle", "circleci"),
+            label = "CircleCi",
+            url = "https://status.circleci.com/api/v2/status.json",
+            arguments = listOf("--circle", "--circle-ci"),
         ),
         CloudFlare(
             label = "CloudFlare",
-            url = "https://www.cloudflarestatus.com/api/v2/summary.json",
-            statusPageUrl = "https://www.cloudflarestatus.com",
-            keywords = listOf("cf", "cloudflare"),
+            url = "https://www.cloudflarestatus.com/api/v2/status.json",
+            arguments = listOf("--cf", "--cloud-flare"),
         ),
     }
 
     data class Status(
         val service: Service,
-        val summary: String,
-        val degradedComponents: List<String>,
-        val activeIncidents: List<String>,
+        val status: String,
+        val updatedAt: String,
     ) {
-        fun toMessage(): String {
-            val hasIssues = degradedComponents.isNotEmpty() || activeIncidents.isNotEmpty()
-            val emoji = if (hasIssues) "🔴" else "🟢"
-
-            val parts = mutableListOf<String>()
-            parts.add("$emoji *${service.label}:* $summary")
-
-            if (degradedComponents.isNotEmpty()) {
-                parts.add("⚠️ Issues: ${degradedComponents.joinToString(", ")}")
+        fun toMessage() =
+            buildMessage {
+                text("*${service.label} status:* $status")
             }
-
-            if (activeIncidents.isNotEmpty()) {
-                parts.add("🚨 Incidents: ${activeIncidents.joinToString(", ")}")
-            }
-
-            parts.add(service.statusPageUrl)
-
-            return parts.joinToString("\n")
-        }
     }
 
     suspend fun fetch(service: Service): Status? {
         return runCatching {
             val responseString = networkClient.fetchString(service.url, emptyMap())
             when (service) {
-                Service.Slack -> parseSlackStatus(service, responseString)
-                Service.Github, Service.CircleCi, Service.CloudFlare ->
-                    parsePageStatus(service, responseString)
+                Service.Slack -> {
+                    val slackResponse = Json.decodeFromString(SlackStatusResponse.serializer(), responseString)
+                    Status(
+                        service = service,
+                        status = slackResponse.status,
+                        updatedAt = slackResponse.dateUpdated.toString() ?: "unknown",
+                    )
+                }
+
+                Service.Github, Service.CircleCi, Service.CloudFlare -> {
+                    val githubResponse = Json.decodeFromString(PageStatusResponse.serializer(), responseString)
+                    Status(
+                        service = service,
+                        status = githubResponse.status.description,
+                        updatedAt = githubResponse.page.updatedAt,
+                    )
+                }
             }
         }.getOrNull()
-    }
-
-    private fun parseSlackStatus(
-        service: Service,
-        responseString: String,
-    ): Status {
-        val response = json.decodeFromString(SlackStatusResponse.serializer(), responseString)
-        val incidents =
-            response.activeIncidents
-                ?.filterNotNull()
-                ?.filter { it.isNotBlank() }
-                ?: emptyList()
-
-        return Status(
-            service = service,
-            summary = response.status,
-            degradedComponents = emptyList(),
-            activeIncidents = incidents,
-        )
-    }
-
-    private fun parsePageStatus(
-        service: Service,
-        responseString: String,
-    ): Status {
-        val response = json.decodeFromString(PageSummaryResponse.serializer(), responseString)
-
-        val degraded =
-            response.components
-                .filter { it.status != "operational" && it.showcase }
-                .map { "${it.name}: ${it.status.replace("_", " ")}" }
-
-        val incidents =
-            response.incidents.map { incident ->
-                val status = incident.status.replace("_", " ")
-                "${incident.name} ($status)"
-            }
-
-        return Status(
-            service = service,
-            summary = response.status.description,
-            degradedComponents = degraded,
-            activeIncidents = incidents,
-        )
     }
 }
 
@@ -127,11 +72,9 @@ data class SlackStatusResponse(
 )
 
 @Serializable
-data class PageSummaryResponse(
+data class PageStatusResponse(
     val page: Page,
-    val status: StatusInfo,
-    val components: List<Component> = emptyList(),
-    val incidents: List<Incident> = emptyList(),
+    val status: Status,
 ) {
     @Serializable
     data class Page(
@@ -143,25 +86,8 @@ data class PageSummaryResponse(
     )
 
     @Serializable
-    data class StatusInfo(
+    data class Status(
         val indicator: String,
         val description: String,
-    )
-
-    @Serializable
-    data class Component(
-        val id: String,
-        val name: String,
-        val status: String,
-        val description: String? = null,
-        val showcase: Boolean = false,
-    )
-
-    @Serializable
-    data class Incident(
-        val id: String,
-        val name: String,
-        val status: String,
-        val impact: String,
     )
 }

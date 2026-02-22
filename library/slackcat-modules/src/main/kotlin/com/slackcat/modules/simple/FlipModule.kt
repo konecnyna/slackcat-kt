@@ -46,7 +46,7 @@ class FlipModule : SlackcatModule() {
         // Handle main flip command
         if (incomingChatMessage.userText.isEmpty()) {
             sendMessage(
-                OutgoingChatMessage.ChannelMessage(
+                OutgoingChatMessage(
                     channelId = incomingChatMessage.channelId,
                     content = textMessage("Please provide text to flip. Example: ?flip hello world"),
                 ),
@@ -56,7 +56,7 @@ class FlipModule : SlackcatModule() {
 
         val flippedText = flipText(incomingChatMessage.userText)
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage("(╯°□°）╯︵ ┻━ $flippedText ━┻"),
             ),
@@ -71,7 +71,7 @@ class FlipModule : SlackcatModule() {
             FlipAliases.Unflip -> {
                 if (incomingChatMessage.userText.isEmpty()) {
                     sendMessage(
-                        OutgoingChatMessage.ChannelMessage(
+                        OutgoingChatMessage(
                             channelId = incomingChatMessage.channelId,
                             content = textMessage("Please provide text to unflip. Example: ?unflip plɹoʍ ollǝɥ"),
                         ),
@@ -81,7 +81,7 @@ class FlipModule : SlackcatModule() {
 
                 val unflippedText = unflipText(incomingChatMessage.userText)
                 sendMessage(
-                    OutgoingChatMessage.ChannelMessage(
+                    OutgoingChatMessage(
                         channelId = incomingChatMessage.channelId,
                         content = textMessage("┳━ $unflippedText ━┳ノ( º _ ºノ)"),
                     ),

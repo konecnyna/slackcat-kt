@@ -114,9 +114,8 @@ class PingModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasPong =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("pong")
                         is MessageElement.Heading -> element.content.contains("pong")
@@ -138,9 +137,8 @@ class PingModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasBong =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("bong")
                         is MessageElement.Heading -> element.content.contains("bong")
@@ -162,9 +160,8 @@ class PingModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasDong =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("dong")
                         is MessageElement.Heading -> element.content.contains("dong")
@@ -186,9 +183,8 @@ class PingModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasWrong =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("wrong")
                         is MessageElement.Heading -> element.content.contains("wrong")
@@ -210,9 +206,8 @@ class PingModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasPong =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("pong")
                         is MessageElement.Heading -> element.content.contains("pong")

@@ -117,9 +117,8 @@ class FlipModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             val hasErrorMessage =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("Please provide text to flip")
                         is MessageElement.Heading -> element.content.contains("Please provide text to flip")
@@ -146,10 +145,9 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain the table flip emoticon
             val hasTableFlip =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
                         is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
@@ -160,7 +158,7 @@ class FlipModuleTest {
 
             // Should contain flipped text (ollǝɥ is hello flipped)
             val hasFlippedText =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("ollǝɥ")
                         is MessageElement.Heading -> element.content.contains("ollǝɥ")
@@ -187,10 +185,9 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain flipped text
             val hasTableFlip =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
                         is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
@@ -217,10 +214,9 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain the table flip emoticon and flipped numbers
             val hasTableFlip =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
                         is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
@@ -231,7 +227,7 @@ class FlipModuleTest {
 
             // 123 flipped should be ƐᄅƖ
             val hasFlippedNumbers =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("ƐᄅƖ")
                         is MessageElement.Heading -> element.content.contains("ƐᄅƖ")
@@ -258,10 +254,9 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain flipped text
             val hasTableFlip =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
                         is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")
@@ -272,7 +267,7 @@ class FlipModuleTest {
 
             // ! flipped is ¡
             val hasFlippedExclamation =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("¡")
                         is MessageElement.Heading -> element.content.contains("¡")
@@ -299,10 +294,9 @@ class FlipModuleTest {
 
             val sentMessage = messageSlot.captured
 
-            val channelMessage = sentMessage as OutgoingChatMessage.ChannelMessage
             // Should contain the table flip emoticon
             val hasTableFlip =
-                channelMessage.content.elements.any { element ->
+                sentMessage.content.elements.any { element ->
                     when (element) {
                         is MessageElement.Text -> element.content.contains("(╯°□°）╯︵")
                         is MessageElement.Heading -> element.content.contains("(╯°□°）╯︵")

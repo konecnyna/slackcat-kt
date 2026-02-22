@@ -38,7 +38,7 @@ class JeopardyModule(
         val questionRow = jeopardyDAO.getJeopardyQuestion(value)
         val message = buildJeopardyMessage(questionRow)
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = message,
             ),

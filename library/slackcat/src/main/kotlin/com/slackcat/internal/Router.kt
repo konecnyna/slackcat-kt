@@ -162,7 +162,7 @@ class Router(
                 text("Error: '${exception.message}'")
             }
         feature.sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = incomingMessage.channelId,
                 content = errorMessage,
             ),

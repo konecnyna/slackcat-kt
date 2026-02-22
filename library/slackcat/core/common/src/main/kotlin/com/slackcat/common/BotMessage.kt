@@ -7,18 +7,4 @@ package com.slackcat.common
 data class BotMessage(
     val elements: List<MessageElement>,
     val style: MessageStyle? = null,
-) {
-    fun toPlainText(): String {
-        return elements.joinToString("\n") { element ->
-            when (element) {
-                is MessageElement.Text -> element.content
-                is MessageElement.Heading -> "*${element.content}*"
-                is MessageElement.Image -> "[Image: ${element.altText}]"
-                is MessageElement.Divider -> "---"
-                is MessageElement.KeyValueList ->
-                    element.items.joinToString("\n") { "${it.key}: ${it.value}" }
-                is MessageElement.Context -> element.content
-            }
-        }
-    }
-}
+)

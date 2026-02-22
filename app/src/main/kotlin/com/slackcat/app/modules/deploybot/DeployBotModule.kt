@@ -43,7 +43,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
             }
 
         sendMessage(
-            OutgoingChatMessage.ChannelMessage(
+            OutgoingChatMessage(
                 channelId = BigHipsChannels.SlackcatTesting.channelId,
                 content = textMessage(message),
             ),
