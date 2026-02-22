@@ -88,6 +88,19 @@ class SlackcatBot(
                     return (chatEngine as? SlackChatEngine)?.getMessageText(channelId, messageTs, threadTs)
                         ?: Result.failure(Exception("getMessageText not supported by this chat engine"))
                 }
+
+                override suspend fun getThreadRepliers(
+                    channelId: String,
+                    threadTs: String,
+                ): Result<List<String>> {
+                    return (chatEngine as? SlackChatEngine)?.getThreadRepliers(channelId, threadTs)
+                        ?: Result.failure(Exception("getThreadRepliers not supported by this chat engine"))
+                }
+
+                override suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> {
+                    return (chatEngine as? SlackChatEngine)?.getUserGroupMembers(usergroupId)
+                        ?: Result.failure(Exception("getUserGroupMembers not supported by this chat engine"))
+                }
             }
 
         // Register ChatClient with Koin

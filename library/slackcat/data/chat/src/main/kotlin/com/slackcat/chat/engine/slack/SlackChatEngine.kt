@@ -342,6 +342,58 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
+    suspend fun getThreadRepliers(
+        channelId: String,
+        threadTs: String,
+    ): Result<List<String>> {
+        return try {
+            val userIds = mutableSetOf<String>()
+            var cursor: String? = null
+
+            do {
+                val response =
+                    client.conversationsReplies { req ->
+                        req.channel(channelId)
+                            .ts(threadTs)
+                            .limit(200)
+                        cursor?.let { req.cursor(it) }
+                    }
+
+                if (!response.isOk) {
+                    return Result.failure(Exception("Slack API error: ${response.error}"))
+                }
+
+                response.messages
+                    ?.filter { it.ts != threadTs }
+                    ?.mapNotNull { it.user }
+                    ?.let { userIds.addAll(it) }
+
+                cursor = response.responseMetadata?.nextCursor?.takeIf { it.isNotEmpty() }
+            } while (cursor != null)
+
+            Result.success(userIds.toList())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> {
+        return try {
+            val response =
+                client.usergroupsUsersList { req ->
+                    req.usergroup(usergroupId)
+                }
+
+            if (response.isOk) {
+                Result.success(response.users ?: emptyList())
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun MessageEvent.toDomain(command: String) =
         IncomingChatMessage(
             command = command,
