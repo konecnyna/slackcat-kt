@@ -22,4 +22,12 @@ interface ChatClient {
         messageTs: String,
         threadTs: String? = null,
     ): Result<String> = Result.failure(UnsupportedOperationException("Not supported"))
+
+    suspend fun getThreadRepliers(
+        channelId: String,
+        threadTs: String,
+    ): Result<List<String>> = Result.failure(UnsupportedOperationException("Not supported"))
+
+    suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> =
+        Result.failure(UnsupportedOperationException("Not supported"))
 }
