@@ -39,6 +39,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
                 is SlackcatEvent.ReactionAdded,
                 is SlackcatEvent.ReactionRemoved,
                 is SlackcatEvent.MessageReceived,
+                is SlackcatEvent.BotMessageReceived,
                 -> return
             }
 

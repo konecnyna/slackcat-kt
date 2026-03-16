@@ -29,4 +29,12 @@ sealed interface SlackcatEvent {
         val itemUserId: String?,
         val eventTimestamp: String,
     ) : SlackcatEvent
+
+    data class BotMessageReceived(
+        val botId: String,
+        val channelId: String,
+        val text: String,
+        val timestamp: String,
+        val threadTimestamp: String?,
+    ) : SlackcatEvent
 }

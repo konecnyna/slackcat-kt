@@ -47,6 +47,17 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             val message = payload.event
 
             if (message.botId != null) {
+                globalCoroutineScope.launch {
+                    eventsFlow?.emit(
+                        SlackcatEvent.BotMessageReceived(
+                            botId = message.botId,
+                            channelId = message.channel,
+                            text = message.text,
+                            timestamp = message.ts,
+                            threadTimestamp = message.threadTs,
+                        ),
+                    )
+                }
                 return@event ctx.ack()
             }
             globalCoroutineScope.launch {
