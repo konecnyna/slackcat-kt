@@ -101,6 +101,7 @@ class SlackMessageConverter {
             MessageStyle.ERROR -> "danger"
             MessageStyle.INFO -> "#2196F3"
             MessageStyle.NEUTRAL -> null
+            is MessageStyle.Custom -> style.hexColor
             null -> null
         }
     }

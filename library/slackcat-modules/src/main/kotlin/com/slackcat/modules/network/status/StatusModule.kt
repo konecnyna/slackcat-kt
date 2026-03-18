@@ -1,6 +1,7 @@
 package com.slackcat.modules.network.status
 
 import com.slackcat.chat.models.IncomingChatMessage
+import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
@@ -14,7 +15,7 @@ class StatusModule(
     private val statusClient by lazy { StatusClient(networkClient) }
 
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val statusService = getStatusSource(incomingChatMessage.arguments)
+        val statusService = getStatusSource(incomingChatMessage.arguments, incomingChatMessage.userText)
         if (statusService == null) {
             postHelpMessage(incomingChatMessage.channelId)
             return
@@ -22,36 +23,60 @@ class StatusModule(
 
         val response = statusClient.fetch(statusService)
 
-        val content =
+        val message =
             response?.let {
-                textMessage(response.toMessage())
-            } ?: textMessage("Got en error when trying fetch status...")
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    content = it.toRichMessage(),
+                )
+            } ?: OutgoingChatMessage(
+                channelId = incomingChatMessage.channelId,
+                content = textMessage("Got an error when trying to fetch status..."),
+            )
 
-        sendMessage(
-            incomingMessage = incomingChatMessage,
-            content = content,
-            preserveThreadContext = true,
-        )
+        sendMessage(message)
     }
 
     override fun commandInfo() = CommandInfo(command = "status")
 
     override fun help(): BotMessage =
         buildMessage {
-            heading("StatusModule Help")
-            text("Quickly check slacks status page with ?status command.")
-            text("Usage: ?status --github")
+            heading("Status Module Help")
+            text(
+                buildString {
+                    appendLine("Check the status of various services.")
+                    appendLine("\nUsage:")
+                    appendLine("\u2022 `?status --github` or `?status github`")
+                    appendLine("\u2022 `?status --slack` or `?status slack`")
+                    appendLine("\n*Available services:*")
 
-            val entries =
-                StatusClient.Service.entries
-                    .map { "${it.label} (${it.arguments.joinToString(", ")})" }
-                    .joinToString(", ")
-            text("Availiable services: $entries")
+                    StatusClient.Service.entries.forEach { service ->
+                        val args = service.arguments.joinToString(", ") { "`$it`" }
+                        appendLine("\u2022 *${service.label}*: $args")
+                    }
+                },
+            )
         }
 
-    private fun getStatusSource(arguments: List<String>): StatusClient.Service? {
+    // Supports both --flag and direct text arguments (e.g., both "--github" and "github")
+    private fun getStatusSource(
+        arguments: List<String>,
+        userText: String,
+    ): StatusClient.Service? {
+        val fromArguments =
+            StatusClient.Service.entries.find { service ->
+                service.arguments.any { arg -> arguments.contains(arg) }
+            }
+
+        if (fromArguments != null) {
+            return fromArguments
+        }
+
+        val normalizedText = userText.trim().lowercase()
         return StatusClient.Service.entries.find { service ->
-            service.arguments.any { arg -> arguments.contains(arg) }
+            service.arguments.any { arg ->
+                arg.removePrefix("--").lowercase() == normalizedText
+            }
         }
     }
 }
