@@ -39,67 +39,46 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val cacheTtlMs = 24 * 60 * 60 * 1000L // 24 hours
 
     override fun connect(ready: () -> Unit) {
-        app.event(MessageBotEvent::class.java) { _, ctx ->
-            // No - op. Need to handle it from the logs
+        app.event(MessageBotEvent::class.java) { payload, ctx ->
+            val message = payload.event
+            emitBotMessage(
+                botId = message.botId ?: "",
+                channelId = message.channel,
+                text = message.text ?: "",
+                timestamp = message.ts,
+                threadTimestamp = message.threadTs,
+            )
             ctx.ack()
         }
 
         app.event(MessageEvent::class.java) { payload, ctx ->
             val message = payload.event
-
             if (message.botId != null) {
-                globalCoroutineScope.launch {
-                    eventsFlow?.emit(
-                        SlackcatEvent.BotMessageReceived(
-                            botId = message.botId,
-                            channelId = message.channel,
-                            text = message.text,
-                            timestamp = message.ts,
-                            threadTimestamp = message.threadTs,
-                        ),
-                    )
-                }
+                emitBotMessage(
+                    botId = message.botId,
+                    channelId = message.channel,
+                    text = message.text,
+                    timestamp = message.ts,
+                    threadTimestamp = message.threadTs,
+                )
                 return@event ctx.ack()
             }
-            globalCoroutineScope.launch {
-                // Cache the thread mapping (message_ts -> thread_ts)
-                cacheThreadMapping(message.ts, message.threadTs)
-
-                // Emit ALL messages to event listeners (for features like timeout)
-                eventsFlow?.emit(
-                    SlackcatEvent.MessageReceived(
-                        userId = message.user,
-                        channelId = message.channel,
-                        text = message.text,
-                        timestamp = message.ts,
-                        threadTimestamp = message.threadTs,
-                    ),
-                )
-
-                // Also emit commands to the command flow
-                CommandParser.extractCommand(message.text)?.let {
-                    _messagesFlow.emit(message.toDomain(it))
-                }
-            }
+            handleUserMessage(message)
             ctx.ack()
         }
 
         app.event(ReactionAddedEvent::class.java) { payload, ctx ->
             val event = payload.event
-            globalCoroutineScope.launch {
-                // Resolve thread root: check cache first, then API if needed
+            emitEvent {
                 val threadRoot = resolveThreadRoot(event.item.channel, event.item.ts)
-
-                eventsFlow?.emit(
-                    SlackcatEvent.ReactionAdded(
-                        userId = event.user,
-                        reaction = event.reaction,
-                        channelId = event.item.channel,
-                        messageTimestamp = event.item.ts,
-                        threadTimestamp = threadRoot,
-                        itemUserId = event.itemUser,
-                        eventTimestamp = event.eventTs,
-                    ),
+                SlackcatEvent.ReactionAdded(
+                    userId = event.user,
+                    reaction = event.reaction,
+                    channelId = event.item.channel,
+                    messageTimestamp = event.item.ts,
+                    threadTimestamp = threadRoot,
+                    itemUserId = event.itemUser,
+                    eventTimestamp = event.eventTs,
                 )
             }
             ctx.ack()
@@ -107,16 +86,14 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
         app.event(ReactionRemovedEvent::class.java) { payload, ctx ->
             val event = payload.event
-            globalCoroutineScope.launch {
-                eventsFlow?.emit(
-                    SlackcatEvent.ReactionRemoved(
-                        userId = event.user,
-                        reaction = event.reaction,
-                        channelId = event.item.channel,
-                        messageTimestamp = event.item.ts,
-                        itemUserId = event.itemUser,
-                        eventTimestamp = event.eventTs,
-                    ),
+            emitEvent {
+                SlackcatEvent.ReactionRemoved(
+                    userId = event.user,
+                    reaction = event.reaction,
+                    channelId = event.item.channel,
+                    messageTimestamp = event.item.ts,
+                    itemUserId = event.itemUser,
+                    eventTimestamp = event.eventTs,
                 )
             }
             ctx.ack()
@@ -127,6 +104,50 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             socketModeApp.startAsync()
             delay(2000)
             ready()
+        }
+    }
+
+    private fun emitEvent(block: suspend () -> SlackcatEvent) {
+        globalCoroutineScope.launch {
+            eventsFlow?.emit(block())
+        }
+    }
+
+    private fun emitBotMessage(
+        botId: String,
+        channelId: String,
+        text: String,
+        timestamp: String,
+        threadTimestamp: String?,
+    ) {
+        emitEvent {
+            SlackcatEvent.BotMessageReceived(
+                botId = botId,
+                channelId = channelId,
+                text = text,
+                timestamp = timestamp,
+                threadTimestamp = threadTimestamp,
+            )
+        }
+    }
+
+    private fun handleUserMessage(message: MessageEvent) {
+        globalCoroutineScope.launch {
+            cacheThreadMapping(message.ts, message.threadTs)
+
+            eventsFlow?.emit(
+                SlackcatEvent.MessageReceived(
+                    userId = message.user,
+                    channelId = message.channel,
+                    text = message.text,
+                    timestamp = message.ts,
+                    threadTimestamp = message.threadTs,
+                ),
+            )
+
+            CommandParser.extractCommand(message.text)?.let {
+                _messagesFlow.emit(message.toDomain(it))
+            }
         }
     }
 
