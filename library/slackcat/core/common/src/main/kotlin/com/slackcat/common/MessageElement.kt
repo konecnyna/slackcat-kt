@@ -62,12 +62,18 @@ enum class ImagePlacement {
     THUMBNAIL, // Small thumbnail (as accessory/sidebar)
 }
 
-enum class MessageStyle {
-    INFO,
-    WARNING,
-    ERROR,
-    SUCCESS,
-    NEUTRAL,
+sealed class MessageStyle {
+    data object INFO : MessageStyle()
+
+    data object WARNING : MessageStyle()
+
+    data object ERROR : MessageStyle()
+
+    data object SUCCESS : MessageStyle()
+
+    data object NEUTRAL : MessageStyle()
+
+    data class Custom(val hexColor: String) : MessageStyle()
 }
 
 data class KeyValue(

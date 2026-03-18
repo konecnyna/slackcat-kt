@@ -66,6 +66,7 @@ class CliMessageConverter {
             MessageStyle.ERROR -> "❌ ERROR"
             MessageStyle.INFO -> "ℹ️  INFO"
             MessageStyle.NEUTRAL -> ""
+            is MessageStyle.Custom -> "🎨 ${style.hexColor}"
         }
     }
 }

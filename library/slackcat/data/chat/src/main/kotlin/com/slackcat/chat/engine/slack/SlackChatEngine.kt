@@ -2,6 +2,7 @@ package com.slackcat.chat.engine.slack
 
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
+import com.slack.api.model.Attachment
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageEvent
 import com.slack.api.model.event.ReactionAddedEvent
@@ -136,12 +137,22 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     ): Result<String> {
         return try {
             val messageBlocks = messageConverter.toSlackBlocks(message.content)
+            val color = messageConverter.toColorString(message.content.style)
 
             val response =
                 client.chatPostMessage { req ->
                     req.apply {
                         channel(message.channelId)
-                        blocks(messageBlocks)
+                        if (color != null) {
+                            val attachment =
+                                Attachment.builder()
+                                    .color(color)
+                                    .blocks(messageBlocks)
+                                    .build()
+                            attachments(listOf(attachment))
+                        } else {
+                            blocks(messageBlocks)
+                        }
                         username(botName)
                         message.threadId?.let { threadTs(it) }
                         when (botIcon) {
@@ -170,13 +181,23 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     ): Result<String> {
         return try {
             val messageBlocks = messageConverter.toSlackBlocks(message.content)
+            val color = messageConverter.toColorString(message.content.style)
 
             val response =
                 client.chatUpdate { req ->
                     req.apply {
                         channel(channelId)
                         ts(messageTs)
-                        blocks(messageBlocks)
+                        if (color != null) {
+                            val attachment =
+                                Attachment.builder()
+                                    .color(color)
+                                    .blocks(messageBlocks)
+                                    .build()
+                            attachments(listOf(attachment))
+                        } else {
+                            blocks(messageBlocks)
+                        }
                     }
                 }
 
