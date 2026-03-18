@@ -30,76 +30,50 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val app = App()
     private val client = app.client
     private val messageConverter = SlackMessageConverter()
-
-    // Cache for message_ts -> thread_ts mappings to avoid API calls on reactions
-    // TTL: 24 hours (reactions typically happen on recent messages)
-    private data class ThreadCacheEntry(val threadTs: String?, val timestamp: Long)
-
-    private val threadCache = mutableMapOf<String, ThreadCacheEntry>()
-    private val cacheTtlMs = 24 * 60 * 60 * 1000L // 24 hours
+    private val threadCache = SlackThreadCache(client)
+    private val apiOps = SlackApiOperations(client)
 
     override fun connect(ready: () -> Unit) {
-        app.event(MessageBotEvent::class.java) { _, ctx ->
-            // No - op. Need to handle it from the logs
+        app.event(MessageBotEvent::class.java) { payload, ctx ->
+            val message = payload.event
+            emitBotMessage(
+                botId = message.botId ?: "",
+                channelId = message.channel,
+                text = message.text ?: "",
+                timestamp = message.ts,
+                threadTimestamp = message.threadTs,
+            )
             ctx.ack()
         }
 
         app.event(MessageEvent::class.java) { payload, ctx ->
             val message = payload.event
-
             if (message.botId != null) {
-                globalCoroutineScope.launch {
-                    eventsFlow?.emit(
-                        SlackcatEvent.BotMessageReceived(
-                            botId = message.botId,
-                            channelId = message.channel,
-                            text = message.text,
-                            timestamp = message.ts,
-                            threadTimestamp = message.threadTs,
-                        ),
-                    )
-                }
+                emitBotMessage(
+                    botId = message.botId,
+                    channelId = message.channel,
+                    text = message.text,
+                    timestamp = message.ts,
+                    threadTimestamp = message.threadTs,
+                )
                 return@event ctx.ack()
             }
-            globalCoroutineScope.launch {
-                // Cache the thread mapping (message_ts -> thread_ts)
-                cacheThreadMapping(message.ts, message.threadTs)
-
-                // Emit ALL messages to event listeners (for features like timeout)
-                eventsFlow?.emit(
-                    SlackcatEvent.MessageReceived(
-                        userId = message.user,
-                        channelId = message.channel,
-                        text = message.text,
-                        timestamp = message.ts,
-                        threadTimestamp = message.threadTs,
-                    ),
-                )
-
-                // Also emit commands to the command flow
-                CommandParser.extractCommand(message.text)?.let {
-                    _messagesFlow.emit(message.toDomain(it))
-                }
-            }
+            handleUserMessage(message)
             ctx.ack()
         }
 
         app.event(ReactionAddedEvent::class.java) { payload, ctx ->
             val event = payload.event
-            globalCoroutineScope.launch {
-                // Resolve thread root: check cache first, then API if needed
-                val threadRoot = resolveThreadRoot(event.item.channel, event.item.ts)
-
-                eventsFlow?.emit(
-                    SlackcatEvent.ReactionAdded(
-                        userId = event.user,
-                        reaction = event.reaction,
-                        channelId = event.item.channel,
-                        messageTimestamp = event.item.ts,
-                        threadTimestamp = threadRoot,
-                        itemUserId = event.itemUser,
-                        eventTimestamp = event.eventTs,
-                    ),
+            emitEvent {
+                val threadRoot = threadCache.resolveThreadRoot(event.item.channel, event.item.ts)
+                SlackcatEvent.ReactionAdded(
+                    userId = event.user,
+                    reaction = event.reaction,
+                    channelId = event.item.channel,
+                    messageTimestamp = event.item.ts,
+                    threadTimestamp = threadRoot,
+                    itemUserId = event.itemUser,
+                    eventTimestamp = event.eventTs,
                 )
             }
             ctx.ack()
@@ -107,16 +81,14 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
         app.event(ReactionRemovedEvent::class.java) { payload, ctx ->
             val event = payload.event
-            globalCoroutineScope.launch {
-                eventsFlow?.emit(
-                    SlackcatEvent.ReactionRemoved(
-                        userId = event.user,
-                        reaction = event.reaction,
-                        channelId = event.item.channel,
-                        messageTimestamp = event.item.ts,
-                        itemUserId = event.itemUser,
-                        eventTimestamp = event.eventTs,
-                    ),
+            emitEvent {
+                SlackcatEvent.ReactionRemoved(
+                    userId = event.user,
+                    reaction = event.reaction,
+                    channelId = event.item.channel,
+                    messageTimestamp = event.item.ts,
+                    itemUserId = event.itemUser,
+                    eventTimestamp = event.eventTs,
                 )
             }
             ctx.ack()
@@ -127,6 +99,50 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             socketModeApp.startAsync()
             delay(2000)
             ready()
+        }
+    }
+
+    private fun emitEvent(block: suspend () -> SlackcatEvent) {
+        globalCoroutineScope.launch {
+            eventsFlow?.emit(block())
+        }
+    }
+
+    private fun emitBotMessage(
+        botId: String,
+        channelId: String,
+        text: String,
+        timestamp: String,
+        threadTimestamp: String?,
+    ) {
+        emitEvent {
+            SlackcatEvent.BotMessageReceived(
+                botId = botId,
+                channelId = channelId,
+                text = text,
+                timestamp = timestamp,
+                threadTimestamp = threadTimestamp,
+            )
+        }
+    }
+
+    private fun handleUserMessage(message: MessageEvent) {
+        globalCoroutineScope.launch {
+            threadCache.cacheThreadMapping(message.ts, message.threadTs)
+
+            eventsFlow?.emit(
+                SlackcatEvent.MessageReceived(
+                    userId = message.user,
+                    channelId = message.channel,
+                    text = message.text,
+                    timestamp = message.ts,
+                    threadTimestamp = message.threadTs,
+                ),
+            )
+
+            CommandParser.extractCommand(message.text)?.let {
+                _messagesFlow.emit(message.toDomain(it))
+            }
         }
     }
 
@@ -230,7 +246,6 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     override fun provideEngineName(): String = "SlackRTM"
 
     override fun capabilities(): Set<ChatCapability> {
-        // Slack supports almost all capabilities
         return setOf(
             ChatCapability.RICH_FORMATTING,
             ChatCapability.IMAGES,
@@ -254,177 +269,16 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         channelId: String,
         messageTs: String,
         threadTs: String?,
-    ): Result<String> {
-        return try {
-            if (threadTs != null) {
-                val response =
-                    client.conversationsReplies { req ->
-                        req.channel(channelId)
-                            .ts(threadTs)
-                            .latest(messageTs)
-                            .inclusive(true)
-                            .limit(1)
-                    }
-                if (response.isOk && response.messages.isNotEmpty()) {
-                    val message =
-                        response.messages.find { it.ts == messageTs }
-                            ?: response.messages[0]
-                    Result.success(message.text ?: "")
-                } else {
-                    Result.failure(Exception("Failed to fetch message: ${response.error}"))
-                }
-            } else {
-                val response =
-                    client.conversationsHistory { req ->
-                        req.channel(channelId)
-                            .latest(messageTs)
-                            .inclusive(true)
-                            .limit(1)
-                    }
-                if (response.isOk && response.messages.isNotEmpty()) {
-                    val message =
-                        response.messages.find { it.ts == messageTs }
-                            ?: response.messages[0]
-                    Result.success(message.text ?: "")
-                } else {
-                    Result.failure(Exception("Failed to fetch message: ${response.error}"))
-                }
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    ): Result<String> = apiOps.getMessageText(channelId, messageTs, threadTs)
 
-    suspend fun getUserDisplayName(userId: String): Result<String> {
-        return try {
-            val response =
-                client.usersInfo { req ->
-                    req.user(userId)
-                }
-
-            if (response.isOk && response.user != null) {
-                val displayName =
-                    response.user.profile?.displayName?.takeIf { it.isNotBlank() }
-                        ?: response.user.realName
-                        ?: response.user.name
-                        ?: userId
-                Result.success(displayName)
-            } else {
-                Result.failure(Exception("Failed to fetch user info: ${response.error}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    /**
-     * Cache thread mapping with TTL cleanup
-     */
-    private fun cacheThreadMapping(
-        messageTs: String,
-        threadTs: String?,
-    ) {
-        val now = System.currentTimeMillis()
-        threadCache[messageTs] = ThreadCacheEntry(threadTs, now)
-
-        // Cleanup expired entries (older than TTL)
-        threadCache.entries.removeIf { (_, entry) ->
-            now - entry.timestamp > cacheTtlMs
-        }
-    }
-
-    /**
-     * Resolve thread root for a message, checking cache first, then API
-     * Returns the thread root timestamp, or null if it's a top-level message
-     */
-    private suspend fun resolveThreadRoot(
-        channelId: String,
-        messageTs: String,
-    ): String? {
-        // Check cache first
-        val cached = threadCache[messageTs]
-        if (cached != null) {
-            return cached.threadTs
-        }
-
-        // Cache miss - fetch from API
-        return try {
-            val response =
-                client.conversationsHistory { req ->
-                    req.channel(channelId)
-                        .latest(messageTs)
-                        .inclusive(true)
-                        .limit(1)
-                }
-
-            if (response.isOk && response.messages.isNotEmpty()) {
-                val message = response.messages[0]
-                val threadTs = message.threadTs
-
-                // Cache the result for future lookups
-                cacheThreadMapping(messageTs, threadTs)
-
-                threadTs
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            println("[SlackChatEngine] Failed to fetch thread info for $messageTs: ${e.message}")
-            null
-        }
-    }
+    suspend fun getUserDisplayName(userId: String): Result<String> = apiOps.getUserDisplayName(userId)
 
     suspend fun getThreadRepliers(
         channelId: String,
         threadTs: String,
-    ): Result<List<String>> {
-        return try {
-            val userIds = mutableSetOf<String>()
-            var cursor: String? = null
+    ): Result<List<String>> = apiOps.getThreadRepliers(channelId, threadTs)
 
-            do {
-                val response =
-                    client.conversationsReplies { req ->
-                        req.channel(channelId)
-                            .ts(threadTs)
-                            .limit(200)
-                        cursor?.let { req.cursor(it) }
-                    }
-
-                if (!response.isOk) {
-                    return Result.failure(Exception("Slack API error: ${response.error}"))
-                }
-
-                response.messages
-                    ?.filter { it.ts != threadTs }
-                    ?.mapNotNull { it.user }
-                    ?.let { userIds.addAll(it) }
-
-                cursor = response.responseMetadata?.nextCursor?.takeIf { it.isNotEmpty() }
-            } while (cursor != null)
-
-            Result.success(userIds.toList())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> {
-        return try {
-            val response =
-                client.usergroupsUsersList { req ->
-                    req.usergroup(usergroupId)
-                }
-
-            if (response.isOk) {
-                Result.success(response.users ?: emptyList())
-            } else {
-                Result.failure(Exception("Slack API error: ${response.error}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> = apiOps.getUserGroupMembers(usergroupId)
 
     fun MessageEvent.toDomain(command: String) =
         IncomingChatMessage(
