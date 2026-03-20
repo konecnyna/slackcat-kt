@@ -8,21 +8,24 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import javax.sql.DataSource
 
 class DatabaseClient {
+    fun connect(databaseConfig: DataSource) {
+        Database.connect(databaseConfig)
+    }
+
+    fun createTables(storageClients: List<Table>) {
+        transaction {
+            storageClients.forEach { SchemaUtils.create(it) }
+            SchemaUtils.createMissingTablesAndColumns(*storageClients.toTypedArray())
+            runMigrations()
+        }
+    }
+
     fun initialize(
         storageClients: List<Table>,
         databaseConfig: DataSource,
     ) {
-        Database.connect(databaseConfig)
-        transaction {
-            storageClients.forEach { SchemaUtils.create(it) }
-            // SchemaUtils.create() doesn't add missing indexes to existing tables
-            // So we need to use createMissingTablesAndColumns to update schema
-            SchemaUtils.createMissingTablesAndColumns(*storageClients.toTypedArray())
-
-            // Drop legacy unique index that conflicts with current schema
-            // The current design allows multiple messages per thread (different botMessageTs)
-            runMigrations()
-        }
+        connect(databaseConfig)
+        createTables(storageClients)
     }
 
     private fun runMigrations() {

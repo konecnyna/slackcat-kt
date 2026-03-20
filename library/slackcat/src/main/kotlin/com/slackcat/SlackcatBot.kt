@@ -39,8 +39,9 @@ class SlackcatBot(
     val eventsFlow = events.asSharedFlow()
 
     fun start(args: String?) {
+        connectDatabase(databaseConfig)
         val modules = setupChatModule(args)
-        connectDatabase(modules, databaseConfig)
+        createDatabaseTables(modules)
         observeRealTimeMessages()
     }
 
@@ -184,17 +185,18 @@ class SlackcatBot(
         return slackcatModules
     }
 
-    private fun connectDatabase(
-        modules: List<SlackcatModule>,
-        databaseConfig: DataSource,
-    ) {
+    private fun connectDatabase(databaseConfig: DataSource) {
+        DatabaseGraph.connectDatabase(databaseConfig)
+    }
+
+    private fun createDatabaseTables(modules: List<SlackcatModule>) {
         val databaseFeatures: List<StorageModule> =
             modules
                 .filter { it is StorageModule }
                 .map { it as StorageModule }
         val databaseTables = databaseFeatures.map { it.tables() }.flatMap { it }
         println(databaseTables)
-        DatabaseGraph.connectDatabase(databaseTables, databaseConfig)
+        DatabaseGraph.createTables(databaseTables)
     }
 
     private fun observeRealTimeMessages() {
