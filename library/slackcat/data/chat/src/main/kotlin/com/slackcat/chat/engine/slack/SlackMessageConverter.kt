@@ -96,9 +96,9 @@ class SlackMessageConverter {
      */
     fun toColorString(style: MessageStyle?): String? {
         return when (style) {
-            MessageStyle.SUCCESS -> "good"
-            MessageStyle.WARNING -> "warning"
-            MessageStyle.ERROR -> "danger"
+            MessageStyle.SUCCESS -> "#4CAF50"
+            MessageStyle.WARNING -> "#FFC107"
+            MessageStyle.ERROR -> "#F44336"
             MessageStyle.INFO -> "#2196F3"
             MessageStyle.NEUTRAL -> null
             is MessageStyle.Custom -> style.hexColor
