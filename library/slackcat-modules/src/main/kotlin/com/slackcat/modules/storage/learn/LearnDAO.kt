@@ -29,6 +29,10 @@ class LearnDAO {
         val learnKey = text("learn_key")
         val learnText = text("learn_text")
         override val primaryKey = PrimaryKey(id)
+
+        init {
+            index(isUnique = false, learnKey)
+        }
     }
 
     suspend fun getLearn(
