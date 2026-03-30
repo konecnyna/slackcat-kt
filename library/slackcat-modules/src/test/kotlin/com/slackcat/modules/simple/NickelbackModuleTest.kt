@@ -22,8 +22,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
-class FrameModuleTest {
-    private lateinit var frameModule: FrameModule
+class NickelbackModuleTest {
+    private lateinit var nickelbackModule: NickelbackModule
     private lateinit var mockChatClient: ChatClient
     private lateinit var mockCoroutineScope: CoroutineScope
     private lateinit var mockConfig: SlackcatConfig
@@ -48,7 +48,7 @@ class FrameModuleTest {
             )
         }
 
-        frameModule = FrameModule()
+        nickelbackModule = NickelbackModule()
     }
 
     @AfterEach
@@ -73,26 +73,25 @@ class FrameModuleTest {
 
     @Test
     fun `provideCommand returns nickelback`() {
-        assertEquals("nickelback", frameModule.commandInfo().command)
+        assertEquals("nickelback", nickelbackModule.commandInfo().command)
     }
 
     @Test
     fun `aliases returns correct list`() {
-        val aliases = frameModule.commandInfo().aliases
+        val aliases = nickelbackModule.commandInfo().aliases
         assertEquals(1, aliases.size)
         assertTrue(aliases.contains("krang"))
     }
 
     @Test
     fun `help returns non-empty string`() {
-        val helpMessage = frameModule.help()
+        val helpMessage = nickelbackModule.help()
         assertTrue(helpMessage.elements.isNotEmpty())
-        // Check that help message contains heading or text with the expected content
         val hasExpectedContent =
             helpMessage.elements.any { element ->
                 when (element) {
-                    is MessageElement.Heading -> element.content.contains("Frame Help")
-                    is MessageElement.Text -> element.content.contains("Frame Help")
+                    is MessageElement.Heading -> element.content.contains("Nickelback Help")
+                    is MessageElement.Text -> element.content.contains("Nickelback Help")
                     else -> false
                 }
             }
@@ -105,7 +104,7 @@ class FrameModuleTest {
             val testUrl = "https://example.com/image.jpg"
             val incomingMessage = createTestMessage("nickelback", testUrl)
 
-            frameModule.onInvoke(incomingMessage)
+            nickelbackModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
@@ -113,7 +112,6 @@ class FrameModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            // The message should contain the framed image URL
             val hasFramedImageUrl =
                 sentMessage.content.elements.any { element ->
                     when (element) {
@@ -130,7 +128,7 @@ class FrameModuleTest {
             val testUrl = "https://example.com/image.jpg"
             val incomingMessage = createTestMessage("krang", testUrl)
 
-            frameModule.onInvoke(incomingMessage)
+            nickelbackModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
@@ -138,7 +136,6 @@ class FrameModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
 
-            // The message should contain the framed image URL
             val hasFramedImageUrl =
                 sentMessage.content.elements.any { element ->
                     when (element) {
@@ -155,14 +152,13 @@ class FrameModuleTest {
             val testUrl = "<https://example.com/image.jpg>"
             val incomingMessage = createTestMessage("nickelback", testUrl)
 
-            frameModule.onInvoke(incomingMessage)
+            nickelbackModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
 
             val sentMessage = messageSlot.captured
 
-            // Should contain the URL without angle brackets
             val hasCleanUrl =
                 sentMessage.content.elements.any { element ->
                     when (element) {
@@ -183,9 +179,8 @@ class FrameModuleTest {
                     arguments = emptyList(),
                 )
 
-            frameModule.onInvoke(incomingMessage)
+            nickelbackModule.onInvoke(incomingMessage)
 
-            // Should send help message when command is not recognized
             coVerify { mockChatClient.sendMessage(any(), any(), any()) }
         }
 
@@ -199,7 +194,7 @@ class FrameModuleTest {
                     arguments = emptyList(),
                 )
 
-            frameModule.onInvoke(incomingMessage)
+            nickelbackModule.onInvoke(incomingMessage)
 
             val messageSlot = slot<OutgoingChatMessage>()
             coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
