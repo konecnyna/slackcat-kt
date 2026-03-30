@@ -1,0 +1,99 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment_type:
+        description: 'Version increment type after deploy'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current version
+        id: get_version
+        run: |
+          MAJOR=$(grep "const val MAJOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/')
+          MINOR=$(grep "const val MINOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/')
+          PATCH=$(grep "const val PATCH" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/')
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: |
+            APP_VERSION=${{ steps.get_version.outputs.version }}
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository }}:latest
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Release v${{ steps.get_version.outputs.version }}
+          body: |
+            Release v${{ steps.get_version.outputs.version }}
+
+            ## Changes
+            See commit history for details.
+          draft: false
+          prerelease: false
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          chmod +x ./scripts/increment-version.sh
+          ./scripts/increment-version.sh ${{ github.event.inputs.increment_type }}
+          NEW_VERSION=$(grep "const val MAJOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/').$(grep "const val MINOR" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/').$(grep "const val PATCH" buildSrc/src/main/kotlin/AppVersion.kt | sed 's/.*= \([0-9]*\).*/\1/')
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Commit and push version bump
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add buildSrc/src/main/kotlin/AppVersion.kt
+          git commit -m "Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
+          git push origin ${{ github.ref_name }}
+
+      - name: Summary
+        run: |
+          echo "## Deploy Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployed version: **v${{ steps.get_version.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Docker image: \`ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Next version: **v${{ steps.increment_version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY

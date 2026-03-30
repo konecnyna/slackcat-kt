@@ -41,7 +41,7 @@ dependencies {
 tasks.jar {
     manifest {
         attributes["Main-Class"] = application.mainClass
-        attributes["Implementation-Version"] = "0.0.1" // Change to project version
+        attributes["Implementation-Version"] = AppVersion.versionName
     }
 }
 
@@ -49,7 +49,15 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveBaseName.set("slackcat")
     manifest {
         attributes["Main-Class"] = application.mainClass
-        attributes["Implementation-Version"] = "0.0.1" // Change to project version
+        attributes["Implementation-Version"] = AppVersion.versionName
+    }
+}
+
+tasks.processResources {
+    val versionProps = mapOf("version" to AppVersion.versionName)
+    inputs.properties(versionProps)
+    filesMatching("version.properties") {
+        expand(versionProps)
     }
 }
 

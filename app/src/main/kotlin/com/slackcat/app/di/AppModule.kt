@@ -3,6 +3,7 @@ package com.slackcat.app.di
 import com.slackcat.app.modules.deploybot.DeployBotModule
 import com.slackcat.app.modules.jeopardy.JeopardyModule
 import com.slackcat.app.modules.kudos.CustomKudosModule
+import com.slackcat.app.modules.version.VersionModule
 import com.slackcat.chat.models.BotIcon
 import com.slackcat.common.DatabaseConfig
 import com.slackcat.common.SlackcatAppDefaults
@@ -27,6 +28,7 @@ val appModule =
                     DeployBotModule::class,
                     EmojiTextModule::class,
                     JeopardyModule::class,
+                    VersionModule::class,
                 )
         }
 
