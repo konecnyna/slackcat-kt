@@ -15,6 +15,7 @@ import com.slackcat.modules.simple.EmojiSentenceModule
 import com.slackcat.modules.simple.FlipModule
 import com.slackcat.modules.simple.FrameModule
 import com.slackcat.modules.simple.ModulesModule
+import com.slackcat.modules.simple.NickelbackModule
 import com.slackcat.modules.simple.PingModule
 import com.slackcat.modules.simple.ReactionCounterModule
 import com.slackcat.modules.storage.kudos.KudosModule
@@ -37,6 +38,7 @@ object SlackcatModules {
             FlipModule::class,
             // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
+            NickelbackModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
@@ -66,6 +68,7 @@ object SlackcatModules {
             FlipModule::class,
             // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
+            NickelbackModule::class,
             EmojiSentenceModule::class,
             ModulesModule::class,
             ReactionCounterModule::class,
@@ -82,6 +85,7 @@ object SlackcatModules {
             FlipModule::class,
             // UnflipModule::class,  // Removed - FlipModule handles unflip via alias
             FrameModule::class,
+            NickelbackModule::class,
             EmojiSentenceModule::class,
         )
 
