@@ -59,6 +59,10 @@ class JeopardyDAO(private val networkClient: NetworkClient) {
         val round = text("round")
         val value = text("value")
         override val primaryKey = PrimaryKey(id)
+
+        init {
+            index(isUnique = false, value)
+        }
     }
 
     object JeopardyScoreTable : Table() {
