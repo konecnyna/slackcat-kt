@@ -48,12 +48,6 @@ open class StatusClient(
             statusPageUrl = "https://status.claude.com",
             arguments = listOf("--claude", "--anthropic", "claude", "anthropic"),
         ),
-        Auth0(
-            label = "Auth0",
-            url = "https://status.auth0.com/api/v2/summary.json",
-            statusPageUrl = "https://status.auth0.com",
-            arguments = listOf("--auth0", "auth0"),
-        ),
         OneSignal(
             label = "OneSignal",
             url = "https://status.onesignal.com/api/v2/summary.json",
@@ -143,7 +137,6 @@ open class StatusClient(
                 Service.CircleCi,
                 Service.CloudFlare,
                 Service.Claude,
-                Service.Auth0,
                 Service.OneSignal,
                 -> {
                     val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
@@ -200,7 +193,7 @@ data class PageStatusResponse(
         val id: String,
         val name: String,
         val url: String,
-        @SerialName("time_zone") val timeZone: String,
+        @SerialName("time_zone") val timeZone: String = "Unknown",
         @SerialName("updated_at") val updatedAt: String,
     )
 

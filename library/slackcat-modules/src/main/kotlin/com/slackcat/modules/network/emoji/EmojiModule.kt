@@ -37,7 +37,7 @@ open class EmojiModule(
     override fun commandInfo() =
         CommandInfo(
             command = "emoji",
-            aliases = listOf("et"),
+            aliases = listOf(),
         )
 
     override fun help(): BotMessage =

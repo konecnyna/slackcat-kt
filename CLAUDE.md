@@ -77,3 +77,4 @@ Modules are registered as `KClass` references in `app/di/AppModule.kt`. Start fr
 - **Versioning**: Semver managed in `buildSrc/AppVersion.kt`. CI auto-bumps via `scripts/increment-version.sh`.
 - **CI**: `pr-tests.yml` runs ktlint + tests on PRs. `release-and-publish.yml` publishes to GitHub Packages on manual dispatch.
 - **Extensibility**: All core modules, clients, and data classes in `library/slackcat-modules/` should be `open` so downstream consumers can extend them. This includes module classes, client classes, enums (prefer sealed classes/interfaces over enums when extensibility is needed), and data models.
+- **Always Verify Locally**: After creating or modifying any module, always test it locally using CLI mode before considering the work done. Run `./gradlew :app:run --args="?<command>"` to verify the module responds correctly. For modules without a direct command, run the relevant test suite with `./gradlew test`. Never skip local verification.
