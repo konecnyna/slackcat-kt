@@ -48,6 +48,18 @@ class StatusClient(
             statusPageUrl = "https://status.claude.com",
             arguments = listOf("--claude", "--anthropic", "claude", "anthropic"),
         ),
+        Auth0(
+            label = "Auth0",
+            url = "https://status.auth0.com/api/v2/summary.json",
+            statusPageUrl = "https://status.auth0.com",
+            arguments = listOf("--auth0", "auth0"),
+        ),
+        OneSignal(
+            label = "OneSignal",
+            url = "https://status.onesignal.com/api/v2/summary.json",
+            statusPageUrl = "https://status.onesignal.com",
+            arguments = listOf("--onesignal", "onesignal"),
+        ),
     }
 
     data class Status(
@@ -127,7 +139,7 @@ class StatusClient(
                         updatedAt = slackResponse.dateUpdated ?: "Unknown",
                     )
                 }
-                Service.Github, Service.CircleCi, Service.CloudFlare, Service.Claude -> {
+                Service.Github, Service.CircleCi, Service.CloudFlare, Service.Claude, Service.Auth0, Service.OneSignal -> {
                     val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
                     Status(
                         service = service,
