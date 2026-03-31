@@ -4,7 +4,7 @@ import com.slackcat.network.NetworkClient
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
-class CryptoPriceClient(private val networkClient: NetworkClient) {
+open class CryptoPriceClient(private val networkClient: NetworkClient) {
     private val priceCache = mutableMapOf<String, CryptoPrice>()
 
     suspend fun getPrice(ticker: String): CryptoPrice? {

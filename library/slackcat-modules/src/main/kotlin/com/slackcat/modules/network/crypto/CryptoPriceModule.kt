@@ -11,7 +11,7 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import java.text.DecimalFormat
 
-class CryptoPriceModule(
+open class CryptoPriceModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val cryptoPriceClient by lazy { CryptoPriceClient(networkClient) }

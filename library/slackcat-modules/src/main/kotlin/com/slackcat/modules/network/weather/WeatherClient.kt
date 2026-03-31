@@ -2,7 +2,7 @@ package com.slackcat.modules.network.weather
 
 import com.slackcat.network.NetworkClient
 
-class WeatherClient(private val networkClient: NetworkClient) {
+open class WeatherClient(private val networkClient: NetworkClient) {
     private val zipToLocationDataCache = mutableMapOf<String, LocationData>()
 
     suspend fun getForecast(zipCode: String): CurrentForecast? {

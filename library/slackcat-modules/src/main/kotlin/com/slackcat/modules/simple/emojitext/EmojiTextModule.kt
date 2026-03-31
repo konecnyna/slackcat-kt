@@ -9,7 +9,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import emojiDictionary
 
-class EmojiTextModule : SlackcatModule() {
+open class EmojiTextModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val input = parseInput(incomingChatMessage.userText ?: "")
         if (input == null) {
@@ -82,7 +82,7 @@ class EmojiTextModule : SlackcatModule() {
         dictionary: Map<String, String>,
     ): String {
         // Get letter pattern from dictionary or default to space
-        return dictionary[letter] ?: dictionary["space"] ?: ""
+        return (dictionary[letter] ?: dictionary["space"] ?: "").trimIndent()
     }
 
     private fun mergeLines(

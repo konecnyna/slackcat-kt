@@ -1,6 +1,6 @@
 package com.slackcat.modules.network.weather
 
-class WeatherMessageFactory {
+open class WeatherMessageFactory {
     fun makeMessage(forecast: CurrentForecast): String {
         return formatForecastAsMarkdown(forecast)
     }

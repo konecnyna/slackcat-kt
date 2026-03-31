@@ -9,7 +9,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 
-class StatusModule(
+open class StatusModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val statusClient by lazy { StatusClient(networkClient) }

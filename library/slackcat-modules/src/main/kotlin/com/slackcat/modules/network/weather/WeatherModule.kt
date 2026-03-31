@@ -9,7 +9,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 
-class WeatherModule(
+open class WeatherModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val weatherClient by lazy { WeatherClient(networkClient) }

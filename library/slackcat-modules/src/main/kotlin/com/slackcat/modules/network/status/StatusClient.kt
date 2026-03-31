@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-class StatusClient(
+open class StatusClient(
     private val networkClient: NetworkClient,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -47,6 +47,18 @@ class StatusClient(
             url = "https://status.claude.com/api/v2/summary.json",
             statusPageUrl = "https://status.claude.com",
             arguments = listOf("--claude", "--anthropic", "claude", "anthropic"),
+        ),
+        Auth0(
+            label = "Auth0",
+            url = "https://status.auth0.com/api/v2/summary.json",
+            statusPageUrl = "https://status.auth0.com",
+            arguments = listOf("--auth0", "auth0"),
+        ),
+        OneSignal(
+            label = "OneSignal",
+            url = "https://status.onesignal.com/api/v2/summary.json",
+            statusPageUrl = "https://status.onesignal.com",
+            arguments = listOf("--onesignal", "onesignal"),
         ),
     }
 
@@ -127,7 +139,13 @@ class StatusClient(
                         updatedAt = slackResponse.dateUpdated ?: "Unknown",
                     )
                 }
-                Service.Github, Service.CircleCi, Service.CloudFlare, Service.Claude -> {
+                Service.Github,
+                Service.CircleCi,
+                Service.CloudFlare,
+                Service.Claude,
+                Service.Auth0,
+                Service.OneSignal,
+                -> {
                     val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
                     Status(
                         service = service,

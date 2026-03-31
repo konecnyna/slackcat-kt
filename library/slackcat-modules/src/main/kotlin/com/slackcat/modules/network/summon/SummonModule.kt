@@ -9,7 +9,7 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 import kotlin.random.Random
 
-class SummonModule(
+open class SummonModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val summonClient by lazy { SummonClient(networkClient) }

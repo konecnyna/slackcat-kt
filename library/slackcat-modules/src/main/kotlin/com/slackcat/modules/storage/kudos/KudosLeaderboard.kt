@@ -5,7 +5,7 @@ import com.slackcat.common.BotMessage
 import com.slackcat.common.MessageStyle
 import com.slackcat.common.buildMessage
 
-class KudosLeaderboard(
+open class KudosLeaderboard(
     private val kudosDAO: KudosDAO,
     private val chatClient: ChatClient,
 ) {

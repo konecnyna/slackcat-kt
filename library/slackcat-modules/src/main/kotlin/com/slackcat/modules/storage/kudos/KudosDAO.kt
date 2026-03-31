@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 
-class KudosDAO(
+open class KudosDAO(
     private val spamProtectionEnabled: Boolean = true,
 ) {
     companion object {

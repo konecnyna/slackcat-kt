@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
-class TranslateModule(
+open class TranslateModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val json = Json { ignoreUnknownKeys = true }

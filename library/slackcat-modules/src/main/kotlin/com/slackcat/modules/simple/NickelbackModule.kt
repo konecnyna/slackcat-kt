@@ -7,7 +7,7 @@ import com.slackcat.common.buildMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class NickelbackModule : SlackcatModule() {
+open class NickelbackModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val inputUrl = incomingChatMessage.userText.replace("<", "").replace(">", "")
         val imageUrl =

@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.net.URLEncoder
 import java.util.regex.Pattern
 
-class SummonClient(private val networkClient: NetworkClient) {
+open class SummonClient(private val networkClient: NetworkClient) {
     private val baseUrl = "https://duckduckgo.com"
     private val headers =
         mapOf(

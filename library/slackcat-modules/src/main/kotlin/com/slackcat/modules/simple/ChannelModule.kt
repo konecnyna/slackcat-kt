@@ -8,7 +8,7 @@ import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class ChannelModule : SlackcatModule() {
+open class ChannelModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         sendMessage(
             OutgoingChatMessage(

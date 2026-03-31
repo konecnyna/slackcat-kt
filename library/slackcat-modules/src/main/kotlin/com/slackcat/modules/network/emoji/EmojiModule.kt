@@ -8,7 +8,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import com.slackcat.network.NetworkClient
 
-class EmojiModule(
+open class EmojiModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     private val emojiClient by lazy { EmojiClient(networkClient) }

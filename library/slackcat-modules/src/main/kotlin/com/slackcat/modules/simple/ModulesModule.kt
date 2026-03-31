@@ -14,7 +14,7 @@ import com.slackcat.models.SlackcatModule
  *
  * Queries the Router at runtime to get the current list of active modules.
  */
-class ModulesModule(
+open class ModulesModule(
     private val router: Router,
 ) : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {

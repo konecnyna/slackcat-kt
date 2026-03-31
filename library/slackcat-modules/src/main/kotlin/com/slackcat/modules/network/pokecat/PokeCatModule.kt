@@ -10,7 +10,7 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.modules.PokemonData
 import com.slackcat.network.NetworkClient
 
-class PokeCatModule(
+open class PokeCatModule(
     private val networkClient: NetworkClient,
 ) : SlackcatModule() {
     val baseurl = "https://pokeapi.co/api/v2/pokemon"

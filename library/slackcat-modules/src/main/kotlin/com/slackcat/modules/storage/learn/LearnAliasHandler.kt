@@ -4,7 +4,7 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.textMessage
 
-class LearnAliasHandler(private val learnDAO: LearnDAO) {
+open class LearnAliasHandler(private val learnDAO: LearnDAO) {
     suspend fun handleAliases(incomingChatMessage: IncomingChatMessage): OutgoingChatMessage? {
         val alias =
             LearnAliases.fromAlias(incomingChatMessage.command)

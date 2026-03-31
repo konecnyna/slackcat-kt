@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Example module that demonstrates reaction event handling.
  * This module tracks how many times specific reactions have been added across all messages.
  */
-class ReactionCounterModule : SlackcatModule() {
+open class ReactionCounterModule : SlackcatModule() {
     // Thread-safe map to store reaction counts
     private val reactionCounts = ConcurrentHashMap<String, Int>()
 
