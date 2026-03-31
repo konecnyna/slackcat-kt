@@ -118,7 +118,7 @@ open class EmojiTextModule : SlackcatModule() {
         }
     }
 
-    override fun commandInfo() = CommandInfo(command = "emoji-text")
+    override fun commandInfo() = CommandInfo(command = "emoji-text", aliases = listOf("et"))
 
     override fun help(): BotMessage =
         buildMessage {
