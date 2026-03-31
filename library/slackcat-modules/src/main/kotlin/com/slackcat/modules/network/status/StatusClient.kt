@@ -139,7 +139,13 @@ open class StatusClient(
                         updatedAt = slackResponse.dateUpdated ?: "Unknown",
                     )
                 }
-                Service.Github, Service.CircleCi, Service.CloudFlare, Service.Claude, Service.Auth0, Service.OneSignal -> {
+                Service.Github,
+                Service.CircleCi,
+                Service.CloudFlare,
+                Service.Claude,
+                Service.Auth0,
+                Service.OneSignal,
+                -> {
                     val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
                     Status(
                         service = service,
