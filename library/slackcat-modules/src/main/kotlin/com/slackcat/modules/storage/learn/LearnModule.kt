@@ -11,7 +11,7 @@ import com.slackcat.models.SlackcatModule
 import com.slackcat.models.StorageModule
 import com.slackcat.models.UnhandledCommandModule
 
-class LearnModule(private var router: com.slackcat.internal.Router? = null) :
+open class LearnModule(private var router: com.slackcat.internal.Router? = null) :
     SlackcatModule(),
     StorageModule,
     UnhandledCommandModule {

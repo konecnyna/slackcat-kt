@@ -9,7 +9,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import emojiDictionary
 
-class EmojiTextModule : SlackcatModule() {
+open class EmojiTextModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val input = parseInput(incomingChatMessage.userText ?: "")
         if (input == null) {

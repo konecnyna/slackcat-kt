@@ -7,7 +7,7 @@ import com.slackcat.common.buildMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class RadarModule : SlackcatModule() {
+open class RadarModule : SlackcatModule() {
     private val radars =
         listOf(
             Radar("bfl", "CA", "CA - Bakersfield"),

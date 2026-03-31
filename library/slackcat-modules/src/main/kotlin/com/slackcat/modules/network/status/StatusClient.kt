@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-class StatusClient(
+open class StatusClient(
     private val networkClient: NetworkClient,
 ) {
     private val json = Json { ignoreUnknownKeys = true }

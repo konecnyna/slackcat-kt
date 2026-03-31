@@ -9,7 +9,7 @@ import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import kotlin.random.Random
 
-class EmojiSentenceModule : SlackcatModule() {
+open class EmojiSentenceModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val text = incomingChatMessage.userText
         val outgoingText = convertString(text)

@@ -2,7 +2,7 @@ package com.slackcat.modules.storage.learn
 
 import com.slackcat.chat.models.IncomingChatMessage
 
-class LearnFactory {
+open class LearnFactory {
     fun makeLearnRequest(incomingChatMessage: IncomingChatMessage): LearnInsertRow? {
         if (incomingChatMessage.userText.isEmpty()) return null
         val userText = incomingChatMessage.userText

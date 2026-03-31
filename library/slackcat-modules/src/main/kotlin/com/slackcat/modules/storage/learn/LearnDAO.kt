@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import kotlin.random.Random
 
-class LearnDAO {
+open class LearnDAO {
     companion object {
         /**
          * Returns the database tables wrapped to hide Exposed implementation.

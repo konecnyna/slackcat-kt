@@ -8,7 +8,7 @@ import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class PingModule : SlackcatModule() {
+open class PingModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val text =
             when (incomingChatMessage.command) {

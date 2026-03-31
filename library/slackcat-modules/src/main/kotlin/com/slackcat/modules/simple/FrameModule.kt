@@ -8,7 +8,7 @@ import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class FrameModule : SlackcatModule() {
+open class FrameModule : SlackcatModule() {
     companion object {
         private const val MAX_EMOJIS = 100
         private val EMOJI_REGEX = Regex(":[a-zA-Z0-9_+\\-]+:")

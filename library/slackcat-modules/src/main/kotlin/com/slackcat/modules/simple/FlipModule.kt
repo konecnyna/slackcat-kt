@@ -8,7 +8,7 @@ import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
-class FlipModule : SlackcatModule() {
+open class FlipModule : SlackcatModule() {
     private val flipMap =
         mapOf(
             // Lowercase letters
