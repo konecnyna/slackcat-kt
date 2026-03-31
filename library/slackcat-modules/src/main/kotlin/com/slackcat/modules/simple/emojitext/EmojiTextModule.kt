@@ -82,7 +82,7 @@ open class EmojiTextModule : SlackcatModule() {
         dictionary: Map<String, String>,
     ): String {
         // Get letter pattern from dictionary or default to space
-        return dictionary[letter] ?: dictionary["space"] ?: ""
+        return (dictionary[letter] ?: dictionary["space"] ?: "").trimIndent()
     }
 
     private fun mergeLines(
