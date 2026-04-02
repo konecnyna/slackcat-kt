@@ -11,6 +11,7 @@ import emojiDictionary
 open class EmojiTextModule : SlackcatModule() {
     companion object {
         private const val MAX_LETTERS_PER_ROW = 6
+
         // Keep under Slack's 3000 char block limit
         private const val MAX_ROW_CHARS = 2900
     }
