@@ -19,6 +19,9 @@ class SlackMessageConverter {
     companion object {
         // Slack's limit is 3000, use 2900 to leave buffer for formatting characters
         private const val MAX_BLOCK_TEXT_LENGTH = 2900
+        // Limit chunks to prevent spam
+        private const val MAX_CHUNKS = 3
+        private const val TRUNCATION_INDICATOR = "\n\n_[Message truncated]_"
     }
 
     fun toSlackBlocks(message: BotMessage): List<LayoutBlock> {
@@ -53,6 +56,7 @@ class SlackMessageConverter {
     /**
      * Intelligently splits text into chunks that fit within Slack's character limit.
      * Preserves formatting by splitting on paragraph breaks, then line breaks, then word boundaries.
+     * Limits to MAX_CHUNKS blocks to prevent spam, truncating with an indicator if needed.
      */
     private fun chunkText(text: String): List<String> {
         if (text.length <= MAX_BLOCK_TEXT_LENGTH) {
@@ -62,15 +66,28 @@ class SlackMessageConverter {
         val chunks = mutableListOf<String>()
         var remaining = text
 
-        while (remaining.isNotEmpty()) {
-            if (remaining.length <= MAX_BLOCK_TEXT_LENGTH) {
+        while (remaining.isNotEmpty() && chunks.size < MAX_CHUNKS) {
+            val isLastAllowedChunk = chunks.size == MAX_CHUNKS - 1
+            val effectiveMaxLength =
+                if (isLastAllowedChunk) MAX_BLOCK_TEXT_LENGTH - TRUNCATION_INDICATOR.length else MAX_BLOCK_TEXT_LENGTH
+
+            if (remaining.length <= effectiveMaxLength) {
                 chunks.add(remaining)
                 break
             }
 
             // Find the best split point within the limit
-            val splitPoint = findBestSplitPoint(remaining, MAX_BLOCK_TEXT_LENGTH)
-            chunks.add(remaining.substring(0, splitPoint).trimEnd())
+            val splitPoint = findBestSplitPoint(remaining, effectiveMaxLength)
+            val chunk = remaining.substring(0, splitPoint).trimEnd()
+
+            // If this is the last allowed chunk and there's more content, add truncation indicator
+            if (isLastAllowedChunk) {
+                chunks.add(chunk + TRUNCATION_INDICATOR)
+                break
+            } else {
+                chunks.add(chunk)
+            }
+
             remaining = remaining.substring(splitPoint).trimStart()
         }
 
