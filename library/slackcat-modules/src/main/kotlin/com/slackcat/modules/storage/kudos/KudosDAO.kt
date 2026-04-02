@@ -129,9 +129,7 @@ open class KudosDAO(
         }
     }
 
-    suspend fun getActiveMessageForThread(
-        threadTs: String,
-    ): KudosMessageRow? {
+    suspend fun getActiveMessageForThread(threadTs: String): KudosMessageRow? {
         return dbQuery {
             KudosMessageTable
                 .select {
