@@ -17,6 +17,7 @@ data class OutgoingChatMessage(
     val channelId: String,
     val content: BotMessage,
     val threadId: String? = null,
+    val plainText: Boolean = false,
 )
 
 sealed interface BotIcon {

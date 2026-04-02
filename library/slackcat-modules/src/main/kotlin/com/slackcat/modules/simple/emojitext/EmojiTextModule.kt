@@ -32,6 +32,7 @@ open class EmojiTextModule : SlackcatModule() {
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
                 content = textMessage(output),
+                plainText = true,
             ),
         )
     }
@@ -48,11 +49,12 @@ open class EmojiTextModule : SlackcatModule() {
             }
 
         // Chunk letters into rows of MAX_LETTERS_PER_LINE
-        val rows = letterDisplays.chunked(MAX_LETTERS_PER_LINE).map { rowLetters ->
-            rowLetters.reduceOrNull { acc, letter ->
-                mergeLines(acc, letter, emojiTwo)
-            } ?: ""
-        }
+        val rows =
+            letterDisplays.chunked(MAX_LETTERS_PER_LINE).map { rowLetters ->
+                rowLetters.reduceOrNull { acc, letter ->
+                    mergeLines(acc, letter, emojiTwo)
+                } ?: ""
+            }
 
         // Join rows with blank line separator
         val result = rows.joinToString("\n\n")
