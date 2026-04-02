@@ -4,12 +4,18 @@ import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
 import com.slackcat.common.buildMessage
-import com.slackcat.common.textMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 import emojiDictionary
 
 open class EmojiTextModule : SlackcatModule() {
+    companion object {
+        private const val MAX_LETTERS_PER_ROW = 6
+
+        // Keep under Slack's 3000 char block limit
+        private const val MAX_ROW_CHARS = 2900
+    }
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val input = parseInput(incomingChatMessage.userText ?: "")
         if (input == null) {
@@ -22,40 +28,57 @@ open class EmojiTextModule : SlackcatModule() {
             return
         }
 
-        val output = renderText(input.letterArray, input.emojiOne, input.emojiTwo)
+        val rows = renderRows(input.letterArray, input.emojiOne, input.emojiTwo)
 
         sendMessage(
             OutgoingChatMessage(
                 channelId = incomingChatMessage.channelId,
-                content = textMessage(output),
+                content = buildMessage { rows.forEach { row -> text(row) } },
             ),
         )
     }
 
-    private fun renderText(
+    private fun renderRows(
         letters: List<String>,
         emojiOne: String,
         emojiTwo: String,
-    ): String {
-        // Convert letters to their emoji representations and merge them
-        var result = ""
+    ): List<String> {
         val letterDisplays =
             letters.map { letter ->
                 getLetter(letter, emojiDictionary)
             }
 
-        // Initialize with first letter
-        if (letterDisplays.isNotEmpty()) {
-            result = letterDisplays[0]
+        // Dynamically group letters into rows that fit within Slack's block char limit
+        val rows = mutableListOf<String>()
+        var currentMerged = ""
+        var lettersInRow = 0
+
+        for (display in letterDisplays) {
+            val tentativeMerged =
+                if (currentMerged.isEmpty()) {
+                    display
+                } else {
+                    mergeLines(currentMerged, display, emojiTwo)
+                }
+            val tentativeRendered = tentativeMerged.replace("#", emojiOne).replace(".", emojiTwo)
+
+            if (lettersInRow >= MAX_LETTERS_PER_ROW ||
+                (tentativeRendered.length > MAX_ROW_CHARS && currentMerged.isNotEmpty())
+            ) {
+                rows.add(currentMerged.replace("#", emojiOne).replace(".", emojiTwo))
+                currentMerged = display
+                lettersInRow = 1
+            } else {
+                currentMerged = tentativeMerged
+                lettersInRow++
+            }
         }
 
-        // Merge remaining letters
-        for (i in 1 until letterDisplays.size) {
-            result = mergeLines(result, letterDisplays[i], emojiTwo)
+        if (currentMerged.isNotEmpty()) {
+            rows.add(currentMerged.replace("#", emojiOne).replace(".", emojiTwo))
         }
 
-        // Replace placeholders with actual emojis
-        return result.replace("#", emojiOne).replace(".", emojiTwo)
+        return rows
     }
 
     private fun parseInput(userText: String): EmojiInput? {

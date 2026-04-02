@@ -152,28 +152,43 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         botIcon: BotIcon,
     ): Result<String> {
         return try {
-            val messageBlocks = messageConverter.toSlackBlocks(message.content)
-            val color = messageConverter.toColorString(message.content.style)
-
             val response =
-                client.chatPostMessage { req ->
-                    req.apply {
-                        channel(message.channelId)
-                        if (color != null) {
-                            val attachment =
-                                Attachment.builder()
-                                    .color(color)
-                                    .blocks(messageBlocks)
-                                    .build()
-                            attachments(listOf(attachment))
-                        } else {
-                            blocks(messageBlocks)
+                if (message.plainText) {
+                    client.chatPostMessage { req ->
+                        req.apply {
+                            channel(message.channelId)
+                            text(toPlainText(message.content))
+                            username(botName)
+                            message.threadId?.let { threadTs(it) }
+                            when (botIcon) {
+                                is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
+                                is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
+                            }
                         }
-                        username(botName)
-                        message.threadId?.let { threadTs(it) }
-                        when (botIcon) {
-                            is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
-                            is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
+                    }
+                } else {
+                    val messageBlocks = messageConverter.toSlackBlocks(message.content)
+                    val color = messageConverter.toColorString(message.content.style)
+
+                    client.chatPostMessage { req ->
+                        req.apply {
+                            channel(message.channelId)
+                            if (color != null) {
+                                val attachment =
+                                    Attachment.builder()
+                                        .color(color)
+                                        .blocks(messageBlocks)
+                                        .build()
+                                attachments(listOf(attachment))
+                            } else {
+                                blocks(messageBlocks)
+                            }
+                            username(botName)
+                            message.threadId?.let { threadTs(it) }
+                            when (botIcon) {
+                                is BotIcon.BotEmojiIcon -> iconEmoji(botIcon.emoji)
+                                is BotIcon.BotImageIcon -> iconUrl(botIcon.url)
+                            }
                         }
                     }
                 }
