@@ -129,15 +129,11 @@ open class KudosDAO(
         }
     }
 
-    suspend fun getActiveMessageForThread(
-        threadTs: String,
-        currentTime: Long = System.currentTimeMillis(),
-    ): KudosMessageRow? {
+    suspend fun getActiveMessageForThread(threadTs: String): KudosMessageRow? {
         return dbQuery {
             KudosMessageTable
                 .select {
-                    (KudosMessageTable.threadTs eq threadTs) and
-                        (KudosMessageTable.expiresAt greater currentTime)
+                    (KudosMessageTable.threadTs eq threadTs)
                 }
                 .orderBy(KudosMessageTable.createdAt, SortOrder.DESC)
                 .limit(1)
