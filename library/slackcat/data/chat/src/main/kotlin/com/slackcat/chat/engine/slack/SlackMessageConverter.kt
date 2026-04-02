@@ -19,6 +19,7 @@ class SlackMessageConverter {
     companion object {
         // Slack's limit is 3000, use 2900 to leave buffer for formatting characters
         private const val MAX_BLOCK_TEXT_LENGTH = 2900
+
         // Limit chunks to prevent spam
         private const val MAX_CHUNKS = 3
         private const val TRUNCATION_INDICATOR = "\n\n_[Message truncated]_"
