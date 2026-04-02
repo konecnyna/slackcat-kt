@@ -10,6 +10,10 @@ import com.slackcat.models.SlackcatModule
 import emojiDictionary
 
 open class EmojiTextModule : SlackcatModule() {
+    companion object {
+        private const val MAX_LETTERS_PER_LINE = 6
+    }
+
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
         val input = parseInput(incomingChatMessage.userText ?: "")
         if (input == null) {
@@ -37,22 +41,21 @@ open class EmojiTextModule : SlackcatModule() {
         emojiOne: String,
         emojiTwo: String,
     ): String {
-        // Convert letters to their emoji representations and merge them
-        var result = ""
+        // Convert letters to their emoji representations
         val letterDisplays =
             letters.map { letter ->
                 getLetter(letter, emojiDictionary)
             }
 
-        // Initialize with first letter
-        if (letterDisplays.isNotEmpty()) {
-            result = letterDisplays[0]
+        // Chunk letters into rows of MAX_LETTERS_PER_LINE
+        val rows = letterDisplays.chunked(MAX_LETTERS_PER_LINE).map { rowLetters ->
+            rowLetters.reduceOrNull { acc, letter ->
+                mergeLines(acc, letter, emojiTwo)
+            } ?: ""
         }
 
-        // Merge remaining letters
-        for (i in 1 until letterDisplays.size) {
-            result = mergeLines(result, letterDisplays[i], emojiTwo)
-        }
+        // Join rows with blank line separator
+        val result = rows.joinToString("\n\n")
 
         // Replace placeholders with actual emojis
         return result.replace("#", emojiOne).replace(".", emojiTwo)
