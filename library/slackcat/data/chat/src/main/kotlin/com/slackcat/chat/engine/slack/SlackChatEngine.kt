@@ -42,6 +42,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 text = message.text ?: "",
                 timestamp = message.ts,
                 threadTimestamp = message.threadTs,
+                attachmentText = extractAttachmentText(message.attachments),
             )
             ctx.ack()
         }
@@ -55,6 +56,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     text = message.text,
                     timestamp = message.ts,
                     threadTimestamp = message.threadTs,
+                    attachmentText = extractAttachmentText(message.attachments),
                 )
                 return@event ctx.ack()
             }
@@ -108,12 +110,20 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         }
     }
 
+    private fun extractAttachmentText(attachments: List<Attachment>?): String {
+        if (attachments.isNullOrEmpty()) return ""
+        return attachments.mapNotNull { attachment ->
+            attachment.fallback ?: attachment.text ?: attachment.pretext ?: attachment.title
+        }.joinToString("\n")
+    }
+
     private fun emitBotMessage(
         botId: String,
         channelId: String,
         text: String,
         timestamp: String,
         threadTimestamp: String?,
+        attachmentText: String = "",
     ) {
         emitEvent {
             SlackcatEvent.BotMessageReceived(
@@ -122,6 +132,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 text = text,
                 timestamp = timestamp,
                 threadTimestamp = threadTimestamp,
+                attachmentText = attachmentText,
             )
         }
     }
