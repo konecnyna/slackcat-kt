@@ -4,7 +4,27 @@ import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.Attachment
 import com.slack.api.model.event.MessageBotEvent
+import com.slack.api.model.event.MessageChangedEvent
+import com.slack.api.model.event.MessageChannelArchiveEvent
+import com.slack.api.model.event.MessageChannelConvertToPublicEvent
+import com.slack.api.model.event.MessageChannelJoinEvent
+import com.slack.api.model.event.MessageChannelLeaveEvent
+import com.slack.api.model.event.MessageChannelNameEvent
+import com.slack.api.model.event.MessageChannelPostingPermissionsEvent
+import com.slack.api.model.event.MessageChannelPurposeEvent
+import com.slack.api.model.event.MessageChannelTopicEvent
+import com.slack.api.model.event.MessageChannelUnarchiveEvent
+import com.slack.api.model.event.MessageDeletedEvent
+import com.slack.api.model.event.MessageEkmAccessDeniedEvent
 import com.slack.api.model.event.MessageEvent
+import com.slack.api.model.event.MessageFileShareEvent
+import com.slack.api.model.event.MessageGroupTopicEvent
+import com.slack.api.model.event.MessageMeEvent
+import com.slack.api.model.event.MessageMetadataDeletedEvent
+import com.slack.api.model.event.MessageMetadataPostedEvent
+import com.slack.api.model.event.MessageMetadataUpdatedEvent
+import com.slack.api.model.event.MessageRepliedEvent
+import com.slack.api.model.event.MessageThreadBroadcastEvent
 import com.slack.api.model.event.ReactionAddedEvent
 import com.slack.api.model.event.ReactionRemovedEvent
 import com.slackcat.chat.engine.ChatEngine
@@ -92,6 +112,34 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                 )
             }
             ctx.ack()
+        }
+
+        // Bolt routes message subtypes (channel_join, message_changed, etc.) to dedicated event
+        // classes. Without registered handlers, Bolt returns 404 and Slack retries — repeated
+        // 404s cause Slack to auto-disable Event Subscriptions. Ack the subtypes we don't act on.
+        listOf(
+            MessageChangedEvent::class.java,
+            MessageChannelArchiveEvent::class.java,
+            MessageChannelConvertToPublicEvent::class.java,
+            MessageChannelJoinEvent::class.java,
+            MessageChannelLeaveEvent::class.java,
+            MessageChannelNameEvent::class.java,
+            MessageChannelPostingPermissionsEvent::class.java,
+            MessageChannelPurposeEvent::class.java,
+            MessageChannelTopicEvent::class.java,
+            MessageChannelUnarchiveEvent::class.java,
+            MessageDeletedEvent::class.java,
+            MessageEkmAccessDeniedEvent::class.java,
+            MessageFileShareEvent::class.java,
+            MessageGroupTopicEvent::class.java,
+            MessageMeEvent::class.java,
+            MessageMetadataDeletedEvent::class.java,
+            MessageMetadataPostedEvent::class.java,
+            MessageMetadataUpdatedEvent::class.java,
+            MessageRepliedEvent::class.java,
+            MessageThreadBroadcastEvent::class.java,
+        ).forEach { eventClass ->
+            app.event(eventClass) { _, ctx -> ctx.ack() }
         }
 
         val socketModeApp = SocketModeApp(System.getenv("SLACK_APP_TOKEN"), app)
