@@ -115,44 +115,52 @@ open class StatusClient(
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
     }
 
-    suspend fun fetch(service: Service): Status? =
-        runCatching {
-            val responseString = networkClient.fetchString(service.url, emptyMap())
-            when (service) {
-                Service.Slack -> {
-                    val slackResponse = json.decodeFromString(SlackStatusResponse.serializer(), responseString)
-                    val indicator =
-                        when (slackResponse.status.lowercase()) {
-                            "ok", "active" -> "operational"
-                            else -> "incident"
-                        }
-                    Status(
-                        service = service,
-                        status = slackResponse.status,
-                        indicator = indicator,
-                        updatedAt = slackResponse.dateUpdated ?: "Unknown",
-                    )
-                }
-                Service.Github,
-                Service.CircleCi,
-                Service.CloudFlare,
-                Service.Claude,
-                Service.OneSignal,
-                -> {
-                    val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
-                    Status(
-                        service = service,
-                        status = response.status.description,
-                        indicator = response.status.indicator,
-                        updatedAt = response.page.updatedAt,
-                        incidents = response.incidents.filter { it.status.lowercase() != "resolved" },
-                    )
-                }
+    suspend fun fetch(service: Service): Status {
+        val responseString = networkClient.fetchString(service.url, emptyMap())
+        return when (service) {
+            Service.Slack -> {
+                val slackResponse = json.decodeFromString(SlackStatusResponse.serializer(), responseString)
+                val hasIncidents = !slackResponse.activeIncidents.isNullOrEmpty()
+                val indicator =
+                    when {
+                        hasIncidents -> "incident"
+                        slackResponse.status.lowercase() in listOf("ok", "active") -> "operational"
+                        else -> "incident"
+                    }
+                Status(
+                    service = service,
+                    status = slackResponse.status,
+                    indicator = indicator,
+                    updatedAt = slackResponse.dateUpdated ?: "Unknown",
+                    incidents =
+                        slackResponse.activeIncidents?.map { active ->
+                            Incident(
+                                id = active.id.toString(),
+                                name = active.title,
+                                status = "active",
+                                createdAt = active.dateCreated ?: "Unknown",
+                                updatedAt = active.dateUpdated ?: "Unknown",
+                            )
+                        } ?: emptyList(),
+                )
             }
-        }.onFailure {
-            println("Error fetching status for ${service.label}: ${it.message}")
-            it.printStackTrace()
-        }.getOrNull()
+            Service.Github,
+            Service.CircleCi,
+            Service.CloudFlare,
+            Service.Claude,
+            Service.OneSignal,
+            -> {
+                val response = json.decodeFromString(PageStatusResponse.serializer(), responseString)
+                Status(
+                    service = service,
+                    status = response.status.description,
+                    indicator = response.status.indicator,
+                    updatedAt = response.page.updatedAt,
+                    incidents = response.incidents.filter { it.status.lowercase() != "resolved" },
+                )
+            }
+        }
+    }
 
     @Serializable
     data class Incident(
@@ -175,11 +183,19 @@ open class StatusClient(
 }
 
 @Serializable
+data class SlackActiveIncident(
+    val id: Int,
+    val title: String,
+    @SerialName("date_created") val dateCreated: String? = null,
+    @SerialName("date_updated") val dateUpdated: String? = null,
+)
+
+@Serializable
 data class SlackStatusResponse(
     val status: String,
     @SerialName("date_created") val dateCreated: String? = null,
     @SerialName("date_updated") val dateUpdated: String? = null,
-    @SerialName("active_incidents") val activeIncidents: List<String?>? = null,
+    @SerialName("active_incidents") val activeIncidents: List<SlackActiveIncident>? = null,
 )
 
 @Serializable

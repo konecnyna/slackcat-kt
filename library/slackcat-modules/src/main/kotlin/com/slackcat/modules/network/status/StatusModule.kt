@@ -21,7 +21,7 @@ open class StatusModule(
             return
         }
 
-        val response = statusClient.fetch(statusService)
+        val response = runCatching { statusClient.fetch(statusService) }.getOrNull()
 
         val message =
             response?.let {
