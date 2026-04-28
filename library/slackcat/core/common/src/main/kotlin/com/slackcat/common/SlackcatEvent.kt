@@ -36,5 +36,6 @@ sealed interface SlackcatEvent {
         val text: String,
         val timestamp: String,
         val threadTimestamp: String?,
+        val attachmentText: String = "",
     ) : SlackcatEvent
 }
