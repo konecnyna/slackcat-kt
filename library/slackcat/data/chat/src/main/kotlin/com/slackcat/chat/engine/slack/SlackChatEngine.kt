@@ -7,6 +7,7 @@ import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageChangedEvent
 import com.slack.api.model.event.MessageChannelArchiveEvent
 import com.slack.api.model.event.MessageChannelConvertToPublicEvent
+import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageChannelJoinEvent
 import com.slack.api.model.event.MessageChannelLeaveEvent
 import com.slack.api.model.event.MessageChannelNameEvent
@@ -109,6 +110,17 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     messageTimestamp = event.item.ts,
                     itemUserId = event.itemUser,
                     eventTimestamp = event.eventTs,
+                )
+            }
+            ctx.ack()
+        }
+
+        app.event(MemberJoinedChannelEvent::class.java) { payload, ctx ->
+            val event = payload.event
+            emitEvent {
+                SlackcatEvent.MemberJoinedChannel(
+                    userId = event.user,
+                    channelId = event.channel,
                 )
             }
             ctx.ack()

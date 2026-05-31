@@ -37,4 +37,9 @@ sealed interface SlackcatEvent {
         val timestamp: String,
         val threadTimestamp: String?,
     ) : SlackcatEvent
+
+    data class MemberJoinedChannel(
+        val userId: String,
+        val channelId: String,
+    ) : SlackcatEvent
 }
