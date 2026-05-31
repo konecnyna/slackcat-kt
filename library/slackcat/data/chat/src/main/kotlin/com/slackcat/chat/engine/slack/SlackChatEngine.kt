@@ -3,6 +3,7 @@ package com.slackcat.chat.engine.slack
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.Attachment
+import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageChangedEvent
 import com.slack.api.model.event.MessageChannelArchiveEvent
@@ -109,6 +110,17 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
                     messageTimestamp = event.item.ts,
                     itemUserId = event.itemUser,
                     eventTimestamp = event.eventTs,
+                )
+            }
+            ctx.ack()
+        }
+
+        app.event(MemberJoinedChannelEvent::class.java) { payload, ctx ->
+            val event = payload.event
+            emitEvent {
+                SlackcatEvent.MemberJoinedChannel(
+                    userId = event.user,
+                    channelId = event.channel,
                 )
             }
             ctx.ack()
