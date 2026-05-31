@@ -3,11 +3,11 @@ package com.slackcat.chat.engine.slack
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.Attachment
+import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageChangedEvent
 import com.slack.api.model.event.MessageChannelArchiveEvent
 import com.slack.api.model.event.MessageChannelConvertToPublicEvent
-import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageChannelJoinEvent
 import com.slack.api.model.event.MessageChannelLeaveEvent
 import com.slack.api.model.event.MessageChannelNameEvent
