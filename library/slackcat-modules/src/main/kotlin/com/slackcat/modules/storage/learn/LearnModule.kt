@@ -19,6 +19,10 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
     private val learnDAO = LearnDAO()
     private val aliasHandler = LearnAliasHandler(learnDAO)
 
+    companion object {
+        private val SLACK_LINK_REGEX = Regex("<([^|<>]+)(?:\\|[^<>]*)?>")
+    }
+
     /**
      * Sets the router reference so the module can check for command conflicts.
      * This is called by the Router after initialization.
@@ -110,7 +114,7 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
         channelId: String,
         learnItem: LearnDAO.LearnRow,
     ) {
-        val text = learnItem.learnText.replace("<", "").replace(">", "")
+        val text = stripSlackLinkFormatting(learnItem.learnText)
         val isImage = text.matches(Regex("https?://.*\\.(jpg|jpeg|png|gif|bmp|svg)$"))
         when (isImage) {
             true -> {
@@ -137,6 +141,12 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
                 )
             }
         }
+    }
+
+    // Slack renders links as `<url>` or `<url|display text>`. Strip the wrapper and
+    // any display text, keeping just the URL so image detection and rendering work.
+    private fun stripSlackLinkFormatting(text: String): String {
+        return SLACK_LINK_REGEX.replace(text) { it.groupValues[1] }
     }
 
     override fun help(): BotMessage =
