@@ -10,6 +10,7 @@ import com.slack.api.model.block.element.ImageElement
 import com.slackcat.common.BotMessage
 import com.slackcat.common.MessageElement
 import com.slackcat.common.MessageStyle
+import com.slackcat.common.SlackLinkFormatter
 import com.slackcat.common.TextStyle
 
 /**
@@ -31,6 +32,7 @@ class SlackMessageConverter {
                 is MessageElement.Text -> convertText(element)
                 is MessageElement.Heading -> listOf(convertHeading(element))
                 is MessageElement.Image -> listOfNotNull(convertImage(element))
+                is MessageElement.Link -> listOf(convertLink(element))
                 is MessageElement.Divider -> listOf(DividerBlock.builder().build())
                 is MessageElement.KeyValueList -> listOf(convertKeyValueList(element))
                 is MessageElement.Context -> convertContext(element)
@@ -38,13 +40,19 @@ class SlackMessageConverter {
         }
     }
 
+    private fun convertLink(link: MessageElement.Link): SectionBlock {
+        return SectionBlock.builder()
+            .text(MarkdownTextObject(SlackLinkFormatter.toSlackLink(link.url, link.label), true))
+            .build()
+    }
+
     private fun convertText(text: MessageElement.Text): List<SectionBlock> {
         val formattedText =
             when (text.style) {
-                TextStyle.BOLD -> "*${text.content}*"
+                TextStyle.BOLD -> "*${toMrkdwn(text.content)}*"
                 TextStyle.CODE -> "`${text.content}`"
-                TextStyle.QUOTE -> ">${text.content}"
-                TextStyle.NORMAL -> text.content
+                TextStyle.QUOTE -> ">${toMrkdwn(text.content)}"
+                TextStyle.NORMAL -> toMrkdwn(text.content)
             }
 
         return chunkText(formattedText).map { chunk ->
@@ -133,7 +141,7 @@ class SlackMessageConverter {
     private fun convertHeading(heading: MessageElement.Heading): SectionBlock {
         // Slack doesn't have true headings, so use bold text
         return SectionBlock.builder()
-            .text(MarkdownTextObject("*${heading.content}*", true))
+            .text(MarkdownTextObject("*${toMrkdwn(heading.content)}*", true))
             .build()
     }
 
@@ -164,7 +172,7 @@ class SlackMessageConverter {
     private fun convertKeyValueList(keyValueList: MessageElement.KeyValueList): SectionBlock {
         val fields =
             keyValueList.items.map { item ->
-                MarkdownTextObject("*${item.key}*\n${item.value}", true)
+                MarkdownTextObject("*${toMrkdwn(item.key)}*\n${toMrkdwn(item.value)}", true)
             }
 
         return SectionBlock.builder()
@@ -173,12 +181,15 @@ class SlackMessageConverter {
     }
 
     private fun convertContext(context: MessageElement.Context): List<ContextBlock> {
-        return chunkText(context.content).map { chunk ->
+        return chunkText(toMrkdwn(context.content)).map { chunk ->
             ContextBlock.builder()
                 .elements(listOf(MarkdownTextObject(chunk, true)))
                 .build()
         }
     }
+
+    // Slack section blocks render mrkdwn, not standard Markdown. Rewrite `[label](url)` so links work.
+    private fun toMrkdwn(content: String): String = SlackLinkFormatter.toSlackMrkdwn(content)
 
     /**
      * Converts MessageStyle to Slack attachment color string.

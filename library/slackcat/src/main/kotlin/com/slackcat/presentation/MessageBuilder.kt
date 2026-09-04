@@ -1,5 +1,7 @@
 package com.slackcat.presentation
 
+import com.slackcat.common.SlackLinkFormatter
+
 class MessageBuilder {
     private val content = StringBuilder()
 
@@ -20,7 +22,7 @@ class MessageBuilder {
         url: String,
         text: String,
     ) {
-        content.append("<$url|$text>\n")
+        content.append(SlackLinkFormatter.toSlackLink(url, text) + "\n")
     }
 
     override fun toString(): String = content.toString()

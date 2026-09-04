@@ -305,16 +305,20 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private fun toPlainText(message: com.slackcat.common.BotMessage): String {
         return message.elements.joinToString("\n") { element ->
             when (element) {
-                is com.slackcat.common.MessageElement.Text -> element.content
-                is com.slackcat.common.MessageElement.Heading -> "*${element.content}*"
+                is com.slackcat.common.MessageElement.Text -> toMrkdwn(element.content)
+                is com.slackcat.common.MessageElement.Heading -> "*${toMrkdwn(element.content)}*"
                 is com.slackcat.common.MessageElement.Image -> "[Image: ${element.altText}]"
+                is com.slackcat.common.MessageElement.Link ->
+                    com.slackcat.common.SlackLinkFormatter.toSlackLink(element.url, element.label)
                 is com.slackcat.common.MessageElement.Divider -> "---"
                 is com.slackcat.common.MessageElement.KeyValueList ->
-                    element.items.joinToString("\n") { "${it.key}: ${it.value}" }
-                is com.slackcat.common.MessageElement.Context -> element.content
+                    element.items.joinToString("\n") { "${toMrkdwn(it.key)}: ${toMrkdwn(it.value)}" }
+                is com.slackcat.common.MessageElement.Context -> toMrkdwn(element.content)
             }
         }
     }
+
+    private fun toMrkdwn(content: String): String = com.slackcat.common.SlackLinkFormatter.toSlackMrkdwn(content)
 
     override suspend fun eventFlow() = messagesFlow
 

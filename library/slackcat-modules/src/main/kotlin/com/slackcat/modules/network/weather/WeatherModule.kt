@@ -25,7 +25,7 @@ open class WeatherModule(
                             textMessage(
                                 "Could not find location ${incomingChatMessage.userText}.\n" +
                                     "Verify it " +
-                                    "<https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US|here>.\n" +
+                                    "[here](https://geocoding-api.open-meteo.com/v1/search?name=04011&country=US).\n" +
                                     "You may need to use a bigger city.",
                             ),
                     ),

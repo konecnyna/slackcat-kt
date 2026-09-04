@@ -3,6 +3,7 @@ package com.slackcat.modules.storage.learn
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
+import com.slackcat.common.SlackLinkFormatter
 import com.slackcat.common.buildMessage
 import com.slackcat.common.textMessage
 import com.slackcat.database.DatabaseTable
@@ -18,10 +19,6 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
     private val learnFactory = LearnFactory()
     private val learnDAO = LearnDAO()
     private val aliasHandler = LearnAliasHandler(learnDAO)
-
-    companion object {
-        private val SLACK_LINK_REGEX = Regex("<([^|<>]+)(?:\\|[^<>]*)?>")
-    }
 
     /**
      * Sets the router reference so the module can check for command conflicts.
@@ -114,9 +111,8 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
         channelId: String,
         learnItem: LearnDAO.LearnRow,
     ) {
-        val text = stripSlackLinkFormatting(learnItem.learnText)
-        val isImage = text.matches(Regex("https?://.*\\.(jpg|jpeg|png|gif|bmp|svg)$"))
-        when (isImage) {
+        val imageUrl = renderableImageUrl(learnItem.learnText)
+        when (imageUrl != null) {
             true -> {
                 sendMessage(
                     OutgoingChatMessage(
@@ -124,7 +120,7 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
                         content =
                             buildMessage {
                                 image(
-                                    url = text,
+                                    url = imageUrl,
                                     altText = "learn image",
                                 )
                             },
@@ -143,10 +139,17 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
         }
     }
 
-    // Slack renders links as `<url>` or `<url|display text>`. Strip the wrapper and
-    // any display text, keeping just the URL so image detection and rendering work.
-    private fun stripSlackLinkFormatting(text: String): String {
-        return SLACK_LINK_REGEX.replace(text) { it.groupValues[1] }
+    /**
+     * Returns the URL to render as an image block, or null to post the entry as text.
+     * The entry must be a lone image link. Slack-hosted private files need a bearer token,
+     * so an image block pointing at one renders broken.
+     */
+    private fun renderableImageUrl(learnText: String): String? {
+        val url = SlackLinkFormatter.extractFirstUrl(learnText) ?: return null
+        if (SlackLinkFormatter.toBareUrls(learnText).trim() != url) return null
+        if (!SlackLinkFormatter.isImageUrl(url)) return null
+        if (SlackLinkFormatter.isPrivateSlackFileUrl(url)) return null
+        return url
     }
 
     override fun help(): BotMessage =

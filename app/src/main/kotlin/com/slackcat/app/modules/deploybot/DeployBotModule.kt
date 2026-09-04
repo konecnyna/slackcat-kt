@@ -40,6 +40,7 @@ class DeployBotModule : SlackcatModule(), SlackcatEventsModule {
                 is SlackcatEvent.ReactionRemoved,
                 is SlackcatEvent.MessageReceived,
                 is SlackcatEvent.BotMessageReceived,
+                is SlackcatEvent.MemberJoinedChannel,
                 -> return
             }
 

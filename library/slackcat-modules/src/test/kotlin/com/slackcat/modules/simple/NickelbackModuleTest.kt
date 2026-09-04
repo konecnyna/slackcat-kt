@@ -202,4 +202,34 @@ class NickelbackModuleTest {
             val sentMessage = messageSlot.captured
             assertEquals("channel123", sentMessage.channelId)
         }
+
+    private suspend fun capturedImageUrl(userText: String): String? {
+        nickelbackModule.onInvoke(createTestMessage("nickelback", userText))
+        val messageSlot = slot<OutgoingChatMessage>()
+        coVerify { mockChatClient.sendMessage(capture(messageSlot), any(), any()) }
+        return messageSlot.captured.content.elements
+            .filterIsInstance<MessageElement.Image>()
+            .firstOrNull()
+            ?.url
+    }
+
+    @Test
+    fun `onInvoke unwraps Slack labeled link to the bare URL`() =
+        runTest {
+            val url = capturedImageUrl("<https://example.com/image.jpg|https://example.com/image.jpg>")
+
+            assertEquals(NICKELBACK_BASE + "https://example.com/image.jpg", url)
+        }
+
+    @Test
+    fun `onInvoke unwraps standard markdown link to the bare URL`() =
+        runTest {
+            val url = capturedImageUrl("[cat](https://example.com/cat.png)")
+
+            assertEquals(NICKELBACK_BASE + "https://example.com/cat.png", url)
+        }
+
+    private companion object {
+        const val NICKELBACK_BASE = "https://home-remote-api.herokuapp.com/nickelback?url="
+    }
 }

@@ -79,6 +79,26 @@ Modules are registered as `KClass` references in `app/di/AppModule.kt`. Start fr
 - **Extensibility**: All core modules, clients, and data classes in `library/slackcat-modules/` should be `open` so downstream consumers can extend them. This includes module classes, client classes, enums (prefer sealed classes/interfaces over enums when extensibility is needed), and data models.
 - **Always Verify Locally**: After creating or modifying any module, always test it locally using CLI mode before considering the work done. Run `./gradlew :app:run --args="?<command>"` to verify the module responds correctly. For modules without a direct command, run the relevant test suite with `./gradlew test`. Never skip local verification.
 
+## Slack Link & Markdown Formats
+
+Slack has two link syntaxes. Both are current. `mrkdwn` is **not** deprecated.
+
+| Direction | Format | Where |
+|---|---|---|
+| **Inbound** (what the bot receives) | `<url>`, `<url\|label>` | `message` event `text` field. Unchanged. |
+| **Outbound** section/context blocks | `<url\|label>` (`mrkdwn`) | `SectionBlock`, `ContextBlock`. Standard Markdown does **not** render here. |
+| **Outbound** `markdown` block | `[label](url)` | Added 2025-02-03. 12,000 char cumulative cap. |
+| **Outbound** `chat.postMessage` | `[label](url)` via `markdown_text` | Do not combine with `blocks` or `text`. |
+
+### Rules
+
+- **Never regex link syntax by hand.** Use `SlackLinkFormatter` in `library/slackcat/core/common`.
+- **Modules emit standard Markdown.** Write `[label](url)` in `buildMessage { text(...) }`, or use `link(url, label)`. `SlackMessageConverter` rewrites it to `mrkdwn`.
+- **Slack entities are not links.** `<@U1>`, `<#C1|general>`, `<!here>`, `<!subteam^S1>` must survive untouched. A naive `<`/`>` strip corrupts them.
+- **Private Slack file URLs cannot go in an image block.** `files.slack.com/...` and `<team>.slack.com/files/...` need a bearer token. Post them as a link instead. Public CDN hosts such as `emoji.slack-edge.com` are fine.
+- **Markdown images become links.** Slack renders `![alt](url)` as a hyperlink, not an embedded image.
+- **`text` is an approximation.** Since 2019-09-01 the precise inbound structure lives in `rich_text` blocks.
+
 ## Slack API Limits & Common Errors
 
 ### Block Text Character Limit (3000 chars)
