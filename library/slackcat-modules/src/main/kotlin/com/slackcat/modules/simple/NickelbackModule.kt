@@ -3,13 +3,14 @@ package com.slackcat.modules.simple
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
+import com.slackcat.common.SlackLinkFormatter
 import com.slackcat.common.buildMessage
 import com.slackcat.models.CommandInfo
 import com.slackcat.models.SlackcatModule
 
 open class NickelbackModule : SlackcatModule() {
     override suspend fun onInvoke(incomingChatMessage: IncomingChatMessage) {
-        val inputUrl = incomingChatMessage.userText.replace("<", "").replace(">", "")
+        val inputUrl = SlackLinkFormatter.toBareUrls(incomingChatMessage.userText).trim()
         val imageUrl =
             when (incomingChatMessage.command) {
                 "nickelback" -> NICKELBACK_BASE + inputUrl

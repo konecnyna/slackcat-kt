@@ -33,6 +33,9 @@ class CliMessageConverter {
                     builder.appendLine("[Image: ${element.altText}]")
                     builder.appendLine("  URL: ${element.url}")
                 }
+                is MessageElement.Link -> {
+                    builder.appendLine(formatLink(element))
+                }
                 is MessageElement.Divider -> {
                     builder.appendLine("-".repeat(60))
                 }
@@ -48,6 +51,11 @@ class CliMessageConverter {
         }
 
         return builder.toString().trimEnd()
+    }
+
+    private fun formatLink(link: MessageElement.Link): String {
+        val label = link.label?.takeIf { it.isNotBlank() } ?: return link.url
+        return "$label (${link.url})"
     }
 
     private fun formatText(text: MessageElement.Text): String {

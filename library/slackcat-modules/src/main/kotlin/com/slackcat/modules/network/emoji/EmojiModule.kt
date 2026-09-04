@@ -45,7 +45,7 @@ open class EmojiModule(
             heading("EmojiModule Help")
             text(
                 "Grab emoji from this fun " +
-                    "<https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3|fun list>",
+                    "[fun list](https://gist.github.com/konecnyna/9968c5a3457b4ef39a824222269f82f3)",
             )
         }
 }

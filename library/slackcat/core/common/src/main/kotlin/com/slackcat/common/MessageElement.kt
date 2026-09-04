@@ -31,6 +31,14 @@ sealed interface MessageElement {
     ) : MessageElement
 
     /**
+     * Hyperlink with an optional display label. Each platform renders its own link syntax.
+     */
+    data class Link(
+        val url: String,
+        val label: String? = null,
+    ) : MessageElement
+
+    /**
      * Visual divider/separator.
      */
     data object Divider : MessageElement

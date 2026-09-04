@@ -14,6 +14,7 @@ slackcat {
         coroutines()
         exposed()
         ktorServer()
+        enableJunitTesting()
     }
 }
 

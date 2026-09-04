@@ -39,6 +39,16 @@ class MessageBuilder {
     }
 
     /**
+     * Add a hyperlink to the message. Omit the label to display the URL itself.
+     */
+    fun link(
+        url: String,
+        label: String? = null,
+    ) {
+        elements.add(MessageElement.Link(url, label))
+    }
+
+    /**
      * Add a visual divider to the message.
      */
     fun divider() {
