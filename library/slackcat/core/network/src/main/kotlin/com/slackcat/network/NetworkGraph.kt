@@ -2,6 +2,7 @@ package com.slackcat.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -12,6 +13,12 @@ object NetworkGraph {
     val networkClient =
         NetworkClient(
             HttpClient(CIO) {
+                // DuckDuckGo returns 403 to any request without Accept-Encoding. CIO sends none by default.
+                install(ContentEncoding) {
+                    gzip()
+                    deflate()
+                }
+
                 install(ContentNegotiation) {
                     Json {
                         // Configure the JSON settings if needed

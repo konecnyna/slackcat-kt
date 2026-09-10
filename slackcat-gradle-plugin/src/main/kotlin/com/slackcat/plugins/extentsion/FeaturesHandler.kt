@@ -60,6 +60,7 @@ abstract class FeaturesHandler
                     dependencies.add("implementation", "io.ktor:ktor-client-serialization:2.3.12")
                     dependencies.add("implementation", "io.ktor:ktor-client-content-negotiation:2.3.12")
                     dependencies.add("implementation", "io.ktor:ktor-client-logging:2.3.12")
+                    dependencies.add("implementation", "io.ktor:ktor-client-encoding:2.3.12")
                 }
 
                 if (ktorServer.get()) {
