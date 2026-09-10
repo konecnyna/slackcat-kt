@@ -28,7 +28,7 @@ open class SummonModule(
 
         val imageUrl =
             when {
-                images.isEmpty() -> "No results found found for `${incomingChatMessage.userText}`"
+                images.isEmpty() -> "No results found for `${incomingChatMessage.userText}`"
                 incomingChatMessage.arguments.contains("--random") -> images[Random.nextInt(images.size)].image
                 else -> images[0].image
             }
