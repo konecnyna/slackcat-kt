@@ -3,9 +3,6 @@ package com.slackcat.chat.engine.slack
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.Attachment
-import com.slack.api.model.block.RichTextBlock
-import com.slack.api.model.block.element.RichTextSectionElement
-import com.slack.api.model.block.element.RichTextUnknownElement
 import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageChangedEvent
@@ -57,6 +54,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val messageConverter = SlackMessageConverter()
     private val threadCache = SlackThreadCache(client)
     private val apiOps = SlackApiOperations(client)
+    private val attachmentResolver = SlackAttachmentResolver(apiOps)
 
     override fun connect(ready: () -> Unit) {
         app.event(MessageBotEvent::class.java) { payload, ctx ->
@@ -205,7 +203,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             )
 
             CommandParser.extractCommand(message.text)?.let {
-                _messagesFlow.emit(message.toDomain(it, resolveAttachments(message)))
+                _messagesFlow.emit(message.toDomain(it, attachmentResolver.resolve(message)))
             }
         }
     }
@@ -365,32 +363,11 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     suspend fun getPublicFileUrl(fileId: String): Result<String> = apiOps.getPublicFileUrl(fileId)
 
-    /**
-     * Slack omits `files` from a message event when it renders a hosted file inline in a
-     * rich_text block. Bolt drops that element too, so the file id only comes back from the API.
-     */
-    private suspend fun resolveAttachments(message: MessageEvent): List<ChatAttachment> {
-        val eventFiles = message.files.orEmpty()
-        if (eventFiles.isNotEmpty()) return eventFiles.mapNotNull { it.toDomain() }
-        if (!message.hasInlineFileElement()) return emptyList()
-        return apiOps.getMessageFiles(message.channel, message.ts, message.threadTs)
-            .getOrDefault(emptyList())
-            .mapNotNull { it.toDomain() }
-    }
-
-    private fun MessageEvent.hasInlineFileElement(): Boolean =
-        blocks.orEmpty()
-            .filterIsInstance<RichTextBlock>()
-            .flatMap { it.elements.orEmpty() }
-            .filterIsInstance<RichTextSectionElement>()
-            .flatMap { it.elements.orEmpty() }
-            .any { it is RichTextUnknownElement && it.type == "file" }
-
     fun MessageEvent.toDomain(
         command: String,
         attachments: List<ChatAttachment>,
     ): IncomingChatMessage {
-        val cleanText = stripAttachmentTokens(text, attachments)
+        val cleanText = attachmentResolver.stripAttachmentTokens(text, attachments)
         return IncomingChatMessage(
             command = command,
             channelId = channel,
@@ -401,30 +378,6 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             arguments = CommandParser.extractArguments(cleanText),
             userText = CommandParser.extractUserText(cleanText),
             attachments = attachments,
-        )
-    }
-
-    // Slack writes an inline file as its bare file id in `text`. Modules read `attachments` instead.
-    private fun stripAttachmentTokens(
-        text: String,
-        attachments: List<ChatAttachment>,
-    ): String {
-        if (attachments.isEmpty()) return text
-        val stripped =
-            attachments.fold(text) { acc, attachment ->
-                acc.replace(Regex("""(?<!\S)${Regex.escape(attachment.id)}(?!\S)"""), "")
-            }
-        return stripped.replace(Regex("""[ \t]+"""), " ").trim()
-    }
-
-    private fun com.slack.api.model.File.toDomain(): ChatAttachment? {
-        val fileId = id ?: return null
-        return ChatAttachment(
-            id = fileId,
-            name = name ?: "",
-            mimetype = mimetype ?: "",
-            urlPrivate = urlPrivate ?: "",
-            permalink = permalink ?: "",
         )
     }
 }
