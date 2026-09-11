@@ -30,6 +30,7 @@ import com.slack.api.model.event.ReactionAddedEvent
 import com.slack.api.model.event.ReactionRemovedEvent
 import com.slackcat.chat.engine.ChatEngine
 import com.slackcat.chat.models.BotIcon
+import com.slackcat.chat.models.ChatAttachment
 import com.slackcat.chat.models.ChatUser
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
@@ -359,15 +360,43 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> = apiOps.getUserGroupMembers(usergroupId)
 
-    fun MessageEvent.toDomain(command: String) =
-        IncomingChatMessage(
+    suspend fun getPublicFileUrl(fileId: String): Result<String> = apiOps.getPublicFileUrl(fileId)
+
+    fun MessageEvent.toDomain(command: String): IncomingChatMessage {
+        val attachments = files.orEmpty().map { it.toDomain() }
+        val cleanText = stripAttachmentTokens(text, attachments)
+        return IncomingChatMessage(
             command = command,
             channelId = channel,
             chatUser = ChatUser(userId = user),
             messageId = ts,
-            rawMessage = text,
+            rawMessage = cleanText,
             threadId = threadTs,
-            arguments = CommandParser.extractArguments(text),
-            userText = CommandParser.extractUserText(text),
+            arguments = CommandParser.extractArguments(cleanText),
+            userText = CommandParser.extractUserText(cleanText),
+            attachments = attachments,
+        )
+    }
+
+    // Slack writes an inline file as its bare file id in `text`. Modules read `attachments` instead.
+    private fun stripAttachmentTokens(
+        text: String,
+        attachments: List<ChatAttachment>,
+    ): String {
+        if (attachments.isEmpty()) return text
+        val stripped =
+            attachments.fold(text) { acc, attachment ->
+                acc.replace(Regex("""(?<!\S)${Regex.escape(attachment.id)}(?!\S)"""), "")
+            }
+        return stripped.replace(Regex("""[ \t]+"""), " ").trim()
+    }
+
+    private fun com.slack.api.model.File.toDomain() =
+        ChatAttachment(
+            id = id,
+            name = name ?: "",
+            mimetype = mimetype ?: "",
+            urlPrivate = urlPrivate ?: "",
+            permalink = permalink ?: "",
         )
 }

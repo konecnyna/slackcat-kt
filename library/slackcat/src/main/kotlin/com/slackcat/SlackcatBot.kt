@@ -102,6 +102,11 @@ class SlackcatBot(
                     return (chatEngine as? SlackChatEngine)?.getUserGroupMembers(usergroupId)
                         ?: Result.failure(Exception("getUserGroupMembers not supported by this chat engine"))
                 }
+
+                override suspend fun getPublicAttachmentUrl(attachmentId: String): Result<String> {
+                    return (chatEngine as? SlackChatEngine)?.getPublicFileUrl(attachmentId)
+                        ?: Result.failure(Exception("getPublicAttachmentUrl not supported by this chat engine"))
+                }
             }
 
         // Register ChatClient with Koin
