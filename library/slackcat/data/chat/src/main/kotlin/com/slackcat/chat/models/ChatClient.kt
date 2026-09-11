@@ -30,4 +30,11 @@ interface ChatClient {
 
     suspend fun getUserGroupMembers(usergroupId: String): Result<List<String>> =
         Result.failure(UnsupportedOperationException("Not supported"))
+
+    /**
+     * Returns a URL for the attachment that renders in an image block.
+     * The platform can share the file publicly to produce it.
+     */
+    suspend fun getPublicAttachmentUrl(attachmentId: String): Result<String> =
+        Result.failure(UnsupportedOperationException("Not supported"))
 }

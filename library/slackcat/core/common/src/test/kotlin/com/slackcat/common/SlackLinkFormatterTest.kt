@@ -170,6 +170,22 @@ class SlackLinkFormatterTest {
     }
 
     @Test
+    fun `isPrivateSlackFileUrl allows a file shared with a pub_secret`() {
+        assertFalse(
+            SlackLinkFormatter.isPrivateSlackFileUrl(
+                "https://files.slack.com/files-pri/T1-F1/cat.png?pub_secret=abc123",
+            ),
+        )
+    }
+
+    @Test
+    fun `isPrivateSlackFileUrl rejects an empty pub_secret`() {
+        assertTrue(
+            SlackLinkFormatter.isPrivateSlackFileUrl("https://files.slack.com/files-pri/T1-F1/cat.png?pub_secret="),
+        )
+    }
+
+    @Test
     fun `isPrivateSlackFileUrl allows public Slack CDN assets`() {
         assertFalse(SlackLinkFormatter.isPrivateSlackFileUrl("https://emoji.slack-edge.com/T1/cat/abc.png"))
         assertFalse(SlackLinkFormatter.isPrivateSlackFileUrl("https://example.com/cat.png"))

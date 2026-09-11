@@ -11,7 +11,18 @@ data class IncomingChatMessage(
     val rawMessage: String,
     var threadId: String? = null,
     val userText: String,
+    val attachments: List<ChatAttachment> = emptyList(),
 )
+
+data class ChatAttachment(
+    val id: String,
+    val name: String,
+    val mimetype: String,
+    val urlPrivate: String,
+    val permalink: String,
+) {
+    val isImage: Boolean get() = mimetype.startsWith("image/")
+}
 
 data class OutgoingChatMessage(
     val channelId: String,

@@ -139,6 +139,15 @@ class LearnModuleLinkTest {
         }
 
     @Test
+    fun `recall renders a publicly shared Slack file as an image`() =
+        runTest {
+            val url = "https://files.slack.com/files-pri/T1-F1/cat.png?pub_secret=abc123"
+            seed("shared", url)
+
+            assertEquals(url, recall("shared").imageUrl())
+        }
+
+    @Test
     fun `recall posts a private Slack file image as a link not an image block`() =
         runTest {
             seed("file", "<https://files.slack.com/files-pri/T1-F1/cat.png|cat.png>")

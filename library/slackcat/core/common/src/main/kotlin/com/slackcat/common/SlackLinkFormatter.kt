@@ -63,12 +63,19 @@ object SlackLinkFormatter {
      * fetch these, so an image block pointing at one renders as a broken image.
      */
     fun isPrivateSlackFileUrl(url: String): Boolean {
+        if (hasPublicSecret(url)) return false
         val host = url.substringAfter("://", missingDelimiterValue = "").substringBefore('/').lowercase()
         if (host == "files.slack.com") return true
         if (!host.endsWith(".slack.com") && host != "slack.com") return false
         val path = "/" + url.substringAfter("://", missingDelimiterValue = "").substringAfter('/', "")
         return PRIVATE_SLACK_FILE_PATH.containsMatchIn(path)
     }
+
+    // files.sharedPublicURL grants anonymous read through this query parameter.
+    private fun hasPublicSecret(url: String): Boolean =
+        url.substringAfter('?', missingDelimiterValue = "")
+            .split('&')
+            .any { it.startsWith("pub_secret=") && it.length > "pub_secret=".length }
 
     private fun mapOutsideCodeSpans(
         text: String,

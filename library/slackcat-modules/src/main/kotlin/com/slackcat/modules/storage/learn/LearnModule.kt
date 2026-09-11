@@ -1,5 +1,6 @@
 package com.slackcat.modules.storage.learn
 
+import com.slackcat.chat.models.ChatAttachment
 import com.slackcat.chat.models.IncomingChatMessage
 import com.slackcat.chat.models.OutgoingChatMessage
 import com.slackcat.common.BotMessage
@@ -37,9 +38,25 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
             return
         }
 
-        println(incomingChatMessage.userText)
+        val attachmentUrls = resolveAttachmentUrls(incomingChatMessage.attachments)
+        if (attachmentUrls.isFailure) {
+            sendMessage(
+                OutgoingChatMessage(
+                    channelId = incomingChatMessage.channelId,
+                    content =
+                        textMessage(
+                            "Failed to read the attached file. ${attachmentUrls.exceptionOrNull()?.message}",
+                        ),
+                    threadId = incomingChatMessage.messageId,
+                ),
+            )
+            return
+        }
 
-        val learnRequest = learnFactory.makeLearnRequest(incomingChatMessage)
+        val learnRequest =
+            learnFactory.makeLearnRequest(
+                withAttachmentUrls(incomingChatMessage, attachmentUrls.getOrThrow()),
+            )
         if (learnRequest == null) {
             postHelpMessage(incomingChatMessage.channelId)
             return
@@ -86,6 +103,38 @@ open class LearnModule(private var router: com.slackcat.internal.Router? = null)
                 threadId = incomingChatMessage.messageId,
             ),
         )
+    }
+
+    /**
+     * Appends each attachment URL to the learned text so `?<key>` recalls the file.
+     * Slack strips the file from `text`, so the URL is the only durable reference.
+     */
+    private fun withAttachmentUrls(
+        message: IncomingChatMessage,
+        urls: List<String>,
+    ): IncomingChatMessage {
+        if (urls.isEmpty()) return message
+        val userText = (message.userText.trim() + "\n" + urls.joinToString("\n")).trim()
+        return message.copy(userText = userText)
+    }
+
+    /**
+     * An image must be publicly readable or the image block renders broken. A non-image keeps its
+     * permalink, so the bot never shares an arbitrary document outside the workspace.
+     */
+    private suspend fun resolveAttachmentUrls(attachments: List<ChatAttachment>): Result<List<String>> {
+        val urls = mutableListOf<String>()
+        attachments.forEach { attachment ->
+            if (attachment.isImage) {
+                chatClient.getPublicAttachmentUrl(attachment.id).fold(
+                    onSuccess = { urls.add(it) },
+                    onFailure = { return Result.failure(it) },
+                )
+            } else {
+                urls.add(attachment.permalink)
+            }
+        }
+        return Result.success(urls)
     }
 
     override suspend fun onUnhandledCommand(message: IncomingChatMessage): Boolean {

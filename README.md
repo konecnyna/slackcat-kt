@@ -218,8 +218,12 @@ If you prefer to configure manually or need to update an existing app:
     - `channels:join` (if your bot needs to join channels automatically)
     - `reactions:read` (to receive reaction events)
     - **`users:read`** ⚠️ **REQUIRED** - To fetch user display names for kudos and other features
+    - `files:read` (to read files attached to a message)
+    - `files:write` (to share an attached image publicly so `?learn` can render it)
 
 **⚠️ Important:** The `users:read` scope is critical for modules like KudosModule that display user information. Without it, you'll see `missing_scope` errors in the logs.
+
+**⚠️ Privacy:** `?learn` with an attached image calls `files.sharedPublicURL`. Slack then serves that file to anyone with the link. A non-image attachment keeps its workspace-only permalink.
 
 #### Reinstall the App
 

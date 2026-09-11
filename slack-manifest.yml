@@ -19,6 +19,8 @@ oauth_config:
       - reactions:read      # Receive reaction_added/reaction_removed events
       - channels:join       # Join channels automatically
       - users:read          # Fetch user display names (REQUIRED for kudos and user mentions)
+      - files:read          # Read files attached to a message
+      - files:write         # Share an attached image publicly so ?learn can render it
 
 settings:
   event_subscriptions:

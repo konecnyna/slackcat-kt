@@ -1,8 +1,50 @@
 package com.slackcat.chat.engine.slack
 
 import com.slack.api.methods.MethodsClient
+import com.slack.api.model.File
 
 class SlackApiOperations(private val client: MethodsClient) {
+    /**
+     * Shares the file publicly and returns a URL that renders in an image block.
+     * Slack refuses `url_private` without a bearer token, so the `pub_secret` query is required.
+     */
+    suspend fun getPublicFileUrl(fileId: String): Result<String> {
+        val file = shareFilePublicly(fileId).getOrElse { return Result.failure(it) }
+        val urlPrivate =
+            file.urlPrivate
+                ?: return Result.failure(Exception("Slack returned no url_private for $fileId"))
+        val publicSecret =
+            file.permalinkPublic?.substringAfterLast('-')?.takeIf { it.isNotBlank() }
+                ?: return Result.failure(Exception("Slack returned no permalink_public for $fileId"))
+        return Result.success("$urlPrivate?pub_secret=$publicSecret")
+    }
+
+    private fun shareFilePublicly(fileId: String): Result<File> {
+        return try {
+            val response = client.filesSharedPublicURL { req -> req.file(fileId) }
+            when {
+                response.isOk && response.file != null -> Result.success(response.file)
+                response.error == "already_public" -> readFile(fileId)
+                else -> Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun readFile(fileId: String): Result<File> {
+        return try {
+            val response = client.filesInfo { req -> req.file(fileId) }
+            if (response.isOk && response.file != null) {
+                Result.success(response.file)
+            } else {
+                Result.failure(Exception("Slack API error: ${response.error}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getMessageText(
         channelId: String,
         messageTs: String,
