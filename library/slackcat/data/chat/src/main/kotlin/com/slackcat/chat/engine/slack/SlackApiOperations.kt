@@ -90,6 +90,39 @@ class SlackApiOperations(private val client: MethodsClient) {
         }
     }
 
+    /**
+     * Reads the files attached to a message. The Events API omits `files` for a hosted file that
+     * Slack renders inline in a rich_text block, so the event alone cannot supply them.
+     */
+    suspend fun getMessageFiles(
+        channelId: String,
+        messageTs: String,
+        threadTs: String?,
+    ): Result<List<File>> {
+        return try {
+            val messages =
+                if (threadTs != null) {
+                    val response =
+                        client.conversationsReplies { req ->
+                            req.channel(channelId).ts(threadTs).latest(messageTs).inclusive(true).limit(1)
+                        }
+                    if (!response.isOk) return Result.failure(Exception("Slack API error: ${response.error}"))
+                    response.messages
+                } else {
+                    val response =
+                        client.conversationsHistory { req ->
+                            req.channel(channelId).latest(messageTs).inclusive(true).limit(1)
+                        }
+                    if (!response.isOk) return Result.failure(Exception("Slack API error: ${response.error}"))
+                    response.messages
+                }
+            val message = messages?.find { it.ts == messageTs } ?: messages?.firstOrNull()
+            Result.success(message?.files.orEmpty())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getUserDisplayName(userId: String): Result<String> {
         return try {
             val response =

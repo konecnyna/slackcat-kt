@@ -3,6 +3,9 @@ package com.slackcat.chat.engine.slack
 import com.slack.api.bolt.App
 import com.slack.api.bolt.socket_mode.SocketModeApp
 import com.slack.api.model.Attachment
+import com.slack.api.model.block.RichTextBlock
+import com.slack.api.model.block.element.RichTextSectionElement
+import com.slack.api.model.block.element.RichTextUnknownElement
 import com.slack.api.model.event.MemberJoinedChannelEvent
 import com.slack.api.model.event.MessageBotEvent
 import com.slack.api.model.event.MessageChangedEvent
@@ -202,7 +205,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             )
 
             CommandParser.extractCommand(message.text)?.let {
-                _messagesFlow.emit(message.toDomain(it))
+                _messagesFlow.emit(message.toDomain(it, resolveAttachments(message)))
             }
         }
     }
@@ -362,8 +365,31 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     suspend fun getPublicFileUrl(fileId: String): Result<String> = apiOps.getPublicFileUrl(fileId)
 
-    fun MessageEvent.toDomain(command: String): IncomingChatMessage {
-        val attachments = files.orEmpty().map { it.toDomain() }
+    /**
+     * Slack omits `files` from a message event when it renders a hosted file inline in a
+     * rich_text block. Bolt drops that element too, so the file id only comes back from the API.
+     */
+    private suspend fun resolveAttachments(message: MessageEvent): List<ChatAttachment> {
+        val eventFiles = message.files.orEmpty()
+        if (eventFiles.isNotEmpty()) return eventFiles.mapNotNull { it.toDomain() }
+        if (!message.hasInlineFileElement()) return emptyList()
+        return apiOps.getMessageFiles(message.channel, message.ts, message.threadTs)
+            .getOrDefault(emptyList())
+            .mapNotNull { it.toDomain() }
+    }
+
+    private fun MessageEvent.hasInlineFileElement(): Boolean =
+        blocks.orEmpty()
+            .filterIsInstance<RichTextBlock>()
+            .flatMap { it.elements.orEmpty() }
+            .filterIsInstance<RichTextSectionElement>()
+            .flatMap { it.elements.orEmpty() }
+            .any { it is RichTextUnknownElement && it.type == "file" }
+
+    fun MessageEvent.toDomain(
+        command: String,
+        attachments: List<ChatAttachment>,
+    ): IncomingChatMessage {
         val cleanText = stripAttachmentTokens(text, attachments)
         return IncomingChatMessage(
             command = command,
@@ -391,12 +417,14 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
         return stripped.replace(Regex("""[ \t]+"""), " ").trim()
     }
 
-    private fun com.slack.api.model.File.toDomain() =
-        ChatAttachment(
-            id = id,
+    private fun com.slack.api.model.File.toDomain(): ChatAttachment? {
+        val fileId = id ?: return null
+        return ChatAttachment(
+            id = fileId,
             name = name ?: "",
             mimetype = mimetype ?: "",
             urlPrivate = urlPrivate ?: "",
             permalink = permalink ?: "",
         )
+    }
 }
