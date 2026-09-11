@@ -54,6 +54,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
     private val messageConverter = SlackMessageConverter()
     private val threadCache = SlackThreadCache(client)
     private val apiOps = SlackApiOperations(client)
+    private val attachmentResolver = SlackAttachmentResolver(apiOps)
 
     override fun connect(ready: () -> Unit) {
         app.event(MessageBotEvent::class.java) { payload, ctx ->
@@ -202,7 +203,7 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             )
 
             CommandParser.extractCommand(message.text)?.let {
-                _messagesFlow.emit(message.toDomain(it))
+                _messagesFlow.emit(message.toDomain(it, attachmentResolver.resolve(message)))
             }
         }
     }
@@ -362,9 +363,11 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
 
     suspend fun getPublicFileUrl(fileId: String): Result<String> = apiOps.getPublicFileUrl(fileId)
 
-    fun MessageEvent.toDomain(command: String): IncomingChatMessage {
-        val attachments = files.orEmpty().map { it.toDomain() }
-        val cleanText = stripAttachmentTokens(text, attachments)
+    fun MessageEvent.toDomain(
+        command: String,
+        attachments: List<ChatAttachment>,
+    ): IncomingChatMessage {
+        val cleanText = attachmentResolver.stripAttachmentTokens(text, attachments)
         return IncomingChatMessage(
             command = command,
             channelId = channel,
@@ -377,26 +380,4 @@ class SlackChatEngine(private val globalCoroutineScope: CoroutineScope) : ChatEn
             attachments = attachments,
         )
     }
-
-    // Slack writes an inline file as its bare file id in `text`. Modules read `attachments` instead.
-    private fun stripAttachmentTokens(
-        text: String,
-        attachments: List<ChatAttachment>,
-    ): String {
-        if (attachments.isEmpty()) return text
-        val stripped =
-            attachments.fold(text) { acc, attachment ->
-                acc.replace(Regex("""(?<!\S)${Regex.escape(attachment.id)}(?!\S)"""), "")
-            }
-        return stripped.replace(Regex("""[ \t]+"""), " ").trim()
-    }
-
-    private fun com.slack.api.model.File.toDomain() =
-        ChatAttachment(
-            id = id,
-            name = name ?: "",
-            mimetype = mimetype ?: "",
-            urlPrivate = urlPrivate ?: "",
-            permalink = permalink ?: "",
-        )
 }
